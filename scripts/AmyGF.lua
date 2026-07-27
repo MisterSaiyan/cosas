@@ -199,14 +199,14 @@ player.CharacterAdded:Connect(function(newChar)
 end)
 
 local isCurrentlyAmy = false
-local isCurrentlySonic = false
+local isPlaying = false
 
 RunService.Heartbeat:Connect(function()
     local check = isAmy()
     if check ~= isCurrentlyAmy then
         isCurrentlyAmy = check
-        isCurrentlySonic = check
-        if isCurrentlySonic then startScript() else stopScript() end
+        isPlaying = check
+        if isPlaying then startScript() else stopScript() end
     end
 end)
 

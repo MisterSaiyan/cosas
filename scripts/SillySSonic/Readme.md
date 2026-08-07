@@ -1,0 +1,40 @@
+# Saiyan's Silly Super Sonic (FT. Remodel Sonic)
+# ALPHA Revision 2
+
+Fanmade OM cosmetic that gives sonic his remodel along with a keybind to turn onto Super Saiyan Sonic
+(Inspired on my old Super Sonic milestone skin idea)
+
+## loadstring
+
+```lua
+loadstring(game:HttpGet("loadstring(game:HttpGet("https://gist.githubusercontent.com/MisterSaiyan/c0f9e449b94b761922221d93dece54cd/raw/"))()"
+))()
+```
+
+# What does it contain
+Rayfield to manage all the toggles, cosmetics transparency, model presets
+LMS Toggle between Super Sonic Hero and the current sonic solo ingame
+Custom Icon for Sonic (Toggable)
+Extra User-Made Cosmetics
+Inputs for your own sonic model edits
+
+# Cosmetics Guide Example
+
+Let's say, my sonic uses front sidded shoes, so the default model/extras clips the custom model's shoes.
+For that, we will use the recolorable presets given for the said shoe cosmetic.
+
+## Example of my sonic
+
+<img width="477" height="577" alt="screenshot" src="https://github.com/user-attachments/assets/5f31761b-263d-43f5-ab9a-2d10416b7b3a" />
+
+Equip it ingame and press "k" to open rayfield, and click the one that matches your choices
+
+<img width="1500" height="732" alt="screenshot2" src="https://github.com/user-attachments/assets/9b46c96c-9a2a-45ac-abc9-0ca317f53cc6" />
+
+<img width="1500" height="732" alt="screenshot2" src="https://github.com/user-attachments/assets/f724c40b-53a4-4045-b704-ae50076d402d" />
+
+ta-da, sonic looks consistent now :D
+<img width="380" height="558" alt="tada" src="https://github.com/user-attachments/assets/2c9de77b-71c6-4a65-85bd-0e9374d80fc8" />
+
+Or you can use your own custom model, just make sure to make the neccesary part invisible so it doesn't clash
+<img width="598" height="275" alt="debugtab" src="https://github.com/user-attachments/assets/91ec29b7-13b4-4dbe-85ff-cf1e1a6ffc1e" />

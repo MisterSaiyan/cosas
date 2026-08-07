@@ -20,10 +20,8 @@ Inputs for your own sonic model edits<br>
 
 # Cosmetics Guide Example
 
-Let's say, my sonic uses front sidded shoes, so the default model/extras clips the custom model's shoes.
+Let's say, my sonic uses front studded shoes, so the default model/extras clips the custom model's shoes.
 For that, we will use the recolorable presets given for the said shoe cosmetic.
-
-## Example of my sonic
 
 <img width="477" height="577" alt="screenshot" src="https://github.com/user-attachments/assets/5f31761b-263d-43f5-ab9a-2d10416b7b3a" />
 

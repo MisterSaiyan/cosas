@@ -34,7 +34,7 @@ press "k" to open rayfield, and click the one that matches your choices
 <img width="512" height="567" alt="screenshot3" src="https://github.com/user-attachments/assets/dec3b4b3-cc84-4110-a9b2-98033be862ed" />
 
 
-ta-da, sonic looks consistent now :D<br>
+ta-da, sonic looks consistent now :D (althought you need to go to extras and recreate the palette by yourself)<br>
 <img width="380" height="558" alt="tada" src="https://github.com/user-attachments/assets/2c9de77b-71c6-4a65-85bd-0e9374d80fc8" />
 
 Or you can use your own custom model, just make sure to make the neccesary part invisible so it doesn't clash

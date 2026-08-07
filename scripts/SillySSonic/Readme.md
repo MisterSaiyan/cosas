@@ -12,11 +12,11 @@ loadstring(game:HttpGet("loadstring(game:HttpGet("https://gist.githubusercontent
 ```
 
 # What does it contain
-Rayfield to manage all the toggles, cosmetics transparency, model presets
-LMS Toggle between Super Sonic Hero and the current sonic solo ingame
-Custom Icon for Sonic (Toggable)
-Extra User-Made Cosmetics
-Inputs for your own sonic model edits
+Rayfield to manage all the toggles, cosmetics transparency, model presets\n
+LMS Toggle between Super Sonic Hero and the current sonic solo ingame\n
+Custom Icon for Sonic (Toggable)\n
+Extra User-Made Cosmetics\n
+Inputs for your own sonic model edits\n
 
 # Cosmetics Guide Example
 

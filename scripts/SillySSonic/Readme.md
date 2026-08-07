@@ -27,9 +27,12 @@ For that, we will use the recolorable presets given for the said shoe cosmetic.
 
 <img width="477" height="577" alt="screenshot" src="https://github.com/user-attachments/assets/5f31761b-263d-43f5-ab9a-2d10416b7b3a" />
 
-Equip it ingame and press "k" to open rayfield, and click the one that matches your choices
+Let's make sure we have it equipped
 
 <img width="1500" height="732" alt="screenshot2" src="https://github.com/user-attachments/assets/9b46c96c-9a2a-45ac-abc9-0ca317f53cc6" />
+
+Once we have it, let's do the thing<br>
+press "k" to open rayfield, and click the one that matches your choices
 
 <img width="512" height="567" alt="screenshot3" src="https://github.com/user-attachments/assets/dec3b4b3-cc84-4110-a9b2-98033be862ed" />
 

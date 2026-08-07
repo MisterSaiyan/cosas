@@ -7,15 +7,14 @@ Fanmade OM cosmetic that gives sonic his remodel along with a keybind to turn on
 ## loadstring
 
 ```lua
-loadstring(game:HttpGet("loadstring(game:HttpGet("https://gist.githubusercontent.com/MisterSaiyan/c0f9e449b94b761922221d93dece54cd/raw/"))()"
-))()
+loadstring(game:HttpGet("https://gist.githubusercontent.com/MisterSaiyan/c0f9e449b94b761922221d93dece54cd/raw/"))()
 ```
 
 # What does it contain
 Rayfield to manage all the toggles, cosmetics transparency, model presets<br>
 LMS Toggle between Super Sonic Hero and the current sonic solo ingame<br>
 Custom Icon for Sonic (Toggable)<br>
-Extra User-Made Cosmetics<br>
+A few extras Custom Cosmetics :]<br>
 Inputs for your own sonic model edits<br>
 
 # Cosmetics Guide Example

@@ -1,6 +1,7 @@
-# [Return](https://mistersaiyan.github.io/cosas/web/)
+# Saiyan's Simple OM Model Replacer
+# a.k.a Silly Super Sonic's codebase
 
-# Saiyan's Simple OM Model Replacer a.k.a Silly Super Sonic's codebase
+# [Return](https://mistersaiyan.github.io/cosas/web/)
 
 Quick Template + GUI to change any character's model with any assetid<br>
 

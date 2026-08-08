@@ -8,7 +8,7 @@
 
 <div class="izquierda">
         <h1>MisterSaiyan's OM STUFF</h1>
-        <img class="perfil" src="Kris icon.jfif" alt="hello :P"
+        <img class="perfil" src="Kris icon.jfif" alt="hello :P">
     <p class="bio">Beginner Coder/Scripter
         <br>Second-year University Student<br>Computer Science Student<br>Chilean</p>
         <div class="estado">

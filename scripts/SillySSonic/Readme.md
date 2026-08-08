@@ -1,10 +1,6 @@
 # Saiyan's Silly Super Sonic (FT. Remodel Sonic)
 
-# [Return](https://mistersaiyan.github.io/cosas/web/)
 # ALPHA Revision 2
-
-[GitHub Gist](https://gist.github.com/MisterSaiyan/c0f9e449b94b761922221d93dece54cd)
-
 
 Fanmade OM cosmetic that gives sonic his remodel along with a keybind to turn onto Super Saiyan Sonic<br>
 (Inspired on my old Super Sonic milestone skin idea)
@@ -44,3 +40,9 @@ ta-da, sonic looks consistent now :D (althought you need to go to extras and rec
 
 Or you can use your own custom model, just make sure to make the neccesary part invisible so it doesn't clash
 <img width="598" height="275" alt="debugtab" src="https://github.com/user-attachments/assets/91ec29b7-13b4-4dbe-85ff-cf1e1a6ffc1e" />
+
+
+# Other Stuff
+[Source Code](https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/SimpleModelReplacer/SourceCodeMODELREPLACER.lua)
+
+# [Return](https://mistersaiyan.github.io/cosas/web/)

@@ -12,10 +12,10 @@ loadstring(game:HttpGet("https://gist.githubusercontent.com/MisterSaiyan/c0f9e44
 ```
 
 # What does it contain
-Rayfield to manage all the toggles, cosmetics transparency, model presets<br>
-LMS Toggle between Super Sonic Hero and the current sonic solo ingame<br>
+Rayfield gui to manage all the toggles, cosmetics transparency, model presets<br>
+LMS Toggle between Super Sonic Hero and the current sonic solo that's ingame<br>
 Custom Icon for Sonic (Toggable)<br>
-A few extras Custom Cosmetics :]<br>
+A few Custom Cosmetics as an extra (credits found ingame) :]<br>
 Inputs for your own sonic model edits<br>
 
 # Cosmetics Guide Example
@@ -27,13 +27,12 @@ For that, we will use the recolorable presets given for the said shoe cosmetic.
 
 Let's make sure we have it equipped
 
-<img width="1500" height="732" alt="screenshot2" src="https://github.com/user-attachments/assets/9b46c96c-9a2a-45ac-abc9-0ca317f53cc6" />
+<img width="1300" height="732" alt="screenshot2" src="https://github.com/user-attachments/assets/9b46c96c-9a2a-45ac-abc9-0ca317f53cc6" />
 
 Once we have it, let's do the thing<br>
 press "k" to open rayfield, and click the one that matches your choices
 
 <img width="512" height="567" alt="screenshot3" src="https://github.com/user-attachments/assets/dec3b4b3-cc84-4110-a9b2-98033be862ed" />
-
 
 ta-da, sonic looks consistent now :D (althought you need to go to extras and recreate the palette by yourself)<br>
 <img width="380" height="558" alt="tada" src="https://github.com/user-attachments/assets/2c9de77b-71c6-4a65-85bd-0e9374d80fc8" />
@@ -46,4 +45,8 @@ Or you can use your own custom model, just make sure to make the neccesary part 
 
 [GitHub Gist](https://gist.github.com/MisterSaiyan/c0f9e449b94b761922221d93dece54cd)
 
-# [Return](https://mistersaiyan.github.io/cosas/web/)
+[Gameplay](https://www.youtube.com/watch?v=CW0NdDi4FPE)
+
+#
+
+[Return](https://mistersaiyan.github.io/cosas/web/)

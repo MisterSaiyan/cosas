@@ -43,6 +43,7 @@ Or you can use your own custom model, just make sure to make the neccesary part 
 
 
 # Other Stuff
-[Source Code](https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/SimpleModelReplacer/SourceCodeMODELREPLACER.lua)
+
+[GitHub Gist](https://gist.github.com/MisterSaiyan/c0f9e449b94b761922221d93dece54cd)
 
 # [Return](https://mistersaiyan.github.io/cosas/web/)

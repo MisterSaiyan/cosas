@@ -8,11 +8,11 @@
         }
 
         .perfil {
-    width: 150px;          /* Limita el ancho de la imagen */
-    height: 150px;         /* Alto idéntico para que no se deforme */
+    width: 130px;          /* Limita el ancho de la imagen */
+    height: 130px;         /* Alto idéntico para que no se deforme */
     object-fit: cover;     /* Ajusta el encuadre del avatar */
     border-radius: 50%;    /* Hace la foto completamente redonda */
-    border: 3px solid #4a9eff; /* Le pone un borde azul estético */
+    border: 3px solid white; /* Le pone un borde azul estético */
     display: block;        /* La acomoda de forma independiente */
     margin: 0 auto 15px auto; /* La centra en la columna izquierda */
 }
@@ -22,67 +22,45 @@
             min-height: 100vh;
             max-width: 1000px;
             margin: 0 auto;
-            background: white;
+            background: #3f3f3f;
+
+            color: white;
         }
 
         .izquierda {
-            width: 30%;
-            background: #1a9a54;
+            width: 280px;
+            background: linear-gradient(
+                180deg,
+                #199c56,
+                #cf3700 
+            );
             color: white;
-            padding: 20px;
-            border: 2px solid #dbdbdb;
+            padding: 30px;
+            border-left: 2px solid #30303a;
+            border-right: 2px solid #30303a;
         }
 
         .derecha {
             width: 70%;
             padding: 20px;
-            border: 2px solid #dbdbdb;
+            border: 2px solid #1c1c24;
         }
 
         h1, h2 {
             margin-top: 0;
         }
 
-        .experiencia {
-            border-bottom: 1px solid #ccc;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            position: relative;
-        }
+        .bio {
+    line-height: 1.6;
+}
 
-        .eliminar {
-            position: absolute;
-            right: 0;
-            top: 0;
-            background: red;
-            color: white;
-            border: none;
-            cursor: pointer;
-            padding: 5px 8px;
-        }
+.estado {
+    margin-top: 20px;
+    padding: 15px;
 
-        input, textarea {
-            width: 100%;
-            margin-bottom: 10px;
-            padding: 8px;
-        }
+    background: #111;
 
-        button {
-            padding: 10px;
-            background: #3498db;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
+    border-radius: 12px;
 
-        .limpiar {
-            background: darkred;
-            margin-top: 10px;
-            
-        }
-
-        .formulario {
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 2px solid #dbdbdb;
-        }
+    line-height: 1.3;
+}

@@ -1,1 +1,1 @@
-> > ## [Abrir Pagina](WEB)
+> > ## [Abrir Pagina](web)

@@ -70,7 +70,7 @@ local selectedKiller = "2011x"
 -- Checks if the player model is the one we want to replace
 local function isCharacter()
 	local model = getPlayerModel()
-	return model and model:GetAttribute("Character") == selectedCharacter -- Char list: "Sonic", "Tails", "Knuckles", "Sonic", "Cream","Silver", "MetalSonic", "Blaze", "Shadow", "Eggman"
+	return model and model:GetAttribute("Character") == selectedCharacter -- Char list: "Sonic", "Tails", "Knuckles", "Amy", "Cream","Silver", "MetalSonic", "Blaze", "Shadow", "Eggman"
 end
 
 -- Replaces the model, but highely depends on the rig of the model
@@ -830,7 +830,7 @@ tab:CreateInput({
 tab:CreateDropdown({
     name = "Survivor",
     multiSelect = false,
-    options = { "Sonic", "Tails", "Knuckles", "MetalSonic", "Sonic", "Eggman", "Cream", "Silver", "Blaze", "Shadow" },
+    options = { "Sonic", "Tails", "Knuckles", "MetalSonic", "Amy", "Eggman", "Cream", "Silver", "Blaze", "Shadow" },
     value = { "Sonic" },
     callback = function(selected)
         local characterChoice = selected

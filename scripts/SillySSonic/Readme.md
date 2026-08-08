@@ -1,4 +1,4 @@
-# [Return](web)
+# [Return](https://mistersaiyan.github.io/cosas/web/))
 
 # Saiyan's Silly Super Sonic (FT. Remodel Sonic)
 # ALPHA Revision 2

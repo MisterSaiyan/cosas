@@ -17,14 +17,10 @@
                 <br>
         <h2>Public Scripts</h2>
 
-# Super Sonic Custom Skin for Sonic (OM v0.2)<br><br>
-
-<h3></h3>
+<h3>Super Sonic Custom Skin for Sonic (OM v0.2)</h3>
         <p><a href="https://mistersaiyan.github.io/cosas/scripts/SillySSonic/">Silly SSonic</a></p>
 
-# Simple OM Model Replacer (OM v0.2)<br><br>
-
-<h4></h4>
+<h4>Simple OM Model Replacer (OM v0.2)</h4>
         <p><a href="https://mistersaiyan.github.io/cosas/scripts/SimpleModelReplacer">OM Model Replacer</a></p>
 
 </div>

@@ -7,10 +7,21 @@
             border: #dbdbdb 2px outset;
         }
 
+        .perfil {
+    width: 150px;          /* Limita el ancho de la imagen */
+    height: 150px;         /* Alto idéntico para que no se deforme */
+    object-fit: cover;     /* Ajusta el encuadre del avatar */
+    border-radius: 50%;    /* Hace la foto completamente redonda */
+    border: 3px solid #4a9eff; /* Le pone un borde azul estético */
+    display: block;        /* La acomoda de forma independiente */
+    margin: 0 auto 15px auto; /* La centra en la columna izquierda */
+}
+
         .contenedor {
             display: flex;
+            min-height: 100vh;
             max-width: 1000px;
-            margin: auto;
+            margin: 0 auto;
             background: white;
         }
 

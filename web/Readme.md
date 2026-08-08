@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>MisterSaiyan's OM Scripts</title>
+    <img class="perfil" src="Kris icon.jfif" alt="hello :P">
     <link rel="stylesheet" href = "estilo.css">
 </head>
 <body>

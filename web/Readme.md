@@ -2,7 +2,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href = "estilo.css">
 </head>
-<bodya>
+<body>
 
 <div class="contenedor">
 
@@ -29,3 +29,4 @@
 
 </div>
 
+</body>

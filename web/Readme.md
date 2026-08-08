@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Currículum</title>
+    <title>MisterSaiyan's OM Scripts</title>
     <link rel="stylesheet" href = "estilo.css">
 </head>
 <bodya>

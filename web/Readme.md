@@ -25,6 +25,6 @@
 # Simple OM Model Replacer (OM v0.2)<br><br>
 
 <h4></h4>
-        <p><a href="(https://mistersaiyan.github.io/cosas/scripts/SimpleModelReplacer">OM Model Replacer</a></p>
+        <p><a href="https://mistersaiyan.github.io/cosas/scripts/SimpleModelReplacer">OM Model Replacer</a></p>
 
 </div>

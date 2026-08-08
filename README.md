@@ -1,4 +1,4 @@
 esto es el readmexd.
 la pagina esta aca abajo
 
-> ## [Abrir Pagina](web)
+> ## [Abrir Pagina](https://mistersaiyan.github.io/cosas/web/)

@@ -1,7 +1,7 @@
 # Saiyan's Silly Super Sonic (FT. Remodel Sonic)
 # ALPHA Revision 2
 
-Fanmade OM cosmetic that gives sonic his remodel along with a keybind to turn onto Super Saiyan Sonic
+Fanmade OM cosmetic that gives sonic his remodel along with a keybind to turn onto Super Saiyan Sonic<br>
 (Inspired on my old Super Sonic milestone skin idea)
 
 ## loadstring

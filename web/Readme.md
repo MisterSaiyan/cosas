@@ -28,5 +28,3 @@
         <p><a href="https://mistersaiyan.github.io/cosas/scripts/SimpleModelReplacer">OM Model Replacer</a></p>
 
 </div>
-
-</body>

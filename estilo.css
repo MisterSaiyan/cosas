@@ -1,0 +1,77 @@
+        body {
+            font-family: Arial;
+            background-color: #e6d2d2;
+            background-image: url(https://tse4.mm.bing.net/th/id/OIP.EX09Bh-XzYWL-2TueGdJQwAAAA?rs=1&pid=ImgDetMain&o=7&rm=3);
+            background-size: cover;
+            margin: 0;
+            border: #dbdbdb 2px outset;
+        }
+
+        .contenedor {
+            display: flex;
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+        }
+
+        .izquierda {
+            width: 30%;
+            background: #1a9a54;
+            color: white;
+            padding: 20px;
+            border: 2px solid #dbdbdb;
+        }
+
+        .derecha {
+            width: 70%;
+            padding: 20px;
+            border: 2px solid #dbdbdb;
+        }
+
+        h1, h2 {
+            margin-top: 0;
+        }
+
+        .experiencia {
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            position: relative;
+        }
+
+        .eliminar {
+            position: absolute;
+            right: 0;
+            top: 0;
+            background: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px 8px;
+        }
+
+        input, textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+        }
+
+        button {
+            padding: 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .limpiar {
+            background: darkred;
+            margin-top: 10px;
+            
+        }
+
+        .formulario {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 2px solid #dbdbdb;
+        }

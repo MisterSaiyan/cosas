@@ -19,10 +19,12 @@
 
 # Super Sonic Custom Skin for Sonic (OM v0.2)<br><br>
 
-> [Silly SSonic](https://mistersaiyan.github.io/cosas/scripts/SillySSonic/)<br><br>
+<h3></h3>
+        <p><a href="https://mistersaiyan.github.io/cosas/scripts/SillySSonic/">Silly SSonic</a></p>
 
 # Simple OM Model Replacer (OM v0.2)<br><br>
 
-> [OM Model Replacer](https://mistersaiyan.github.io/cosas/scripts/SimpleModelReplacer)<br><br>
+<h4></h4>
+        <p><a href="(https://mistersaiyan.github.io/cosas/scripts/SimpleModelReplacer)">OM Model Replacer</a></p>
 
 </div>

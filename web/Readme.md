@@ -6,7 +6,7 @@
 
 <div class="contenedor">
 
-    <div class="izquierda">
+<div class="izquierda">
         <h1>MisterSaiyan's OM STUFF</h1>
         <img class="perfil" src="Kris icon.jfif" alt="hello :P">
         <p class="bio">Beginner Coder/Scripter
@@ -18,7 +18,7 @@
 
         
 
-    </div>
+</div>
 
 
 

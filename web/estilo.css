@@ -7,6 +7,10 @@
             border: #dbdbdb 2px outset;
         }
 
+        *{
+            box-sizing: border-box;
+        }
+
         .version {
             margin-top: -8px;
             margin-bottom: 10px;

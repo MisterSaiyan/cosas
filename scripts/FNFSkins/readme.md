@@ -22,9 +22,9 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/re
 
 # To-do
 
-Fix Amy's Hammer being invisible when spawning (throwing it restores it for now)
-Improve Amy's Head Sync
-Icons
+Fix Amy's Hammer being invisible when spawning (throwing it restores it for now)<br>
+Improve Amy's Head Sync<br>
+Icons<br>
 
 # Other Stuff
 

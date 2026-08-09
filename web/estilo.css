@@ -7,6 +7,15 @@
             border: #dbdbdb 2px outset;
         }
 
+        .version {
+            margin-top: -8px;
+            margin-bottom: 10px;
+
+            opacity: 0.95;
+            font-size: 14px;
+            color: #999;
+        }
+
         .perfil {
     width: 130px;          /* Limita el ancho de la imagen */
     height: 130px;         /* Alto idéntico para que no se deforme */
@@ -16,6 +25,17 @@
     display: block;        /* La acomoda de forma independiente */
     margin: 0 auto 15px auto; /* La centra en la columna izquierda */
 }
+
+.img-banner {
+    display: block;        /* La acomoda de forma independiente */
+    border-radius: 12px;    /* Bordes redondeados para un efecto más suave */
+}
+
+.img-banner:hover {
+    transform: scale(1.05); /* Aumenta ligeramente el tamaño al pasar el cursor */
+    transition: transform 0.3s ease; /* Suaviza la transición del efecto */
+}
+
 
         .contenedor {
             display: flex;
@@ -38,6 +58,7 @@
             padding: 30px;
             border-left: 2px solid #30303a;
             border-right: 2px solid #30303a;
+            font-size: 14px;
         }
 
         .derecha {

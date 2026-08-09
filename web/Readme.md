@@ -20,11 +20,20 @@
 <div class="derecha">
         <h2>Public Scripts</h2>
         <p>Not all of these are final, as they are still being updated</p>
+        <p>Click the banners to view the pages</p>
 
 <h3>Super Sonic Custom Skin for Sonic (OM v0.2)</h3>
-        <p><a href="https://mistersaiyan.github.io/cosas/scripts/SillySSonic/">Silly SSonic</a></p>
+        <p><a href="https://mistersaiyan.github.io/cosas/scripts/SillySSonic/">
+            <img class="ssonic.png" src="ssonic.png" alt="Silly SSonic" width="650" height="200">
+        </a></p>
 
 <h4>Simple OM Model Replacer (OM v0.2)</h4>
-        <p><a href="https://mistersaiyan.github.io/cosas/scripts/SimpleModelReplacer">OM Model Replacer</a></p>
+<a href="https://mistersaiyan.github.io/cosas/scripts/SimpleModelReplacer">
+<img class="knux.png" src="knux.png" alt="Model Replacer" width="650" height="200">
+        </a>
 
+<h4>FNF Skins for Sonic and Amy</h4>
+<a href="https://mistersaiyan.github.io/cosas/scripts/FNFSkins">
+<img class="fnf.png" src="fnf.png" alt="FNF Skins" width="650" height="200">
+        </a>
 </div>

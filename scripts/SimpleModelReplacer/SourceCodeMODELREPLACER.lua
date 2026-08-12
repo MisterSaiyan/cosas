@@ -1,8 +1,8 @@
 -- Saiyan's Outcome Memories Model Replacer
 -- MAKE SURE THE MODEL RIG IS IDENTICAL OR IT WILL PUT YOU ON THE REST POSE
 
--- My version of the model replacer thing that has the used methods
--- that are in the silly super sonic skin
+-- My version of the model replacer thing.
+-- has the used methods that are in the silly super sonic skin
 
 -- Features:
 -- Experimental Head Sync using c0/c1 to sync custom model with the default model
@@ -34,8 +34,8 @@ local synctoggle = true -- Set to false if you want to disable the head sync
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local MODEL_ID = 76242789522318 -- The model you wish to use
-local KILLER_ID = nil -- Killer model
+local MODEL_ID = 76242789522318 -- The model you wish to use (Default: Sonic Remodel)
+local KILLER_ID = 116966924438902 -- Killer model (Default: Girl Fleetway)
 local isScriptActive = false -- Set to true if you want to enable the whole script
 local currentMdl = nil -- used to manage current mdl from MODEL_ID
 local currentKillerMdl = nil -- used to manage current killer mdl from KILLER_ID
@@ -64,13 +64,13 @@ end
 -- Selected character from the dropdown (default: Sonic)
 local selectedCharacter = "Sonic"
 
--- (WIP) Killer Selection
+-- (WIP) Killer Selection (default: 2011x)
 local selectedKiller = "2011x"
 
 -- Checks if the player model is the one we want to replace
 local function isCharacter()
 	local model = getPlayerModel()
-	return model and model:GetAttribute("Character") == selectedCharacter -- Char list: "Sonic", "Tails", "Knuckles", "Amy", "Cream","Silver", "MetalSonic", "Blaze", "Shadow", "Eggman"
+	return model and model:GetAttribute("Character") == selectedCharacter -- Char list: "Sonic", "Tails", "Knuckles", "Amy", "Cream", "Silver", "MetalSonic", "Blaze", "Shadow", "Eggman"
 end
 
 -- Replaces the model, but highely depends on the rig of the model
@@ -96,6 +96,64 @@ local function setupViewport()
 		local vpOverrideModel = nil
 		local function replaceViewportModel()
 			local ok, objects = pcall(game.GetObjects, game, "rbxassetid://" .. MODEL_ID)
+			if not ok or #objects == 0 then return end
+			if vpOverrideModel and vpOverrideModel.Parent then
+				vpOverrideModel:Destroy()
+				vpOverrideModel = nil
+			end
+			local newModel = objects[1]:Clone()
+			vpOverrideModel = newModel
+			for _, part in ipairs(viewportModel:GetDescendants()) do
+				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+					part.Transparency = 1
+				end
+			end
+			local newHum = newModel:FindFirstChildOfClass("Humanoid")
+			if newHum then newHum:Destroy() end
+			for _, v in ipairs(newModel:GetDescendants()) do
+				if v:IsA("BasePart") then v.CanCollide = false end
+			end
+			newModel.Parent = viewportModel
+			local viewportHRP = viewportModel:FindFirstChild("HumanoidRootPart")
+			local primaryPart = newModel.PrimaryPart or newModel:FindFirstChildWhichIsA("BasePart")
+			if viewportHRP and primaryPart then
+				newModel:PivotTo(viewportHRP.CFrame)
+				primaryPart.Transparency = 1
+				local weld = Instance.new("WeldConstraint")
+				weld.Part0 = viewportHRP
+				weld.Part1 = primaryPart
+				weld.Parent = viewportHRP
+			end
+		end
+
+		replaceViewportModel()
+
+		viewportModel.DescendantAdded:Connect(function()
+			task.wait(0.1)
+			if not vpOverrideModel or not vpOverrideModel.Parent then
+				vpOverrideModel = nil
+				replaceViewportModel()
+			end
+		end)
+	end)
+end
+
+local function setupFleetwayVP()
+	task.spawn(function()
+		local viewportFrame = player.PlayerGui
+			:WaitForChild("Round", 30)
+			:WaitForChild("Game", 30)
+			:WaitForChild("SurvivorHP", 30)
+			:WaitForChild("ViewportFrame", 30)
+		if not viewportFrame then return end
+		local viewportModel = viewportFrame
+			:WaitForChild("WorldModel", 30)
+			:WaitForChild("Default", 30)
+		if not viewportModel then return end
+
+		local vpOverrideModel = nil
+		local function replaceViewportModel()
+			local ok, objects = pcall(game.GetObjects, game, "rbxassetid://" .. KILLER_ID)
 			if not ok or #objects == 0 then return end
 			if vpOverrideModel and vpOverrideModel.Parent then
 				vpOverrideModel:Destroy()
@@ -726,12 +784,13 @@ local function startScript()
 	if isScriptActive then return end
 	task.wait(3)
 	isScriptActive = true
-	setupViewport()
 	if character then
 		if IsKiller() then
 			setupKiller(character)
+			setupFleetwayVP()
 		elseif isCharacter() then
 			setupCharacter(character)
+			setupViewport()
 		end
 	end
 end
@@ -756,10 +815,11 @@ player.CharacterAdded:Connect(function(newChar)
 		task.wait(1)
 		if IsKiller() then
 			setupKiller(newChar)
+			setupFleetwayVP()
 		elseif isCharacter() then
 			setupCharacter(newChar)
+			setupViewport()
 		end
-		setupViewport()
 	end
 end)
 
@@ -784,6 +844,10 @@ if isCharacter() or IsKiller() then
 	isCurrentlyTargetKiller = IsKiller()
 	startScript()
 end
+
+
+-- Remove the rayfield gui below if you wish to not have it
+
 
 -- ==========================================
 -- Rayfield
@@ -814,7 +878,7 @@ tab:CreateInput({
 })
 
 tab:CreateInput({
-    name = "Kiler AssetID",
+    name = "Killer AssetID",
     numeric = true,
     value = "",
     placeholder = "Enter a valid assetid",
@@ -853,6 +917,21 @@ tab:CreateDropdown({
         end
         selectedKiller = characterChoiceK
     end,
+})
+
+local forcereloadrayfield = tab:CreateButton({
+	name = "Force Reload",
+	callback = function()
+		forceReload = true
+		if character then
+			if IsKiller() then
+				setupKiller(character, true)
+			elseif isCharacter() then
+				setupCharacter(character, true)
+			end
+		end
+		forceReload = false
+	end,
 })
 
 window:Notify({

@@ -58,4 +58,6 @@ You can also use your own custom model. Just make sure to hide the necessary par
 
 [Gameplay](https://www.youtube.com/watch?v=CW0NdDi4FPE)
 
+[Debug Tab Guide](https://www.youtube.com/watch?v=1MENuHJ_qLs)
+
 # [Return](https://mistersaiyan.github.io/cosas/web/)

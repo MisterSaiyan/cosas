@@ -40,9 +40,9 @@
         </a>
 
 <h4>FNF Skins for Sonic and Amy</h4>
-<p class="version">Custom Cosmetic | Outcome Memories</p>
+<p class="version">Custom Skins (V1 and V2) | Outcome Memories</p>
 <a href="https://mistersaiyan.github.io/cosas/scripts/FNFSkins">
-<img class="img-banner" src="fnf.png" alt="FNF Skins" width="650" height="200">
+<img class="img-banner" src="fnfv2banner.png" alt="FNF Skins" width="650" height="200">
         </a>
 
 

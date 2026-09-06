@@ -1,4 +1,5 @@
 # FNF Skins for Sonic and Amy V2
+# [V1](https://mistersaiyan.github.io/cosas/scripts/FNFSkins/)
 
 Custom Skins that overrides Sonic and Amy with an custom designed boyfriend and girlfriend from fnf
 

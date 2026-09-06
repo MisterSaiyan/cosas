@@ -5,13 +5,13 @@ Small script that has model edits for sonic and amy that resembles boyfriend and
 ## Amy (GF)
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/AmyGF.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/AmyGFV2.lua"))()
 ```
 
 ## Sonic (BF) 
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/SonicBF.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/SonicBFV2.lua"))()
 ```
 
 # Screenshots

@@ -2,6 +2,12 @@
 
 Custom Skins that overrides Sonic and Amy with an custom designed boyfriend and girlfriend from fnf
 
+Head Sync + Few Extras are toggleable by changing their value to true / false
+
+Press R to Force Reload Sonic
+
+Press T to Force Reload Amy
+
 ## Amy (GF)
 
 ```lua

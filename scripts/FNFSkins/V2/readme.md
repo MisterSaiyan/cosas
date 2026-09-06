@@ -32,15 +32,13 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/re
 
 # Current To-Do
 
-🟢 Custom BF skin<p>
-🟢 Custom GF skin<p>
-🟢 Head Sync<p>
-🟡 Fix expressions during certain emotes<p>
-🔴 Icons<p>
-🔴 Observer/Skins applied for the rest of the server<p>
+🟢 Custom BF skin<br>
+🟢 Custom GF skin<br>
+🟢 Head Sync<br>
+🟡 Fix expressions during certain emotes<br>
+🔴 Icons<br>
+🔴 Observer/Skins applied for the rest of the server<br>
 
 # Other Stuff
-
-[Showcase](https://www.youtube.com/watch?v=bJDg1IMJ9nA)
 
 # [Return](https://mistersaiyan.github.io/cosas/web/)

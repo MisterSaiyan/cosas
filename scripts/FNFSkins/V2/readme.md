@@ -23,10 +23,21 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/re
 
 # Screenshots
 
+<img width="508" height="458" alt="1 screen" src="https://github.com/user-attachments/assets/b312d833-885f-47f9-86e8-30c8cf525a32" />
+
+<img width="425" height="232" alt="screenshot 2" src="https://github.com/user-attachments/assets/dd142083-e4c2-4bfa-97e8-544f76f00563" />
+
+<img width="492" height="375" alt="screenshot 3" src="https://github.com/user-attachments/assets/e519c168-88fe-456a-9394-34b471d022c7" />
+
+
 # Current To-Do
 
-Fixing the skins's expressions when doing certain emotes<br>
-Icons<br>
+🟢 Custom BF skin
+🟢 Custom GF skin
+🟢 Head Sync
+🟡 Fix expressions during certain emotes
+🔴 Icons
+🔴 Observer/Skins applied for the rest of the server
 
 # Other Stuff
 

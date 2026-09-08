@@ -36,7 +36,8 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/re
 🟢 Custom GF skin<br>
 🟢 Head Sync<br>
 🟡 Fix expressions during certain emotes<br>
-🔴 Icons<br>
+🟡 Cosmetic Compatiblity (Only BF has partial compatiblity with a few cosmetics)<br>
+🟡 Icons (Only BF has an early icon currently)<br>
 🔴 Observer/Skins applied for the rest of the server<br>
 
 # Other Stuff

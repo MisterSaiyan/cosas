@@ -36,8 +36,15 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/re
 🟢 Custom GF skin<br>
 🟢 Head Sync<br>
 🟡 Fix expressions during certain emotes<br>
-🟡 Cosmetic Compatiblity (Only BF has partial compatiblity with a few cosmetics)<br>
-🟡 Icons (Only BF has an early icon currently)<br>
+🟡 Cosmetic Compatiblity<br>
+Sonic: Almost all Capes, Most of the hats<br>
+Amy: Fancy Dress<br>
+🟡 Icons<br>
+Sonic: Very early but works<br>
+Amy: WIP<br>
+🟡 LMS<br>
+Sonic: Replaced by Discharge (FNF: Corruption)<br>
+Amy: Default
 🔴 Observer/Skins applied for the rest of the server<br>
 
 # Other Stuff

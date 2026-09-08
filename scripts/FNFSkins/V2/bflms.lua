@@ -82,7 +82,8 @@
 				end
 			SetTheme()
 
-						local soloFolder = game:GetService("ReplicatedStorage"):FindFirstChild("ClientAssets")
+			-- Detener
+				local soloFolder = game:GetService("ReplicatedStorage"):FindFirstChild("ClientAssets")
 				and game.ReplicatedStorage.ClientAssets:FindFirstChild("Sounds")
 				and game.ReplicatedStorage.ClientAssets.Sounds:FindFirstChild("mus")
 				and game.ReplicatedStorage.ClientAssets.Sounds.mus:FindFirstChild("Game")
@@ -96,4 +97,3 @@
 			end
 
 			LMSsound:Stop()
-			LMSsound.TimePosition = 0

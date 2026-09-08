@@ -57,13 +57,6 @@
 			originalSonicSoloID = sonicSolo.SoundId
 		end
 
-		if SuperHeroTheme then
-			sonicSolo.SoundId = SuperHero
-			sonicSolo.Volume = 1
-			sonicSolo.Looped = false
-			return
-		end
-
 		if BFTheme then
 			if not canUseModernLMS() then
 				sonicSolo.SoundId = originalSonicSoloID
@@ -104,4 +97,3 @@
 
 			LMSsound:Stop()
 			LMSsound.TimePosition = 0
-			LMSsound:Play()

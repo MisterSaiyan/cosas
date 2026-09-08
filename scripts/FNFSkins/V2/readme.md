@@ -44,7 +44,7 @@ Sonic: Very early but works<br>
 Amy: WIP<br>
 🟡 LMS<br>
 Sonic: Replaced by Discharge (FNF: Corruption)<br>
-Amy: Default
+Amy: Default<br>
 🔴 Observer/Skins applied for the rest of the server<br>
 
 # Other Stuff

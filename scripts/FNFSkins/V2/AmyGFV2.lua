@@ -83,7 +83,7 @@ local function setupAmyViewport()
 
 		local vpOverrideModel = nil
 		local function replaceAViewportModel()
-			local ok, objects = pcall(game.GetObjects, game, "rbxassetid://" .. 108016890710520)
+			local ok, objects = pcall(game.GetObjects, game, "rbxassetid://" .. 73695760388601)
 			if not ok or #objects == 0 then return end
 			if vpOverrideModel and vpOverrideModel.Parent then
 				vpOverrideModel:Destroy()

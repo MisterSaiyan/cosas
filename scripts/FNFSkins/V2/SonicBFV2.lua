@@ -63,7 +63,7 @@ end
 
 -- Cosmetics
 
-local cosmetictoggle = false -- true to protect cosmetics from being hidden (Default: false)
+local cosmetictoggle = true -- true to protect cosmetics from being hidden (Default: false)
 
 local cosmeticRootNames = {
 	Shadow = true,
@@ -79,6 +79,8 @@ local shirtCosmetics =
 	EnergyCape = true,
 	DevilHunter = true,
 	PostMortemCape = true,
+	superMoist_cape = true,
+	BrownScarg = true,
 }
 
 local HatsCosmetics =
@@ -86,6 +88,17 @@ local HatsCosmetics =
 	Hair = true,
 	PaceHat = true,
 	StrawCowboy = true,
+	AnniFlowers = true,
+	AnniversaryCombo = true,
+	AnniDoll = true,
+	AnniNo1Hat = true,
+	AnniHat = true,
+	OvaHat = true,
+	BrokenCrown = true,
+	SANTA_HAT = true,
+	TrevorsHat = true,
+	Crown = true,
+	ScoutHat = true,
 	}
 
 local function updateInsertedShirt(model, insertedModel)
@@ -585,30 +598,40 @@ local function getBooleanState(root, names)
 		if value == true or value == "true" or value == "True" then
 			return true
 		end
+
+		local stateObject = root:FindFirstChild(name, true)
+		if stateObject and stateObject:IsA("BoolValue") and stateObject.Value then
+			return true
+		end
 	end
 
 	return false
 end
 
-local function setFolderState(folder, activeName, imageId, fitToFrame, imageColor, layout, zIndex)
+local function setFolderState(folder, activeName, imageId, fitToFrame, imageColor, layout, zIndex, position)
 	if not folder then
 		return
 	end
 
 	for _, child in ipairs(folder:GetChildren()) do
 		if child:IsA("ImageLabel") or child:IsA("ImageButton") then
-			child.Visible = child.Name == activeName
-			if child.Name == activeName and imageId then
+			local isActive = child.Name == activeName
+			child.Visible = isActive
+			if isActive then
+				if zIndex then
+					child.ZIndex = zIndex
+				end
+			end
+			if isActive and imageId then
 				child.Image = imageId
 				if imageColor then
 					child.ImageColor3 = imageColor
 				end
-				if zIndex then
-					child.ZIndex = zIndex
+				if layout and layout.position then
+					child.Position = layout.position
 				end
 				if fitToFrame and folder:IsA("GuiObject") then
 					child.AnchorPoint = Vector2.new(0.5, 0.5)
-					child.Position = layout and layout.position or UDim2.fromScale(0.47, 0.39)
 					child.Size = layout and layout.size or UDim2.fromScale(0.47, 0.45)
 					child.ScaleType = Enum.ScaleType.Fit
 				end
@@ -658,8 +681,10 @@ ApplyIcon = function()
 		eyesImage,
 		false,
 		Color3.new(0, 0, 0),
-		nil,
-		5
+		{
+			position = UDim2.fromScale(0.16922964, 0.126643255),
+		},
+		10
 	)
 	setFolderState(
 		characterGui:FindFirstChild("Expression"),
@@ -668,9 +693,10 @@ ApplyIcon = function()
 		true,
 		nil,
 		{
-			position = UDim2.fromScale(0.47, 0.39),
+			position = UDim2.fromScale(0.16922964, 0.126643255),
 			size = UDim2.fromScale(0.47, 0.45),
-		}
+		},
+		5
 	)
 end
 
@@ -682,6 +708,15 @@ end
 -- Keybind para forcereload de debug
 
 local function triggerForceReload()
+	if not isCurrentlySonic then
+		game.StarterGui:SetCore("SendNotification", {
+        Title = "BF Over Sonic", 
+        Text = "Force Reload doesn't work if you are not playing as sonic.", 
+        Icon = "rbxassetid://128451136697149", Duration = 10
+    })
+	return
+	end
+	
     if forceReload then
         return
     end
@@ -717,4 +752,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end)
 
     triggerForceReload()
-end)	
+end)
+
+-- Loadstring para el tema lms
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/bflms.lua"))()

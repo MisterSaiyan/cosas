@@ -15,6 +15,48 @@ local keyDebounce = false
 
 local hidething = false -- Toggle Hammer visibility fix (don't change)
 
+local shirtCosmetics = {
+    TMOSTH = true,
+}
+
+local cosmeticRootNames = {
+    TMOSTH = true,
+}
+
+local function belongsToCosmeticRoot(object, model)
+    local current = object
+    while current and current ~= model do
+        if cosmeticRootNames[current.Name] or shirtCosmetics[current.Name] then
+            return true
+        end
+        current = current.Parent
+    end
+    return false
+end
+
+local function restoreCosmeticVisibility(model)
+    if not model then
+        return
+    end
+
+    for cosmeticName in pairs(shirtCosmetics) do
+        local cosmetic = model:FindFirstChild(cosmeticName, true)
+        if cosmetic then
+            local objects = { cosmetic }
+            for _, object in ipairs(cosmetic:GetDescendants()) do
+                table.insert(objects, object)
+            end
+
+            for _, object in ipairs(objects) do
+                if object:IsA("BasePart") then
+                    object.Transparency = 0
+                    object.CanCollide = false
+                end
+            end
+        end
+    end
+end
+
 local function HammerVisiblityFix(targetModel, visible)
     if hidething or not targetModel then
         return
@@ -36,6 +78,44 @@ local function HammerVisiblityFix(targetModel, visible)
             object.Transparency = transparency
         end
     end
+end
+
+local function updateInsertedShirt(model, insertedModel)
+    if not model or not insertedModel then
+        return
+    end
+
+    local hasShirtCosmetic = false
+    for cosmeticName in pairs(shirtCosmetics) do
+        if model:FindFirstChild(cosmeticName, true) then
+            hasShirtCosmetic = true
+            break
+        end
+    end
+
+    local shirtModel = insertedModel:FindFirstChild("Vestido", true)
+
+    local function setShirtVisibility(shirtGroup, visible)
+        if not shirtGroup then
+            return
+        end
+
+        local objects = { shirtGroup }
+        for _, object in ipairs(shirtGroup:GetDescendants()) do
+            table.insert(objects, object)
+        end
+
+        for _, object in ipairs(objects) do
+            if object:IsA("BasePart") then
+                object.Transparency = visible and 0 or 1
+                object.CanCollide = false
+            elseif object:IsA("Decal") or object:IsA("Texture") then
+                object.Transparency = visible and 0 or 1
+            end
+        end
+    end
+
+    setShirtVisibility(shirtModel, not hasShirtCosmetic)
 end
 
 local function loadAsset(id)
@@ -275,7 +355,7 @@ local function setupCharacter(char, forceReload)
     if currentMdl and currentMdl.Parent then currentMdl:Destroy() currentMdl = nil end
 
     for _, v in ipairs(char:GetDescendants()) do
-        if v:IsA("BasePart") then
+        if v:IsA("BasePart") and not belongsToCosmeticRoot(v, char) then
             v.Transparency = 1
             if v.Name == "HumanoidRootPart" then
                 v.CanCollide = true
@@ -289,8 +369,11 @@ local function setupCharacter(char, forceReload)
     local oldVisual = playersFolder and playersFolder:FindFirstChild(player.Name)
     if oldVisual then
         for _, v in ipairs(oldVisual:GetDescendants()) do
-            if v:IsA("BasePart") then v.Transparency = 1 end
+            if v:IsA("BasePart") and not belongsToCosmeticRoot(v, oldVisual) then
+                v.Transparency = 1
+            end
         end
+        restoreCosmeticVisibility(oldVisual)
     end
 
     HammerVisiblityFix(oldVisual or char, true)
@@ -342,7 +425,16 @@ local function setupCharacter(char, forceReload)
     physicalWeld.Parent = newHrp
 
     currentMdl = mdl
+    updateInsertedShirt(oldVisual or char, mdl)
     setupHeadSync(oldVisual or char, mdl, hrp)
+
+    task.spawn(function()
+        while char and char.Parent and isScriptActive and currentMdl == mdl do
+            restoreCosmeticVisibility(oldVisual or char)
+            updateInsertedShirt(oldVisual or char, mdl)
+            task.wait(0.1)
+        end
+    end)
 
     syncConn = RunService.RenderStepped:Connect(function()
         if not char or not char.Parent or not hrp or not hrp.Parent or not newHrp or not newHrp.Parent or not isScriptActive then
@@ -420,6 +512,15 @@ end
 -- Keybind para forcereload de debug
 
 local function triggerForceReload()
+	if not isCurrentlyAmy then
+		game.StarterGui:SetCore("SendNotification", {
+        Title = "GF Over Amy", 
+        Text = "Force Reload doesn't work if you are not playing as amy.", 
+        Icon = "rbxassetid://128451136697149", Duration = 10
+    })
+	return
+	end
+
     if forceReload then
         return
     end

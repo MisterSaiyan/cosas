@@ -9,6 +9,19 @@ local isScriptActive = false
 local currentMdl = nil
 local syncConn = nil
 
+--Iconos FirstLife
+
+local IconNormal = "rbxassetid://114228592450607" -- Expression.Regular
+local ExpressionNormal = "rbxassetid://105224083812202" -- Eyes.Regular
+local ExpressionChased = "rbxassetid://134712413253361" -- Eyes.Chased
+
+-- LastLife Iconos
+
+local DownedIcon = "rbxassetid://97120638843605" -- Expression.Downed
+
+local IconLastLife = "rbxassetid://91850457535074" -- Expression.LastLife
+local ExpressionLastLife = "rbxassetid://80325412154894" -- Reemplaza Eyes.Regular si estas en lastlife
+
 -- force reload without a gui
 local forceReload = false
 local keyDebounce = false
@@ -34,6 +47,13 @@ local sonicBaseRoots = {
 	"RLeg1", "RLeg2", "RLeg3", "RLeg4", "RLeg5", "RSleeve",
 	"LSleeve", "tail", "belly", "Sphere.003", "Sphere.006",
 	"Sphere.007", "Sphere.010", "left backspike", "right backspike",
+	-- remodel parts
+	"Cube.015", "Cube.016", "burger", 
+	"Cube.009", "Cube.014", "exportme", "Cube.011",
+	"ears", "ears.001", "ears.002", "ears.003", "replace",
+	"aah", "head new", "altedxport.005", "altedxport.006", "Cube",
+	"muzzle new", "sdgdsagsd", "altedxport.001", "altedxport.003",
+	"remodelSphere.010", "Cube.017", "Cube.008",
 }
 
 local sonicBasePartNames = {}
@@ -46,19 +66,96 @@ end
 local cosmetictoggle = false -- true to protect cosmetics from being hidden (Default: false)
 
 local cosmeticRootNames = {
-	Hair = true,
-	RedCape = true,
-	PaceHat = true,
-	PacedCape = true,
 	Shadow = true,
+	SHOVEL = true,
+	Bodyy = true,
+}
+
+local shirtCosmetics = 
+{
+	HyperCape = true,
+	RedCape = true,
+	PacedCape = true,
 	EnergyCape = true,
 	DevilHunter = true,
 	PostMortemCape = true,
-	StrawCowboy = true,
-	SHOVEL = true,
-	Bodyy = true,
-	HyperCape = true,
 }
+
+local HatsCosmetics =
+	{
+	Hair = true,
+	PaceHat = true,
+	StrawCowboy = true,
+	}
+
+local function updateInsertedShirt(model, insertedModel)
+	if not model or not insertedModel then
+		return
+	end
+
+	local hasShirtCosmetic = false
+	for cosmeticName in pairs(shirtCosmetics) do
+		if model:FindFirstChild(cosmeticName, true) then
+			hasShirtCosmetic = true
+			break
+		end
+	end
+
+	local shirtModel = insertedModel:FindFirstChild("poleronmodel", true)
+	local baseShirtModel = insertedModel:FindFirstChild("Camisa", true)
+		or insertedModel:FindFirstChild("camisa", true)
+
+	local function setShirtVisibility(model, visible)
+		if not model then
+			return
+		end
+
+		local objects = { model }
+		for _, object in ipairs(model:GetDescendants()) do
+			table.insert(objects, object)
+		end
+
+		for _, object in ipairs(objects) do
+			if object:IsA("BasePart") then
+				object.Transparency = visible and 0 or 1
+				object.CanCollide = false
+			elseif object:IsA("Decal") or object:IsA("Texture") then
+				object.Transparency = visible and 0 or 1
+			end
+		end
+	end
+
+	setShirtVisibility(shirtModel, not hasShirtCosmetic)
+	setShirtVisibility(baseShirtModel, hasShirtCosmetic)
+end
+
+local function updateInsertedHat(model, insertedModel)
+	if not model or not insertedModel then
+		return
+	end
+
+	local hasHatCosmetic = false
+	for cosmeticName in pairs(HatsCosmetics) do
+		if model:FindFirstChild(cosmeticName, true) then
+			hasHatCosmetic = true
+			break
+		end
+	end
+
+
+	for _, object in ipairs(insertedModel:GetDescendants()) do
+		if object:IsA("BasePart") and object.Name == "bhat" then
+			object.Transparency = hasHatCosmetic and 1 or 0
+			object.CanCollide = false
+		end
+	end
+	for _, object in ipairs(insertedModel:GetDescendants()) do
+		if object:IsA("BasePart") and object.Name == "hat" then
+			object.Transparency = hasHatCosmetic and 1 or 0
+			object.CanCollide = false
+		end
+	end
+end
 
 local function belongsToCosmeticRoot(object, model)
 	local current = object
@@ -94,6 +191,24 @@ local function hideModelParts(model, exceptModel)
 	end
 end
 
+local function hideModelGeometry(model)
+	if not model then
+		return
+	end
+
+	if model:IsA("BasePart") then
+		model.Transparency = 1
+		model.CanCollide = false
+	end
+
+	for _, object in ipairs(model:GetDescendants()) do
+		if object:IsA("BasePart") then
+			object.Transparency = 1
+			object.CanCollide = false
+		end
+	end
+end
+
 -- Replace the replicatedstorage char (affects viewport, character selection and inventory)
 
 task.spawn(function()
@@ -110,6 +225,13 @@ task.spawn(function()
 
     if replacement then
         replacement.Name = "Default"
+		local replacementRoot = replacement:FindFirstChild("HumanoidRootPart", true)
+		if replacementRoot and replacement:IsA("Model") then
+			local rootCFrame = replacementRoot.CFrame
+			local pivotCFrame = replacement:GetPivot()
+			replacement.PrimaryPart = replacementRoot
+			replacement:PivotTo(rootCFrame:ToObjectSpace(pivotCFrame))
+		end
 		if not replacement:FindFirstChild("Sphere.003") then
 			local fallback = Instance.new("Part")
 			fallback.Name = "Sphere.003"
@@ -295,6 +417,7 @@ local function setupCharacter(char, forceReload)
 
 	local playersFolder = workspace:FindFirstChild("Players")
 	local oldVisual = playersFolder and playersFolder:FindFirstChild(player.Name)
+	local originalDefault = oldVisual and oldVisual:FindFirstChild("Default")
 
 	for _, v in ipairs(char:GetDescendants()) do
 		if v:IsA("BasePart") and (not oldVisual or not v:IsDescendantOf(oldVisual)) then
@@ -318,7 +441,12 @@ local function setupCharacter(char, forceReload)
 
 	if oldVisual then
 		hideModelParts(oldVisual, mdl)
+		if originalDefault and originalDefault ~= mdl then
+			hideModelGeometry(originalDefault)
+		end
 	end
+	updateInsertedHat(oldVisual or char, mdl)
+	updateInsertedShirt(oldVisual or char, mdl)
 
 	local hrp = char:FindFirstChild("HumanoidRootPart")
 	local newHrp = mdl:FindFirstChild("HumanoidRootPart", true)
@@ -386,6 +514,8 @@ local function setupCharacter(char, forceReload)
 
 	task.spawn(function()
 		while char and char.Parent and isScriptActive do
+			updateInsertedHat(oldVisual or char, mdl)
+				updateInsertedShirt(oldVisual or char, mdl)
 			if oldVisual and oldVisual.Parent then
 				local defaultFolder = oldVisual:FindFirstChild("Default")
 				if defaultFolder then
@@ -400,11 +530,20 @@ local function setupCharacter(char, forceReload)
 	end)
 end
 
+local ApplyIcon
+
 local function startScript()
 	if isScriptActive then return end
 	task.wait(3)
 	isScriptActive = true
 	if character then setupCharacter(character) end
+
+	task.spawn(function()
+		while isScriptActive and isSonic() do
+			ApplyIcon()
+			task.wait(0.25)
+		end
+	end)
 end
 
 local function stopScript()
@@ -435,6 +574,105 @@ RunService.Heartbeat:Connect(function()
 		if isCurrentlySonic then startScript() else stopScript() end
 	end
 end)
+
+local function getBooleanState(root, names)
+	if not root then
+		return false
+	end
+
+	for _, name in ipairs(names) do
+		local value = root:GetAttribute(name)
+		if value == true or value == "true" or value == "True" then
+			return true
+		end
+	end
+
+	return false
+end
+
+local function setFolderState(folder, activeName, imageId, fitToFrame, imageColor, layout, zIndex)
+	if not folder then
+		return
+	end
+
+	for _, child in ipairs(folder:GetChildren()) do
+		if child:IsA("ImageLabel") or child:IsA("ImageButton") then
+			child.Visible = child.Name == activeName
+			if child.Name == activeName and imageId then
+				child.Image = imageId
+				if imageColor then
+					child.ImageColor3 = imageColor
+				end
+				if zIndex then
+					child.ZIndex = zIndex
+				end
+				if fitToFrame and folder:IsA("GuiObject") then
+					child.AnchorPoint = Vector2.new(0.5, 0.5)
+					child.Position = layout and layout.position or UDim2.fromScale(0.47, 0.39)
+					child.Size = layout and layout.size or UDim2.fromScale(0.47, 0.45)
+					child.ScaleType = Enum.ScaleType.Fit
+				end
+			end
+		end
+	end
+end
+
+ApplyIcon = function()
+	local playerGui = player:FindFirstChildOfClass("PlayerGui")
+	local round = playerGui and playerGui:FindFirstChild("Round")
+	local gameGui = round and round:FindFirstChild("Game")
+	local teams = gameGui and gameGui:FindFirstChild("Teams")
+	local playerFrame = teams and teams:FindFirstChild(player.Name)
+	local frame = playerFrame and playerFrame:FindFirstChild("Frame")
+	local characterGui = frame and frame:FindFirstChild("Character")
+
+	if not characterGui then
+		return
+	end
+
+	local model = getPlayerModel() or player.Character
+	local isLastLife = getBooleanState(model, { "LastLife", "IsLastLife", "SecondLife" })
+	local isDowned = getBooleanState(model, { "Downed", "IsDowned" })
+	local isChased = getBooleanState(model, { "Chased", "IsChased", "InChase" })
+
+	local eyesState = isChased and "Chased" or "Regular"
+	local expressionState = "Regular"
+	local eyesImage = isChased and ExpressionChased or ExpressionNormal
+	local expressionImage = IconNormal
+
+	if isLastLife then
+		expressionState = "LastLife"
+		eyesImage = ExpressionLastLife
+	end
+	if isDowned then
+		expressionState = "Downed"
+		eyesState = "Stunned"
+		expressionImage = DownedIcon
+	elseif isLastLife then
+		expressionImage = IconLastLife
+	end
+
+	setFolderState(
+		characterGui:FindFirstChild("Eyes"),
+		eyesState,
+		eyesImage,
+		false,
+		Color3.new(0, 0, 0),
+		nil,
+		5
+	)
+	setFolderState(
+		characterGui:FindFirstChild("Expression"),
+		expressionState,
+		expressionImage,
+		true,
+		nil,
+		{
+			position = UDim2.fromScale(0.47, 0.39),
+			size = UDim2.fromScale(0.47, 0.45),
+		}
+	)
+end
 
 if isSonic() then
 	isCurrentlySonic = true

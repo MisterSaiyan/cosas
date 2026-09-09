@@ -9,16 +9,24 @@ Press R to Force Reload Sonic
 
 Press T to Force Reload Amy
 
-## Amy (GF)
+## Loadstring for both
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/AmyGFV2.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/fnfskinsv2.lua"))()
 ```
 
-## Sonic (BF) 
+## Separate loadstrings
+
+# Amy
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/SonicBFV2.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/AmyGFV2.lua"))()
+```
+
+# Sonic
+
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/SonicBFV2.lua"))()
 ```
 
 # Screenshots

@@ -3,17 +3,16 @@
 
 Small script that has model edits for sonic and amy that resembles boyfriend and girlfriend from fnf
 
-## Amy (GF)
+## Loadstring
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/AmyGFV2.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V1/fnfskinsv1.lua"))()
 ```
 
-## Sonic (BF) 
+# NOTICE
 
-```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/SonicBFV2.lua"))()
-```
+Not really updating this version anymore, i've patched amy's hammer but i'm merely focused in V2<br>
+You can use this if you don't really like an full replace
 
 # Screenshots
 

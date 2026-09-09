@@ -9,11 +9,22 @@ local isScriptActive = false
 local currentMdl = nil
 local syncConn = nil
 
+-- Amy Iconos
+
+local IconNormal = "rbxassetid://71742134603425" -- Expression.Regular
+local ExpressionNormal = "rbxassetid://84044297426855" -- Eyes.Regular
+local ExpressionChased = "rbxassetid://129477061313180" -- Eyes.Chased
+
+-- LastLife Iconos Amy
+
+local DownedIcon = "rbxassetid://73290527991494" -- Expression.Downed
+
+local IconLastLife = "rbxassetid://123405413536790" -- Expression.LastLife
+local ExpressionLastLife = "rbxassetid://129477061313180" -- Reemplaza Eyes.Regular si estas en lastlife
+
 -- force reload without a gui
 local forceReload = false
 local keyDebounce = false
-
-local hidething = false -- Toggle Hammer visibility fix (don't change)
 
 local shirtCosmetics = {
     TMOSTH = true,
@@ -56,6 +67,8 @@ local function restoreCosmeticVisibility(model)
         end
     end
 end
+
+local hidething = false -- Toggle Hammer visibility fix (don't change)
 
 local function HammerVisiblityFix(targetModel, visible)
     if hidething or not targetModel then
@@ -127,6 +140,93 @@ end
 local function getPlayerModel()
     local playersFolder = workspace:FindFirstChild("Players")
     return playersFolder and playersFolder:FindFirstChild(player.Name)
+end
+
+local function getBooleanState(root, names)
+    if not root then
+        return false
+    end
+
+    for _, name in ipairs(names) do
+        local value = root:GetAttribute(name)
+        if value == true or value == "true" or value == "True" then
+            return true
+        end
+
+        local stateObject = root:FindFirstChild(name, true)
+        if stateObject and stateObject:IsA("BoolValue") and stateObject.Value then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function setFolderState(folder, activeName, imageId, fitToFrame, layout, zIndex)
+    if not folder then
+        return
+    end
+
+    for _, child in ipairs(folder:GetChildren()) do
+        if child:IsA("ImageLabel") or child:IsA("ImageButton") then
+            local isActive = child.Name == activeName
+            child.Visible = isActive
+            if isActive then
+                child.Image = imageId
+                child.ZIndex = zIndex
+                if layout and layout.position then
+                    child.Position = layout.position
+                end
+                if fitToFrame and layout and layout.size then
+                    child.AnchorPoint = Vector2.new(0.5, 0.5)
+                    child.Size = layout.size
+                    child.ScaleType = Enum.ScaleType.Fit
+                end
+            end
+        end
+    end
+end
+
+local ApplyIcon
+
+ApplyIcon = function()
+    local playerGui = player:FindFirstChildOfClass("PlayerGui")
+    local round = playerGui and playerGui:FindFirstChild("Round")
+    local gameGui = round and round:FindFirstChild("Game")
+    local teams = gameGui and gameGui:FindFirstChild("Teams")
+    local playerFrame = teams and teams:FindFirstChild(player.Name)
+    local frame = playerFrame and playerFrame:FindFirstChild("Frame")
+    local characterGui = frame and frame:FindFirstChild("Character")
+
+    if not characterGui then
+        return
+    end
+
+    local model = getPlayerModel() or player.Character
+    local isLastLife = getBooleanState(model, { "LastLife", "IsLastLife", "SecondLife" })
+    local isDowned = getBooleanState(model, { "Downed", "IsDowned" })
+    local isChased = getBooleanState(model, { "Chased", "IsChased", "InChase" })
+
+    local eyesState = isChased and "Chased" or "Regular"
+    local expressionState = isLastLife and "LastLife" or "Regular"
+    local eyesImage = isChased and ExpressionChased or ExpressionNormal
+    local expressionImage = isLastLife and IconLastLife or IconNormal
+
+    if isLastLife then
+        eyesImage = ExpressionLastLife
+    end
+    if isDowned then
+        eyesState = "Stunned"
+        expressionState = "Downed"
+        expressionImage = DownedIcon
+    end
+
+    local layout = {
+        position = UDim2.fromScale(0.47, 0.39),
+        size = UDim2.fromScale(0.47, 0.45),
+    }
+    setFolderState(characterGui:FindFirstChild("Eyes"), eyesState, eyesImage, true, layout, 10)
+    setFolderState(characterGui:FindFirstChild("Expression"), expressionState, expressionImage, true, layout, 5)
 end
 
 -- Head Sync
@@ -469,6 +569,13 @@ local function startScript()
     setupAmyViewport()
     isScriptActive = true
     if character then setupCharacter(character) end
+
+    task.spawn(function()
+        while isScriptActive and isAmy() do
+            ApplyIcon()
+            task.wait(0.25)
+        end
+    end)
 end
 
 local function stopScript()
@@ -557,3 +664,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 
     triggerForceReload()
 end)
+
+-- Loadstring para el tema lms
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/gflms.lua"))()

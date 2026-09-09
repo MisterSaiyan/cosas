@@ -42,9 +42,9 @@ Amy: Fancy Dress<br>
 🟡 Icons<br>
 Sonic: Very early but works<br>
 Amy: WIP<br>
-🟡 LMS<br>
+🟢 LMS<br>
 Sonic: Replaced by Discharge (FNF: Corruption)<br>
-Amy: Default<br>
+Amy: Replaced by Pretence (FNF: Corruption IF)<br>
 🔴 Observer/Skins applied for the rest of the server<br>
 
 # Other Stuff

@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -63,7 +64,7 @@ end
 
 -- Cosmetics
 
-local cosmetictoggle = true -- true to protect cosmetics from being hidden (Default: false)
+local cosmetictoggle = true -- true to protect cosmetics from being hidden (Default: true)
 
 local cosmeticRootNames = {
 	Shadow = true,
@@ -86,6 +87,8 @@ local shirtCosmetics =
 local HatsCosmetics =
 	{
 	Hair = true,
+	Hat = true,
+	Bowtie = true,
 	PaceHat = true,
 	StrawCowboy = true,
 	AnniFlowers = true,
@@ -102,6 +105,7 @@ local HatsCosmetics =
 	}
 
 local function updateInsertedShirt(model, insertedModel)
+	if not cosmetictoggle then return end
 	if not model or not insertedModel then
 		return
 	end
@@ -143,6 +147,8 @@ local function updateInsertedShirt(model, insertedModel)
 end
 
 local function updateInsertedHat(model, insertedModel)
+	if not cosmetictoggle then return end
+
 	if not model or not insertedModel then
 		return
 	end
@@ -600,8 +606,19 @@ local function getBooleanState(root, names)
 		end
 
 		local stateObject = root:FindFirstChild(name, true)
-		if stateObject and stateObject:IsA("BoolValue") and stateObject.Value then
-			return true
+		if stateObject then
+			if stateObject:IsA("BoolValue") and stateObject.Value then
+				return true
+			end
+			if stateObject:IsA("ObjectValue") and stateObject.Value ~= nil then
+				return true
+			end
+			if stateObject:IsA("StringValue") and (stateObject.Value == "true" or stateObject.Value == "True") then
+				return true
+			end
+			if stateObject:IsA("IntValue") and stateObject.Value > 0 then
+				return true
+			end
 		end
 	end
 
@@ -632,7 +649,7 @@ local function setFolderState(folder, activeName, imageId, fitToFrame, imageColo
 				end
 				if fitToFrame and folder:IsA("GuiObject") then
 					child.AnchorPoint = Vector2.new(0.5, 0.5)
-					child.Size = layout and layout.size or UDim2.fromScale(0.47, 0.45)
+					child.Size = layout and layout.size or UDim2.fromScale(0.46, 0.44)
 					child.ScaleType = Enum.ScaleType.Fit
 				end
 			end
@@ -654,25 +671,29 @@ ApplyIcon = function()
 	end
 
 	local model = getPlayerModel() or player.Character
+		local isDowned = getBooleanState(model, { "Downed", "IsDowned", "BeingDowned" })
+		or getBooleanState(player, { "Downed", "IsDowned", "BeingDowned" })
 	local isLastLife = getBooleanState(model, { "LastLife", "IsLastLife", "SecondLife" })
-	local isDowned = getBooleanState(model, { "Downed", "IsDowned" })
-	local isChased = getBooleanState(model, { "Chased", "IsChased", "InChase" })
+		or getBooleanState(player, { "LastLife", "IsLastLife", "SecondLife" })
+	local isChased = getBooleanState(model, { "Chased", "IsChased", "InChase", "BeingChased" })
+		or getBooleanState(player, { "Chased", "IsChased", "InChase", "BeingChased" })
 
 	local eyesState = isChased and "Chased" or "Regular"
 	local expressionState = "Regular"
 	local eyesImage = isChased and ExpressionChased or ExpressionNormal
 	local expressionImage = IconNormal
 
-	if isLastLife then
-		expressionState = "LastLife"
-		eyesImage = ExpressionLastLife
-	end
 	if isDowned then
 		expressionState = "Downed"
 		eyesState = "Stunned"
 		expressionImage = DownedIcon
 	elseif isLastLife then
 		expressionImage = IconLastLife
+	end
+
+	if isLastLife then
+		expressionState = "LastLife"
+		eyesImage = ExpressionLastLife
 	end
 
 	setFolderState(
@@ -682,7 +703,7 @@ ApplyIcon = function()
 		false,
 		Color3.new(0, 0, 0),
 		{
-			position = UDim2.fromScale(0.16922964, 0.126643255),
+			position = UDim2.fromScale(0.171, 0.126643255),
 		},
 		10
 	)
@@ -693,7 +714,7 @@ ApplyIcon = function()
 		true,
 		nil,
 		{
-			position = UDim2.fromScale(0.16922964, 0.126643255),
+			position = UDim2.fromScale(0.171, 0.126643255),
 			size = UDim2.fromScale(0.47, 0.45),
 		},
 		5
@@ -757,3 +778,215 @@ end)
 -- Loadstring para el tema lms
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/bflms.lua"))()
+
+-- Configuracion BFV2
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ConfiguracionesBF"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+
+local success = pcall(function()
+    screenGui.Parent = CoreGui
+end)
+if not success then
+    screenGui.Parent = player:WaitForChild("PlayerGui")
+end
+
+local gui = Instance.new("Frame")
+gui.Name = "ContenedorHorizontal"
+gui.Size = UDim2.new(0, 0, 0, 42)
+gui.AutomaticSize = Enum.AutomaticSize.X 
+gui.Position = UDim2.new(0, 300, 0, 12) 
+gui.BackgroundTransparency = 1
+gui.Parent = screenGui
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.Parent = gui
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.FillDirection = Enum.FillDirection.Horizontal
+listLayout.Padding = UDim.new(0, 12)
+listLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+
+local function crearBotonVisual(texto, orden)
+    local boton = Instance.new("TextButton")
+    boton.Name = "Panel_" .. (texto:gsub("%s+", ""))
+    boton.Size = UDim2.new(0, 0, 0, 42) 
+    boton.AutomaticSize = Enum.AutomaticSize.X
+    boton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    boton.BackgroundTransparency = 0.1
+    boton.AutoButtonColor = true
+    boton.LayoutOrder = orden
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0.5, 0) 
+    corner.Parent = boton
+    
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 22)
+    padding.PaddingRight = UDim.new(0, 22)
+    padding.Parent = boton
+    
+    boton.Text = texto
+    boton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    boton.Font = Enum.Font.GothamBold
+    boton.TextSize = 15
+    
+    return boton
+end
+
+local btnBFV2 = crearBotonVisual("BFv2", 1)
+btnBFV2.Parent = gui
+
+local bfConfigOpen = false
+
+local existingBFPanel = rawget(_G, "BFV2ConfigPanel")
+local bfConfigPanel = existingBFPanel or (function()
+    local panel = Instance.new("Frame")
+    panel.Name = "BFV2ConfigPanel"
+    panel.Size = UDim2.new(0, 220, 0, 190)
+    panel.Position = UDim2.new(0, 300, 0, 60)
+    panel.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+    panel.BorderSizePixel = 0
+    panel.Visible = false
+    panel.Parent = screenGui
+
+    local panelCorner = Instance.new("UICorner")
+    panelCorner.CornerRadius = UDim.new(0, 14)
+    panelCorner.Parent = panel
+
+    local panelStroke = Instance.new("UIStroke")
+    panelStroke.Color = Color3.fromRGB(255, 255, 255)
+    panelStroke.Thickness = 2
+    panelStroke.LineJoinMode = Enum.LineJoinMode.Miter
+    panelStroke.Parent = panel
+
+    return panel
+end)()
+
+_G.BFV2ConfigPanel = bfConfigPanel
+
+local bfConfigLayout = Instance.new("UIListLayout")
+bfConfigLayout.Parent = bfConfigPanel
+bfConfigLayout.Padding = UDim.new(0, 8)
+bfConfigLayout.FillDirection = Enum.FillDirection.Vertical
+bfConfigLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+bfConfigLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local bfPadding = Instance.new("UIPadding")
+bfPadding.Parent = bfConfigPanel
+bfPadding.PaddingLeft = UDim.new(0, 10)
+bfPadding.PaddingRight = UDim.new(0, 10)
+bfPadding.PaddingTop = UDim.new(0, 10)
+bfPadding.PaddingBottom = UDim.new(0, 10)
+
+local function createToggleRow(parent, labelText, valueRef, onToggle)
+    local row = Instance.new("Frame")
+    row.Name = labelText .. "Row"
+    row.Size = UDim2.new(1, 0, 0, 32)
+    row.BackgroundTransparency = 1
+    row.Parent = parent
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(0.6, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = labelText
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textLabel.Font = Enum.Font.GothamSemibold
+    textLabel.TextSize = 14
+    textLabel.TextXAlignment = Enum.TextXAlignment.Left
+    textLabel.Parent = row
+
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Size = UDim2.new(0.34, 0, 1, 0)
+    toggleButton.Position = UDim2.new(0.64, 0, 0, 0)
+    toggleButton.BackgroundColor3 = valueRef() and Color3.fromRGB(34, 197, 94) or Color3.fromRGB(120, 120, 120)
+    toggleButton.Text = tostring(valueRef())
+    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleButton.Font = Enum.Font.GothamBold
+    toggleButton.TextSize = 12
+    toggleButton.AutoButtonColor = false
+    toggleButton.BorderSizePixel = 0
+    toggleButton.Parent = row
+
+    local toggleCorner = Instance.new("UICorner")
+    toggleCorner.CornerRadius = UDim.new(0, 8)
+    toggleCorner.Parent = toggleButton
+
+    local toggleStroke = Instance.new("UIStroke")
+    toggleStroke.Color = Color3.fromRGB(255, 255, 255)
+    toggleStroke.Thickness = 1
+    toggleStroke.Parent = toggleButton
+
+    toggleButton.MouseButton1Click:Connect(function()
+        if onToggle then
+            onToggle()
+        end
+        local nextValue = valueRef()
+        toggleButton.Text = tostring(nextValue)
+        toggleButton.BackgroundColor3 = nextValue and Color3.fromRGB(34, 197, 94) or Color3.fromRGB(120, 120, 120)
+    end)
+
+    return row
+end
+
+local function toggleCosmeticState()
+    cosmetictoggle = not cosmetictoggle
+    if player.Character and player.Character.Parent then
+        setupCharacter(player.Character, true)
+    end
+end
+
+local function toggleSyncState()
+    synctoggle = not synctoggle
+end
+
+local function makeConfigButton(label, callback)
+    local button = Instance.new("TextButton")
+    button.Name = label
+    button.Size = UDim2.new(1, 0, 0, 30)
+    button.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    button.Text = label
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 13
+    button.AutoButtonColor = false
+    button.BorderSizePixel = 0
+    button.Parent = bfConfigPanel
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = button
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 255, 255)
+    stroke.Thickness = 1
+    stroke.Parent = button
+
+    button.MouseButton1Click:Connect(function()
+        if callback then
+            callback()
+        end
+    end)
+
+    return button
+end
+
+createToggleRow(bfConfigPanel, "Cosmetics", function() return cosmetictoggle end, toggleCosmeticState)
+createToggleRow(bfConfigPanel, "Head Sync", function() return synctoggle end, toggleSyncState)
+
+local forceReloadButton = makeConfigButton("Force Reload", function()
+    triggerForceReload()
+end)
+
+local function setBFConfigVisible(visible)
+    bfConfigOpen = visible
+    bfConfigPanel.Visible = visible
+    btnBFV2.Text = visible and "Close" or "BFv2"
+end
+
+btnBFV2.MouseButton1Click:Connect(function()
+    setBFConfigVisible(not bfConfigOpen)
+end)
+
+setBFConfigVisible(false)

@@ -44,15 +44,18 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/re
 🟢 Custom GF skin<br>
 🟢 Head Sync<br>
 🟡 Fix expressions during certain emotes<br>
+BF: WIP<br>
+GF: WIP<br>
 🟡 Cosmetic Compatiblity<br>
 Sonic: Almost all Capes, Most of the hats<br>
-Amy: Fancy Dress<br>
+Amy: Most Dresses, Axe, MagicalAmy<br>
 🟡 Icons<br>
 Sonic: Very early but works<br>
-Amy: WIP<br>
+Amy: Very early but works<br>
 🟢 LMS<br>
 Sonic: Replaced by Discharge (FNF: Corruption)<br>
 Amy: Replaced by Pretence (FNF: Corruption IF)<br>
+🟢 Config GUI ingame<br>
 🔴 Observer/Skins applied for the rest of the server<br>
 
 # Other Stuff

@@ -24,7 +24,7 @@
 
 	local ModernLMS = loadCustomAsset(
 		"https://raw.githubusercontent.com/MisterSaiyan/cosas/main/bfthingv2.mp3",
-		"bfthing.mp3"
+		"bfthingv2.mp3"
 	)
 
     local function canUseModernLMS()

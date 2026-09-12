@@ -41,6 +41,7 @@ local cosmeticRootNames = {
 }
 
 local function GFBelongsToCosmeticRoot(object, model)
+    if not GFCosmeticToggle then return end
     local current = object
     while current and current ~= model do
         if cosmeticRootNames[current.Name] or shirtCosmetics[current.Name] then
@@ -527,77 +528,6 @@ task.spawn(function()
     end
 end)
 
-local EmotesList = {
-    "union",
-    "animblink",
-    "blink",
-}
-
-local EMOTE_EYE_BACK_OFFSET = 1.75 -- Empuja el emote más hacia atrás para cerrar el hueco entre los ojos y la cara
-
-local function GFSyncEmotesToEyes(model)
-    if not model then
-        return
-    end
-
-    local eye1 = model:FindFirstChild("eye1", true)
-    local eye2 = model:FindFirstChild("eye2", true)
-    if not eye1 or not eye2 then
-        return
-    end
-
-    if not eye1:IsA("BasePart") or not eye2:IsA("BasePart") then
-        return
-    end
-
-    local midpoint = eye1.Position:Lerp(eye2.Position, 0.5)
-    local rotation = eye1.CFrame.Rotation
-    local backOffset = rotation * Vector3.new(0, 0.12, -EMOTE_EYE_BACK_OFFSET)
-
-    for _, object in ipairs(model:GetDescendants()) do
-        if object:IsA("BasePart") then
-            local isTracked = false
-            for _, emoteName in ipairs(EmotesList) do
-                if object.Name == emoteName then
-                    isTracked = true
-                    break
-                end
-            end
-
-            if isTracked then
-                object.CFrame = CFrame.new(midpoint + backOffset) * rotation
-            end
-        end
-    end
-end
-
-local function GFHookEmoteEyeSync(model)
-    if not model then
-        return
-    end
-
-    GFSyncEmotesToEyes(model)
-
-    model.DescendantAdded:Connect(function(descendant)
-        if not descendant:IsA("BasePart") then
-            return
-        end
-
-        for _, emoteName in ipairs(EmotesList) do
-            if descendant.Name == emoteName then
-                task.defer(function()
-                    GFSyncEmotesToEyes(model)
-                end)
-                break
-            end
-        end
-    end)
-end
-
-local function GFEyeFix(model)
-    GFSyncEmotesToEyes(model)
-end
-
 local function GFSetupCharacter(char, forceReload)
     if not GFIsScriptActive and not forceReload then return end
 
@@ -681,13 +611,11 @@ local function GFSetupCharacter(char, forceReload)
     GFCurrentModel = mdl
     GFUpdateInsertedShirt(oldVisual or char, mdl)
     GFSetupHeadSync(oldVisual or char, mdl, hrp)
-    GFHookEmoteEyeSync(mdl)
 
     task.spawn(function()
         while char and char.Parent and GFIsScriptActive and GFCurrentModel == mdl do
             GFRestoreCosmeticVisibility(oldVisual or char)
             GFUpdateInsertedShirt(oldVisual or char, mdl)
-            GFSyncEmotesToEyes(mdl)
             task.wait(0.1)
         end
     end)
@@ -938,7 +866,7 @@ local function ensureGFPanel()
     local stroke = Instance.new("UIStroke")
     stroke.Color = Color3.fromRGB(255, 255, 255)
     stroke.Thickness = 1.5
-    stroke.Transparency = 0.2
+    stroke.Transparency = 1
     stroke.LineJoinMode = Enum.LineJoinMode.Miter
     stroke.Parent = panel
 
@@ -1000,9 +928,9 @@ local function createGFConfigRow(parent, labelText, valueRef, onToggle)
     toggleCorner.Parent = toggleButton
 
     local toggleStroke = Instance.new("UIStroke")
-    toggleStroke.Color = Color3.fromRGB(255, 255, 255)
+    toggleStroke.Color = Color3.fromRGB(0, 0, 0)
     toggleStroke.Thickness = 1
-    toggleStroke.Transparency = 0.25
+    toggleStroke.Transparency = 1
     toggleStroke.Parent = toggleButton
 
     toggleButton.MouseButton1Click:Connect(function()
@@ -1035,7 +963,7 @@ local function makeGFConfigButton(label, callback)
     corner.Parent = button
 
     local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255, 255, 255)
+    stroke.Color = Color3.fromRGB(0, 0, 0)
     stroke.Thickness = 1
     stroke.Parent = button
 
@@ -1065,7 +993,7 @@ local function setGFConfigVisible(visible)
     GFButton.Text = visible and "Close" or "GFv2"
 end
 
-createGFConfigRow(GFPanel, "Cosmetics", function() return GFCosmeticToggle end, toggleGFCosmeticState)
+createGFConfigRow(GFPanel, "Cosmetic Comp.", function() return GFCosmeticToggle end, toggleGFCosmeticState)
 createGFConfigRow(GFPanel, "Head Sync", function() return GFSyncToggle end, toggleGFSyncState)
 
 makeGFConfigButton("Force Reload", function()

@@ -8,10 +8,35 @@ local isScriptActive = false
 local currentMdl = nil
 local syncConn = nil
 
+local hidething = false -- Toggle Hammer visibility fix (don't change)
+
 local function loadAsset(id)
     local ok, objects = pcall(game.GetObjects, game, "rbxassetid://" .. id)
     if not ok or not objects or #objects == 0 then return nil end
     return objects[1]:Clone()
+end
+
+local function HammerVisiblityFix(targetModel, visible)
+	if hidething or not targetModel then
+		return
+	end
+
+	local hammer = targetModel:FindFirstChild("Hammer", true)
+		or targetModel:FindFirstChild("Axe", true)
+	if not hammer then
+		return
+	end
+
+	local transparency = visible and 0 or 1
+	if hammer:IsA("BasePart") then
+		hammer.Transparency = transparency
+	end
+
+	for _, object in ipairs(hammer:GetDescendants()) do
+		if object:IsA("BasePart") then
+			object.Transparency = transparency
+		end
+	end
 end
 
 local function getPlayerModel()
@@ -219,6 +244,8 @@ local function setupCharacter(char)
             if v:IsA("BasePart") then v.Transparency = 1 end
         end
     end
+
+	HammerVisiblityFix(oldVisual or char, true)
 
     local mdl = loadAsset(ASSET_ID)
     if not mdl then return end

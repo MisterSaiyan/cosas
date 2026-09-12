@@ -53,7 +53,7 @@ Amy: Most Dresses, Axe, MagicalAmy<br>
 Sonic: Very early but works<br>
 Amy: Very early but works<br>
 🟢 LMS<br>
-Sonic: Replaced by Discharge (FNF: Corruption)<br>
+Sonic: Replaced by Discharge 2026 (SIGHTLY EDITED TO FIT IN DON'T BLINK's LENGTH)<br>
 Amy: Replaced by Pretence (FNF: Corruption IF)<br>
 🟢 Config GUI ingame<br>
 🔴 Observer/Skins applied for the rest of the server<br>

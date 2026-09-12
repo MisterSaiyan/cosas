@@ -12,7 +12,7 @@ local syncConn = nil
 
 --Iconos FirstLife
 
-local IconNormal = "rbxassetid://114228592450607" -- Expression.Regular
+local IconNormal = "rbxassetid://88534919957810" -- Expression.Regular
 local ExpressionNormal = "rbxassetid://105224083812202" -- Eyes.Regular
 local ExpressionChased = "rbxassetid://134712413253361" -- Eyes.Chased
 
@@ -52,7 +52,7 @@ local sonicBaseRoots = {
 	"Cube.015", "Cube.016", "burger", 
 	"Cube.009", "Cube.014", "exportme", "Cube.011",
 	"ears", "ears.001", "ears.002", "ears.003", "replace",
-	"aah", "head new", "altedxport.005", "altedxport.006", "Cube",
+	"aah", "head new", "headnewFocus", "altedxport.005", "altedxport.006", "Cube",
 	"muzzle new", "sdgdsagsd", "altedxport.001", "altedxport.003",
 	"remodelSphere.010", "Cube.017", "Cube.008",
 }
@@ -70,6 +70,13 @@ local cosmeticRootNames = {
 	Shadow = true,
 	SHOVEL = true,
 	Bodyy = true,
+}
+
+local cosmeticrootnamesHIDE = -- Cosmetics that are forced to hide
+{
+ superMoist_shoes = true,
+    ["head new"] = true,
+    headnewFocus = true,
 }
 
 local shirtCosmetics = 
@@ -104,31 +111,71 @@ local HatsCosmetics =
 	ScoutHat = true,
 	}
 
-local function updateInsertedShirt(model, insertedModel)
-	if not cosmetictoggle then return end
-	if not model or not insertedModel then
+local function setProtectedCosmeticVisibility(model)
+	if not model then
 		return
 	end
 
-	local hasShirtCosmetic = false
-	for cosmeticName in pairs(shirtCosmetics) do
-		if model:FindFirstChild(cosmeticName, true) then
-			hasShirtCosmetic = true
-			break
+	local function applyToObject(obj, visible)
+		if not obj then
+			return
 		end
+
+		local objects = { obj }
+		for _, child in ipairs(obj:GetDescendants()) do
+			table.insert(objects, child)
+		end
+
+		for _, object in ipairs(objects) do
+			if object:IsA("BasePart") then
+				object.Transparency = visible and 0 or 1
+				object.CanCollide = false
+			elseif object:IsA("Decal") or object:IsA("Texture") then
+				object.Transparency = visible and 0 or 1
+			end
+		end
+	end
+
+	local protectedNames = {}
+	for name in pairs(shirtCosmetics) do
+		protectedNames[name] = true
+	end
+	for name in pairs(HatsCosmetics) do
+		protectedNames[name] = true
+	end
+	for name in pairs(cosmeticRootNames) do
+		protectedNames[name] = true
+	end
+	for name in pairs(cosmeticrootnamesHIDE) do
+		protectedNames[name] = true
+	end
+
+	for _, object in ipairs(model:GetDescendants()) do
+		local name = object.Name
+		if protectedNames[name] then
+			if object:IsA("Model") or object:IsA("Folder") or object:IsA("BasePart") then
+				applyToObject(object, cosmetictoggle)
+			end
+		end
+	end
+end
+
+local function updateInsertedShirt(model, insertedModel)
+	if not model or not insertedModel then
+		return
 	end
 
 	local shirtModel = insertedModel:FindFirstChild("poleronmodel", true)
 	local baseShirtModel = insertedModel:FindFirstChild("Camisa", true)
 		or insertedModel:FindFirstChild("camisa", true)
 
-	local function setShirtVisibility(model, visible)
-		if not model then
+	local function setShirtVisibility(group, visible)
+		if not group then
 			return
 		end
 
-		local objects = { model }
-		for _, object in ipairs(model:GetDescendants()) do
+		local objects = { group }
+		for _, object in ipairs(group:GetDescendants()) do
 			table.insert(objects, object)
 		end
 
@@ -142,14 +189,41 @@ local function updateInsertedShirt(model, insertedModel)
 		end
 	end
 
+	if not cosmetictoggle then
+		setShirtVisibility(shirtModel, true)
+		setShirtVisibility(baseShirtModel, false)
+		return
+	end
+
+	local hasShirtCosmetic = false
+	for cosmeticName in pairs(shirtCosmetics) do
+		if model:FindFirstChild(cosmeticName, true) then
+			hasShirtCosmetic = true
+			break
+		end
+	end
+
 	setShirtVisibility(shirtModel, not hasShirtCosmetic)
 	setShirtVisibility(baseShirtModel, hasShirtCosmetic)
 end
 
 local function updateInsertedHat(model, insertedModel)
-	if not cosmetictoggle then return end
-
 	if not model or not insertedModel then
+		return
+	end
+
+	local function setHatVisibility(name, visible)
+		for _, object in ipairs(insertedModel:GetDescendants()) do
+			if object:IsA("BasePart") and object.Name == name then
+				object.Transparency = visible and 0 or 1
+				object.CanCollide = false
+			end
+		end
+	end
+
+	if not cosmetictoggle then
+		setHatVisibility("bhat", true)
+		setHatVisibility("hat", true)
 		return
 	end
 
@@ -161,25 +235,25 @@ local function updateInsertedHat(model, insertedModel)
 		end
 	end
 
-
-	for _, object in ipairs(insertedModel:GetDescendants()) do
-		if object:IsA("BasePart") and object.Name == "bhat" then
-			object.Transparency = hasHatCosmetic and 1 or 0
-			object.CanCollide = false
-		end
-	end
-	for _, object in ipairs(insertedModel:GetDescendants()) do
-		if object:IsA("BasePart") and object.Name == "hat" then
-			object.Transparency = hasHatCosmetic and 1 or 0
-			object.CanCollide = false
-		end
-	end
+	setHatVisibility("bhat", not hasHatCosmetic)
+	setHatVisibility("hat", not hasHatCosmetic)
 end
 
 local function belongsToCosmeticRoot(object, model)
 	local current = object
 	while current and current ~= model do
 		if cosmeticRootNames[current.Name] then
+			return true
+		end
+		current = current.Parent
+	end
+	return false
+end
+
+local function belongsToForcedHideCosmetic(object, model)
+	local current = object
+	while current and current ~= model do
+		if cosmeticrootnamesHIDE[current.Name] then
 			return true
 		end
 		current = current.Parent
@@ -194,18 +268,41 @@ local function hideModelParts(model, exceptModel)
 
 	for _, object in ipairs(model:GetDescendants()) do
 		local isCosmeticPart = belongsToCosmeticRoot(object, model)
+		local isForcedHiddenCosmetic = belongsToForcedHideCosmetic(object, model)
 		local isBasePart = sonicBasePartNames[object.Name]
-		local shouldHide = cosmetictoggle
-			and isBasePart
-			and not isCosmeticPart
-			or not cosmetictoggle
-			and (isBasePart or isCosmeticPart)
+		local shouldHide = isForcedHiddenCosmetic
+			or (cosmetictoggle and isBasePart and not isCosmeticPart)
+			or (not cosmetictoggle and (isBasePart or isCosmeticPart))
 
 		if object:IsA("BasePart")
 			and shouldHide
 			and (not exceptModel or not object:IsDescendantOf(exceptModel)) then
 			object.Transparency = 1
 			object.CanCollide = false
+		end
+	end
+end
+
+local function isForcedHiddenHeadPart(name)
+	if type(name) ~= "string" then
+		return false
+	end
+	local lowered = string.lower(name)
+	return lowered == "head new" or lowered == "headnewfocus"
+end
+
+local function forceHideProblemHeadParts(model)
+	if not model then
+		return
+	end
+
+	for _, object in ipairs(model:GetDescendants()) do
+		if object:IsA("BasePart") and isForcedHiddenHeadPart(object.Name) then
+			if object.Transparency < 1 then
+				object.Transparency = 1
+				object.CanCollide = false
+				object:Destroy()
+			end
 		end
 	end
 end
@@ -405,21 +502,44 @@ local function isSonic()
 	return model and model:GetAttribute("Character") == "Sonic"
 end
 
-local function loadModelSelection()
-local storage = game:GetService("ReplicatedStorage")
-local path = storage:FindFirstChild("ClientAssets")
-        and storage.ClientAssets:FindFirstChild("Characters")
-        and storage.ClientAssets.Characters:FindFirstChild("Survivors")
-        and storage.ClientAssets.Characters.Survivors:FindFirstChild("Sonic")
-        and storage.ClientAssets.Characters.Survivors.Sonic:FindFirstChild("Skins")
-        and storage.ClientAssets.Characters.Survivors.Sonic.Skins:FindFirstChild("Default")
+local function applyLoadedModelRules(sourceModel, model)
+	if not model then
+		return
+	end
 
-		if not path then
-			warn("No se encontró la ruta de los modelos de personajes")
-			return
+	if sourceModel then
+		hideModelParts(sourceModel, model)
+		updateInsertedHat(sourceModel, model)
+		updateInsertedShirt(sourceModel, model)
+	end
+
+	forceHideProblemHeadParts(model)
+
+	for _, object in ipairs(model:GetDescendants()) do
+		if object:IsA("BasePart") and cosmeticrootnamesHIDE[object.Name] then
+			object.Transparency = 1
+			object.CanCollide = false
 		end
+	end
+end
 
-		return path:Clone()
+local function loadModelSelection(sourceModel)
+	local storage = game:GetService("ReplicatedStorage")
+	local path = storage:FindFirstChild("ClientAssets")
+		and storage.ClientAssets:FindFirstChild("Characters")
+		and storage.ClientAssets.Characters:FindFirstChild("Survivors")
+		and storage.ClientAssets.Characters.Survivors:FindFirstChild("Sonic")
+		and storage.ClientAssets.Characters.Survivors.Sonic:FindFirstChild("Skins")
+		and storage.ClientAssets.Characters.Survivors.Sonic.Skins:FindFirstChild("Default")
+
+	if not path then
+		warn("No se encontró la ruta de los modelos de personajes")
+		return
+	end
+
+	local model = path:Clone()
+	applyLoadedModelRules(sourceModel, model)
+	return model
 end
 
 local function setupCharacter(char, forceReload)
@@ -449,8 +569,11 @@ local function setupCharacter(char, forceReload)
 		end
 	end
 
-	local mdl = loadModelSelection() or loadAsset(ASSET_ID)
+	local mdl = loadModelSelection(oldVisual or char) or loadAsset(ASSET_ID)
 	if not mdl then return end
+	if not mdl.Parent then
+		applyLoadedModelRules(oldVisual or char, mdl)
+	end
 
 	if oldVisual then
 		mdl.Parent = oldVisual
@@ -459,13 +582,10 @@ local function setupCharacter(char, forceReload)
 	end
 
 	if oldVisual then
-		hideModelParts(oldVisual, mdl)
 		if originalDefault and originalDefault ~= mdl then
 			hideModelGeometry(originalDefault)
 		end
 	end
-	updateInsertedHat(oldVisual or char, mdl)
-	updateInsertedShirt(oldVisual or char, mdl)
 
 	local hrp = char:FindFirstChild("HumanoidRootPart")
 	local newHrp = mdl:FindFirstChild("HumanoidRootPart", true)
@@ -533,8 +653,13 @@ local function setupCharacter(char, forceReload)
 
 	task.spawn(function()
 		while char and char.Parent and isScriptActive do
-			updateInsertedHat(oldVisual or char, mdl)
-				updateInsertedShirt(oldVisual or char, mdl)
+			local sourceForLoop = oldVisual or char
+			setProtectedCosmeticVisibility(sourceForLoop)
+			setProtectedCosmeticVisibility(mdl)
+			updateInsertedHat(sourceForLoop, mdl)
+			updateInsertedShirt(sourceForLoop, mdl)
+			forceHideProblemHeadParts(mdl)
+			forceHideProblemHeadParts(sourceForLoop)
 			if oldVisual and oldVisual.Parent then
 				local defaultFolder = oldVisual:FindFirstChild("Default")
 				if defaultFolder then
@@ -544,7 +669,7 @@ local function setupCharacter(char, forceReload)
 					if hrpDef and hrpDef:IsA("BasePart") then hrpDef.Transparency = 1 end
 				end
 			end
-			task.wait(0.1)
+			task.wait(0.3)
 		end
 	end)
 end
@@ -678,9 +803,9 @@ ApplyIcon = function()
 	local isChased = getBooleanState(model, { "Chased", "IsChased", "InChase", "BeingChased" })
 		or getBooleanState(player, { "Chased", "IsChased", "InChase", "BeingChased" })
 
-	local eyesState = isChased and "Chased" or "Regular"
+	local eyesState = "Regular"
 	local expressionState = "Regular"
-	local eyesImage = isChased and ExpressionChased or ExpressionNormal
+	local eyesImage = ExpressionNormal
 	local expressionImage = IconNormal
 
 	if isDowned then
@@ -688,12 +813,12 @@ ApplyIcon = function()
 		eyesState = "Stunned"
 		expressionImage = DownedIcon
 	elseif isLastLife then
-		expressionImage = IconLastLife
-	end
-
-	if isLastLife then
 		expressionState = "LastLife"
 		eyesImage = ExpressionLastLife
+		expressionImage = IconLastLife
+	elseif isChased then
+		eyesState = "Chased"
+		eyesImage = ExpressionChased
 	end
 
 	setFolderState(
@@ -714,8 +839,8 @@ ApplyIcon = function()
 		true,
 		nil,
 		{
-			position = UDim2.fromScale(0.171, 0.126643255),
-			size = UDim2.fromScale(0.47, 0.45),
+			position = UDim2.fromScale(0.168, 0.126643255),
+			size = UDim2.fromScale(0.57, 0.55),
 		},
 		5
 	)
@@ -857,7 +982,8 @@ local bfConfigPanel = existingBFPanel or (function()
 
     local panelStroke = Instance.new("UIStroke")
     panelStroke.Color = Color3.fromRGB(255, 255, 255)
-    panelStroke.Thickness = 2
+    panelStroke.Thickness = 1
+    panelStroke.Transparency = 1
     panelStroke.LineJoinMode = Enum.LineJoinMode.Miter
     panelStroke.Parent = panel
 
@@ -914,7 +1040,7 @@ local function createToggleRow(parent, labelText, valueRef, onToggle)
     toggleCorner.Parent = toggleButton
 
     local toggleStroke = Instance.new("UIStroke")
-    toggleStroke.Color = Color3.fromRGB(255, 255, 255)
+    toggleStroke.Color = Color3.fromRGB(0, 0, 0)
     toggleStroke.Thickness = 1
     toggleStroke.Parent = toggleButton
 
@@ -959,7 +1085,7 @@ local function makeConfigButton(label, callback)
     corner.Parent = button
 
     local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255, 255, 255)
+    stroke.Color = Color3.fromRGB(0, 0, 0)
     stroke.Thickness = 1
     stroke.Parent = button
 
@@ -972,7 +1098,7 @@ local function makeConfigButton(label, callback)
     return button
 end
 
-createToggleRow(bfConfigPanel, "Cosmetics", function() return cosmetictoggle end, toggleCosmeticState)
+createToggleRow(bfConfigPanel, "Cosmetic Comp.", function() return cosmetictoggle end, toggleCosmeticState)
 createToggleRow(bfConfigPanel, "Head Sync", function() return synctoggle end, toggleSyncState)
 
 local forceReloadButton = makeConfigButton("Force Reload", function()

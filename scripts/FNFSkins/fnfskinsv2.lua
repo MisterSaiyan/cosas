@@ -2,13 +2,13 @@ local CoreGui = game:GetService("CoreGui")
         
 		game.StarterGui:SetCore("SendNotification", {
         Title = "FNF Skins V2", 
-        Text = "Made by MisterSaiyan | Head sync comes disabled by default, enable it if you use head cosmetics", 
+        Text = "Made by MisterSaiyan | Head sync comes disabled by default", 
         Icon = "", Duration = 10
     })
 
     		game.StarterGui:SetCore("SendNotification", {
         Title = "IMPORTANT", 
-        Text = "IMPORTANT: SUPER SONIC (SUPERMOIST) STUFF IS REALLY BUGGY WITH HEAD SYNC", 
+        Text = "SUPERMOIST STUFF IS REALLY BUGGY WITH HEAD SYNC", 
         Icon = "", Duration = 10
     })
 

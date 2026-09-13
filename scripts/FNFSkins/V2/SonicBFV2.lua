@@ -48,14 +48,32 @@ local function hasNamedDescendant(root, name)
 	return false
 end
 
-local function hasSuperMoistQuills()
-	return hasNamedDescendant(workspace, "superMoist_quills")
-		or hasNamedDescendant(player.Character, "superMoist_quills")
-		or hasNamedDescendant(player.Character and player.Character.Parent, "superMoist_quills")
+local function hasSuperMoistQuills(root)
+	local roots = {}
+	if root then
+		table.insert(roots, root)
+	end
+	if player.Character then
+		table.insert(roots, player.Character)
+	end
+	if currentMdl then
+		table.insert(roots, currentMdl)
+	end
+	if player.Character and player.Character.Parent then
+		table.insert(roots, player.Character.Parent)
+	end
+
+	for _, candidate in ipairs(roots) do
+		if hasNamedDescendant(candidate, "superMoist_quills") then
+			return true
+		end
+	end
+
+	return false
 end
 
-local function getActiveAssetId()
-	return hasSuperMoistQuills() and SUPER_ID or ASSET_ID
+local function getActiveAssetId(root)
+	return hasSuperMoistQuills(root) and SUPER_ID or ASSET_ID
 end
 
 local function isSuperMoistCapeWeld(part)
@@ -77,7 +95,7 @@ local sonicBaseRoots = {
 	"Left Hand", "LArm1", "LArm2", "LArm3", "LArm4", "LArm5",
 	"RArm1", "RArm2", "RArm3", "RArm4", "RArm5", "LFoot",
 	"RFoot", "LFoot1", "LFoot2", "LFoot3", "LFoot4", "LFoot5",
-	"RLeg1", "RLeg2", "RLeg3", "RLeg4", "RLeg5", "RSleeve",
+	"RLeg1", "RLeg2", "RLeg3", "RLeg4", "RLeg5", "RSleeve", "Cape",
 	"LSleeve", "tail", "belly", "Sphere.003", "Sphere.006",
 	"Sphere.007", "Sphere.010", "left backspike", "right backspike", "angry", "Coloreye1", "Coloreye2",
 	-- remodel parts
@@ -586,7 +604,7 @@ local function applyLoadedModelRules(sourceModel, model)
 end
 
 local function loadModelSelection(sourceModel)
-	if hasSuperMoistQuills() then
+	if hasSuperMoistQuills(sourceModel) then
 		local superModel = loadAsset(SUPER_ID)
 		if superModel then
 			applyLoadedModelRules(sourceModel, superModel)
@@ -621,11 +639,13 @@ local function setupCharacter(char, forceReload)
 			isScriptActive = true
 		end
 
+	local playersFolder = workspace:FindFirstChild("Players")
+	local oldVisual = playersFolder and playersFolder:FindFirstChild(player.Name)
+	local sourceRoot = oldVisual or char
+	local activeAssetId = getActiveAssetId(sourceRoot)
 	if syncConn then syncConn:Disconnect() syncConn = nil end
 	if currentMdl and currentMdl.Parent then currentMdl:Destroy() currentMdl = nil end
 
-	local playersFolder = workspace:FindFirstChild("Players")
-	local oldVisual = playersFolder and playersFolder:FindFirstChild(player.Name)
 	local originalDefault = oldVisual and oldVisual:FindFirstChild("Default")
 
 	for _, v in ipairs(char:GetDescendants()) do
@@ -639,12 +659,12 @@ local function setupCharacter(char, forceReload)
 		end
 	end
 
-	local activeAssetId = getActiveAssetId()
-	local mdl = loadModelSelection(oldVisual or char) or loadAsset(activeAssetId)
+	local mdl = loadModelSelection(sourceRoot) or loadAsset(activeAssetId)
 	if not mdl then return end
 	if not mdl.Parent then
-		applyLoadedModelRules(oldVisual or char, mdl)
+		applyLoadedModelRules(sourceRoot, mdl)
 	end
+	mdl:SetAttribute("AssetId", activeAssetId)
 
 	if oldVisual then
 		mdl.Parent = oldVisual
@@ -723,7 +743,19 @@ local function setupCharacter(char, forceReload)
 	end)
 
 	task.spawn(function()
+		local lastAssetCheck = 0
 		while char and char.Parent and isScriptActive do
+			local now = os.clock()
+			if now - lastAssetCheck >= 0.75 then
+				lastAssetCheck = now
+				local sourceForLoop = oldVisual or char
+				local detectedAssetId = getActiveAssetId(sourceForLoop)
+				if currentMdl and currentMdl:GetAttribute("AssetId") ~= detectedAssetId then
+					setupCharacter(char, true)
+					return
+				end
+			end
+
 			local sourceForLoop = oldVisual or char
 			setProtectedCosmeticVisibility(sourceForLoop)
 			setProtectedCosmeticVisibility(mdl)
@@ -740,7 +772,7 @@ local function setupCharacter(char, forceReload)
 					if hrpDef and hrpDef:IsA("BasePart") then hrpDef.Transparency = 1 end
 				end
 			end
-			task.wait(0.3)
+			task.wait(0.1)
 		end
 	end)
 end

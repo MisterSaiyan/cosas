@@ -315,7 +315,7 @@ end
 
 -- Head Sync
 
-local GFSyncToggle = true -- True to enable head sync, false to disable (Default: true)
+local GFSyncToggle = false -- True to enable head sync, false to disable (Default: true)
 
 local GFOriginalHeadBase, GFCustomMotorBase, GFOriginalBody, GFOriginalHead, GFCustomHead, GFCustomHeadMotor
 

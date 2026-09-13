@@ -6,6 +6,7 @@ local CoreGui = game:GetService("CoreGui")
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local ASSET_ID = 137895615579863
+local SUPER_ID = 138131908852771
 local isScriptActive = false
 local currentMdl = nil
 local syncConn = nil
@@ -33,6 +34,37 @@ local function loadAsset(id)
 	return objects[1]:Clone()
 end
 
+local function hasNamedDescendant(root, name)
+	if not root then
+		return false
+	end
+
+	for _, descendant in ipairs(root:GetDescendants()) do
+		if descendant.Name == name then
+			return true
+		end
+	end
+
+	return false
+end
+
+local function hasSuperMoistQuills()
+	return hasNamedDescendant(workspace, "superMoist_quills")
+		or hasNamedDescendant(player.Character, "superMoist_quills")
+		or hasNamedDescendant(player.Character and player.Character.Parent, "superMoist_quills")
+end
+
+local function getActiveAssetId()
+	return hasSuperMoistQuills() and SUPER_ID or ASSET_ID
+end
+
+local function isSuperMoistCapeWeld(part)
+    return part
+        and part.Name == "Weld"
+        and part.Parent
+        and part.Parent.Name == "superMoist_cape"
+end
+
 -- Silly SSonic Base Parts (Reused from previous script)
 
 local sonicBaseRoots = {
@@ -47,7 +79,7 @@ local sonicBaseRoots = {
 	"RFoot", "LFoot1", "LFoot2", "LFoot3", "LFoot4", "LFoot5",
 	"RLeg1", "RLeg2", "RLeg3", "RLeg4", "RLeg5", "RSleeve",
 	"LSleeve", "tail", "belly", "Sphere.003", "Sphere.006",
-	"Sphere.007", "Sphere.010", "left backspike", "right backspike",
+	"Sphere.007", "Sphere.010", "left backspike", "right backspike", "angry", "Coloreye1", "Coloreye2",
 	-- remodel parts
 	"Cube.015", "Cube.016", "burger", 
 	"Cube.009", "Cube.014", "exportme", "Cube.011",
@@ -55,6 +87,9 @@ local sonicBaseRoots = {
 	"aah", "head new", "headnewFocus", "altedxport.005", "altedxport.006", "Cube",
 	"muzzle new", "sdgdsagsd", "altedxport.001", "altedxport.003",
 	"remodelSphere.010", "Cube.017", "Cube.008",
+	-- Super parts
+	"superMoist_quillB", "superMoist_quillBotR", "superMoist_quillF", "superMoist_quillR",
+	"superMoist_quillTopR", "superMoist_wiskerss", "Weld",
 }
 
 local sonicBasePartNames = {}
@@ -65,6 +100,7 @@ end
 -- Cosmetics
 
 local cosmetictoggle = true -- true to protect cosmetics from being hidden (Default: true)
+local hatCosmeticToggle = true -- separate toggle for hats only (Default: true)
 
 local cosmeticRootNames = {
 	Shadow = true,
@@ -133,6 +169,18 @@ local function setProtectedCosmeticVisibility(model)
 			elseif object:IsA("Decal") or object:IsA("Texture") then
 				object.Transparency = visible and 0 or 1
 			end
+
+			if object:IsA("BasePart") then
+    if isSuperMoistCapeWeld(object) then
+        object.Transparency = 1
+        object.CanCollide = false
+        return
+    end
+
+    object.Transparency = visible and 0 or 1
+    object.CanCollide = false
+		end
+
 		end
 	end
 
@@ -154,7 +202,12 @@ local function setProtectedCosmeticVisibility(model)
 		local name = object.Name
 		if protectedNames[name] then
 			if object:IsA("Model") or object:IsA("Folder") or object:IsA("BasePart") then
-				applyToObject(object, cosmetictoggle)
+				local isHatCosmetic = HatsCosmetics[name] == true
+				local targetVisible = cosmetictoggle
+				if isHatCosmetic then
+					targetVisible = cosmetictoggle and hatCosmeticToggle
+				end
+				applyToObject(object, targetVisible)
 			end
 		end
 	end
@@ -224,6 +277,14 @@ local function updateInsertedHat(model, insertedModel)
 	if not cosmetictoggle then
 		setHatVisibility("bhat", true)
 		setHatVisibility("hat", true)
+		setHatVisibility("sas", true)
+		return
+	end
+
+	if not hatCosmeticToggle then
+		setHatVisibility("bhat", true)
+		setHatVisibility("hat", true)
+		setHatVisibility("sas", true)
 		return
 	end
 
@@ -237,6 +298,7 @@ local function updateInsertedHat(model, insertedModel)
 
 	setHatVisibility("bhat", not hasHatCosmetic)
 	setHatVisibility("hat", not hasHatCosmetic)
+	setHatVisibility("sas", not hasHatCosmetic)
 end
 
 local function belongsToCosmeticRoot(object, model)
@@ -337,7 +399,7 @@ task.spawn(function()
         :WaitForChild("Skins")
 
     local originalDefault = skins:WaitForChild("Default")
-    local replacement = loadAsset(ASSET_ID)
+    local replacement = loadAsset(getActiveAssetId())
 
     if replacement then
         replacement.Name = "Default"
@@ -382,7 +444,7 @@ end
 
 -- Head Sync
 
-local synctoggle = true -- False to disable head sync (Default: true)
+local synctoggle = false -- Default: false, because the custom Sonic head is already aligned and the sync offset breaks the intended pose.
 
 local originalHeadBase, customMotorBase, originalBody, originalHead, customHead, customHeadMotor
 
@@ -524,6 +586,14 @@ local function applyLoadedModelRules(sourceModel, model)
 end
 
 local function loadModelSelection(sourceModel)
+	if hasSuperMoistQuills() then
+		local superModel = loadAsset(SUPER_ID)
+		if superModel then
+			applyLoadedModelRules(sourceModel, superModel)
+			return superModel
+		end
+	end
+
 	local storage = game:GetService("ReplicatedStorage")
 	local path = storage:FindFirstChild("ClientAssets")
 		and storage.ClientAssets:FindFirstChild("Characters")
@@ -569,7 +639,8 @@ local function setupCharacter(char, forceReload)
 		end
 	end
 
-	local mdl = loadModelSelection(oldVisual or char) or loadAsset(ASSET_ID)
+	local activeAssetId = getActiveAssetId()
+	local mdl = loadModelSelection(oldVisual or char) or loadAsset(activeAssetId)
 	if not mdl then return end
 	if not mdl.Parent then
 		applyLoadedModelRules(oldVisual or char, mdl)
@@ -607,8 +678,8 @@ local function setupCharacter(char, forceReload)
 			v.CanCollide = false
 			v.Massless = true
 			v.Anchored = false
-			if v.Name == "HumanoidRootPart" or v.Name == "Waist" or v.Name == "Weld" then
-				v.Transparency = 1
+			if (v.Name == "HumanoidRootPart" or v.Name == "Waist") or isSuperMoistCapeWeld(v) then
+    		v.Transparency = 1
 			end
 		elseif v:IsA("Trail") or v:IsA("Beam") then
 			v.Enabled = false
@@ -697,7 +768,11 @@ local function stopScript()
 	if currentMdl and currentMdl.Parent then currentMdl:Destroy() currentMdl = nil end
 	if character then
 		for _, v in ipairs(character:GetDescendants()) do
-			if v:IsA("BasePart") then v.Transparency = 0 end
+			if v:IsA("BasePart") then
+				if not isSuperMoistCapeWeld(v) then
+					v.Transparency = 0
+				end
+			end
 		end
 	end
 end
@@ -1065,6 +1140,16 @@ end
 
 local function toggleSyncState()
     synctoggle = not synctoggle
+    if player.Character and player.Character.Parent and isScriptActive then
+        setupCharacter(player.Character, true)
+    end
+end
+
+local function toggleHatCosmeticState()
+    hatCosmeticToggle = not hatCosmeticToggle
+    if player.Character and player.Character.Parent and isScriptActive then
+        setupCharacter(player.Character, true)
+    end
 end
 
 local function makeConfigButton(label, callback)
@@ -1099,6 +1184,7 @@ local function makeConfigButton(label, callback)
 end
 
 createToggleRow(bfConfigPanel, "Cosmetic Comp.", function() return cosmetictoggle end, toggleCosmeticState)
+createToggleRow(bfConfigPanel, "Hat Cosmetics", function() return hatCosmeticToggle end, toggleHatCosmeticState)
 createToggleRow(bfConfigPanel, "Head Sync", function() return synctoggle end, toggleSyncState)
 
 local forceReloadButton = makeConfigButton("Force Reload", function()

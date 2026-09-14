@@ -8,7 +8,7 @@ Fanmade OM cosmetic that gives Sonic his remodel, along with a keybind to transf
 ## loadstring
 
 ```lua
-loadstring(game:HttpGet("https://gist.githubusercontent.com/MisterSaiyan/c0f9e449b94b761922221d93dece54cd/raw/"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/SillySSonic/SillySSonicLS.lua"))()
 ```
 
 # What does it contain

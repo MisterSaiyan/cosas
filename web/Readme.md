@@ -27,7 +27,7 @@
         <p>Click the banners to view the pages</p>
         <p><a href="https://scriptblox.com/u/MisterSaiyan">
             Find me in scriptblox too :D
-            </p>
+        </a></p>
 
 <h3>Saiyan's Silly Super Sonic</h3>
 <p class="version">Alpha Revision 2 | Outcome Memories</p>

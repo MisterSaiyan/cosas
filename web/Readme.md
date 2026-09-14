@@ -13,7 +13,6 @@
             <br>Second-year University Student<br>Computer Science Student<br>Chilean</p>
         <div class="estado">
             i have no idea of what i am doing :P
-            [Find me in scriptblox](https://scriptblox.com/u/MisterSaiyan)
         </div>
         <div class="estado">This page mainly stores my OM/Roblox stuff if i keep doing this</div>
 
@@ -22,11 +21,12 @@
 </div>
 
 
-
 <div class="derecha">
         <h2>Public Scripts</h2>
         <p>Not all of these are final, as they are still being updated</p>
         <p>Click the banners to view the pages</p>
+
+[Find me in scriptblox](https://scriptblox.com/u/MisterSaiyan)
 
 <h3>Saiyan's Silly Super Sonic</h3>
 <p class="version">Alpha Revision 2 | Outcome Memories</p>

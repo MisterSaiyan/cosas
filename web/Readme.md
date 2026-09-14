@@ -32,7 +32,7 @@
 <h3>Saiyan's Silly Super Sonic</h3>
 <p class="version">Alpha Revision 2 | Outcome Memories</p>
         <p><a href="https://mistersaiyan.github.io/cosas/scripts/SillySSonic/">
-            <img class="img-banner" src="ssonic.png" alt="Silly SSonic" width="650" height="200">
+            <img class="img-banner" src="ssonicv2.png" alt="Silly SSonic" width="650" height="200">
         </a></p>
 
 <h4>Simple OM Model Replacer (OM v0.2)</h4>

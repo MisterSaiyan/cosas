@@ -13,6 +13,7 @@
             <br>Second-year University Student<br>Computer Science Student<br>Chilean</p>
         <div class="estado">
             i have no idea of what i am doing :P
+            [Find me in scriptblox](https://scriptblox.com/u/MisterSaiyan)
         </div>
         <div class="estado">This page mainly stores my OM/Roblox stuff if i keep doing this</div>
 

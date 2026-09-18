@@ -1,5 +1,6 @@
 # FNF Skins for Sonic and Amy
 # [V2](https://mistersaiyan.github.io/cosas/scripts/FNFSkins/V2/)
+# [Scriptblox page](https://scriptblox.com/script/Outcome-Memories-v0.2-Fanmade-FNF-Skins-for-Sonic-and-Amy-246153)
 
 Small script that has model edits for sonic and amy that resembles boyfriend and girlfriend from fnf
 

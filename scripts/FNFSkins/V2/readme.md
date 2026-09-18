@@ -1,5 +1,6 @@
 # FNF Skins for Sonic and Amy V2
 # [V1](https://mistersaiyan.github.io/cosas/scripts/FNFSkins/)
+# [Scriptblox Page](https://scriptblox.com/script/(ANNIVERSARY)-Outcome-Memories-v0.2-UPDATED-FNF-Skins-for-Sonic-and-Amy-For-Outcome-Memories-0.2-227278)
 
 Custom Skins that overrides Sonic and Amy with an custom designed boyfriend and girlfriend from fnf
 

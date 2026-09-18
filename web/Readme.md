@@ -35,20 +35,20 @@
             <img class="img-banner" src="ssonicv2.png" alt="Silly SSonic" width="650" height="200">
         </a></p>
 
-<h4>Simple OM Model Replacer (OM v0.2)</h4>
+<h3>Simple OM Model Replacer (OM v0.2)</h3>
 <p class="version">Funny Template | Outcome Memories</p>
 <a href="https://mistersaiyan.github.io/cosas/scripts/SimpleModelReplacer">
 <img class="img-banner" src="knux.png" alt="Model Replacer" width="650" height="200">
         </a>
 
-<h5>FNF Skins for Sonic and Amy</h5>
+<h3>FNF Skins for Sonic and Amy</h3>
 <p class="version">Custom Skins (V1 and V2) | Outcome Memories</p>
 <a href="https://mistersaiyan.github.io/cosas/scripts/FNFSkins/V2/">
 <img class="img-banner" src="fnfv2banner.png" alt="FNF Skins" width="650" height="200">
         </a>
 
 
-<h1>Chilean Knuckles Skin (CURRENTLY IN REVIEW)</h1>
+<h3>Chilean Knuckles Skin</h3>
 <p class="version">Custom Skin | Outcome Memories</p>
 <a href="https://mistersaiyan.github.io/cosas/scripts/knuxchile/">
 <img class="img-banner" src="knucklesbanner.png" alt="chilea" width="650" height="200">

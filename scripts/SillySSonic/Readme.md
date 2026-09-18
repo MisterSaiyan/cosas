@@ -11,6 +11,8 @@ Fanmade OM cosmetic that gives Sonic his remodel, along with a keybind to transf
 loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/SillySSonic/SillySSonicLS.lua"))()
 ```
 
+## [Scriptblox Page](https://scriptblox.com/script/Outcome-Memories-v0.2-Silly-Transformable-Super-Sonic-Skin-244618)
+
 # What does it contain
 Rayfield GUI to manage toggles, cosmetic transparency, and model presets<br>
 LMS toggle between Super Sonic Hero and the current Sonic solo in-game.<br>

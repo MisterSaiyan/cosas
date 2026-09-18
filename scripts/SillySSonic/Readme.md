@@ -2,6 +2,8 @@
 
 # ALPHA Revision 2
 
+## [Scriptblox Page](https://scriptblox.com/script/Outcome-Memories-v0.2-Silly-Transformable-Super-Sonic-Skin-244618)
+
 Fanmade OM cosmetic that gives Sonic his remodel, along with a keybind to transform into Sonic (Mid) Super Saiyan.<br>
 (Inspired by my old Super Sonic milestone skin idea)
 
@@ -10,8 +12,6 @@ Fanmade OM cosmetic that gives Sonic his remodel, along with a keybind to transf
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/SillySSonic/SillySSonicLS.lua"))()
 ```
-
-## [Scriptblox Page](https://scriptblox.com/script/Outcome-Memories-v0.2-Silly-Transformable-Super-Sonic-Skin-244618)
 
 # What does it contain
 Rayfield GUI to manage toggles, cosmetic transparency, and model presets<br>

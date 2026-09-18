@@ -1,5 +1,6 @@
 # Saiyan's Simple OM Model Replacer
 # a.k.a Silly Super Sonic's codebase
+# [Scriptblox page](https://scriptblox.com/script/Outcome-Memories-v0.2-Simple-OM-Model-Replacer-223934)
 
 <img width="518" height="537" alt="image" src="https://github.com/user-attachments/assets/1382d6d7-88f8-4ae7-9df5-61f30f330c84" />
 

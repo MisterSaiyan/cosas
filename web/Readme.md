@@ -41,10 +41,17 @@
 <img class="img-banner" src="knux.png" alt="Model Replacer" width="650" height="200">
         </a>
 
-<h4>FNF Skins for Sonic and Amy</h4>
+<h5>FNF Skins for Sonic and Amy</h5>
 <p class="version">Custom Skins (V1 and V2) | Outcome Memories</p>
 <a href="https://mistersaiyan.github.io/cosas/scripts/FNFSkins/V2/">
 <img class="img-banner" src="fnfv2banner.png" alt="FNF Skins" width="650" height="200">
+        </a>
+
+
+<h6>Chilean Knuckles Skin</h6>
+<p class="version">Custom Skin | Outcome Memories</p>
+<a href="https://scriptblox.com/script/(ANNIVERSARY)-Outcome-Memories-v0.2-Chilean-Knuckles-Skin-for-Outcome-Memories-0.2-228799">
+<img class="img-banner" src="knucklesbanner.png" alt="chilea" width="650" height="200">
         </a>
 
 

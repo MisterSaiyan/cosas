@@ -48,9 +48,9 @@
         </a>
 
 
-<h6>Chilean Knuckles Skin (CURRENTLY IN REVIEW)</h6>
+<h1>Chilean Knuckles Skin (CURRENTLY IN REVIEW)</h1>
 <p class="version">Custom Skin | Outcome Memories</p>
-<a href="https://scriptblox.com/script/(ANNIVERSARY)-Outcome-Memories-v0.2-Chilean-Knuckles-Skin-for-Outcome-Memories-0.2-228799">
+<a href="https://mistersaiyan.github.io/cosas/scripts/knuxchile/">
 <img class="img-banner" src="knucklesbanner.png" alt="chilea" width="650" height="200">
         </a>
 

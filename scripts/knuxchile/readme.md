@@ -7,10 +7,10 @@ El 18 ctm, viva el 18<br>
 ## loadstring
 
 ```lua
-
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/knuxchile/chile.lua"))()
 ```
 # Other Stuff
 
-[Video Guide](https://www.youtube.com/watch?v=jUPFXx3MQgE&t)
+[Showcase](https://www.youtube.com/watch?v=jUPFXx3MQgE&t)
 
 # [Return](https://mistersaiyan.github.io/cosas/web/)

@@ -2,7 +2,7 @@ local CoreGui = game:GetService("CoreGui")
         
 		game.StarterGui:SetCore("SendNotification", {
         Title = "Silly SSonic Alpha Revision 2", 
-        Text = "Made by MisterSaiyan | Latest Update: 14-09-2026", 
+        Text = "Made by MisterSaiyan | Latest Update: 19-09-2026", 
         Icon = "", Duration = 10
     })
 

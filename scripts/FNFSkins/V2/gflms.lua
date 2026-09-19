@@ -24,7 +24,7 @@
 
 	local AmyLMS = loadCustomAsset(
 		"https://raw.githubusercontent.com/MisterSaiyan/cosas/main/gfthing.mp3",
-		"gfsolothing.mp3"
+		"gfsolothingfix.mp3"
 	)
 
     local function canUseModernLMS()

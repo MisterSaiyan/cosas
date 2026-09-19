@@ -3,12 +3,23 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
+if _G.AmyGFV2Loaded then
+    return
+end
+_G.AmyGFV2Loaded = true
+
 local player = Players.LocalPlayer
 local GFCharacter = player.Character or player.CharacterAdded:Wait()
 local GFAssetId = 73695760388601
 local GFIsScriptActive = false
 local GFCurrentModel = nil
 local GFSyncConn = nil
+local GFSetupInProgress = false
+local GFSetupGeneration = 0
+local GFLastEyesState = nil
+local GFPhysicalWeld = nil
+local GFChasedVisible = false
+local GFChasedLostAt = nil
 
 -- Amy Iconos
 
@@ -251,8 +262,15 @@ local function GFSetFolderState(folder, activeName, imageId, fitToFrame, layout,
     for _, child in ipairs(folder:GetChildren()) do
         if child:IsA("ImageLabel") or child:IsA("ImageButton") then
             local isActive = child.Name == activeName
-            child.Visible = isActive
+            child.Visible = false
+        end
+    end
+
+    for _, child in ipairs(folder:GetChildren()) do
+        if child:IsA("ImageLabel") or child:IsA("ImageButton") then
+            local isActive = child.Name == activeName
             if isActive then
+                child.Visible = true
                 child.Image = imageId
                 child.ZIndex = zIndex
                 if layout and layout.position then
@@ -291,18 +309,38 @@ GFFunctionApplyIcon = function()
     local isChased = GFGetBooleanState(model, { "Chased", "IsChased", "InChase", "BeingChased" })
         or GFGetBooleanState(player, { "Chased", "IsChased", "InChase", "BeingChased" })
 
-    local eyesState = isChased and "Chased" or "Regular"
+    if isChased then
+        GFChasedVisible = true
+        GFChasedLostAt = nil
+    elseif GFChasedVisible then
+        GFChasedLostAt = GFChasedLostAt or os.clock()
+        if os.clock() - GFChasedLostAt >= 0.75 then
+            GFChasedVisible = false
+            GFChasedLostAt = nil
+        end
+    end
+
+    local eyesState = "Regular"
     local expressionState = isLastLife and "LastLife" or "Regular"
-    local eyesImage = isChased and ExpressionChasedGF or ExpressionNormalGF
+    local eyesImage = ExpressionNormalGF
     local expressionImage = isLastLife and IconLastLifeGF or IconNormalGF
 
+    if GFChasedVisible then
+        eyesState = "Chased"
+        eyesImage = ExpressionChasedGF
+    end
     if isDowned then
         eyesState = "Stunned"
         expressionState = "Downed"
         expressionImage = DownedIconGF
     end
-    if isLastLife then
+    if isLastLife and not GFChasedVisible then
         eyesImage = ExpressionLastLifeGF
+    end
+
+    if eyesState ~= GFLastEyesState then
+        GFLastEyesState = eyesState
+        warn("[AmyGFV2] Eyes state:", eyesState, "Chased:", isChased, "Downed:", isDowned)
     end
 
     local layout = {
@@ -530,12 +568,17 @@ end)
 
 local function GFSetupCharacter(char, forceReload)
     if not GFIsScriptActive and not forceReload then return end
+    if GFSetupInProgress then return end
+    GFSetupInProgress = true
+    GFSetupGeneration += 1
+    local generation = GFSetupGeneration
 
 	if forceReload then
 			GFIsScriptActive = true
 		end
 
     if GFSyncConn then GFSyncConn:Disconnect() GFSyncConn = nil end
+    GFPhysicalWeld = nil
     if GFCurrentModel and GFCurrentModel.Parent then GFCurrentModel:Destroy() GFCurrentModel = nil end
 
     for _, v in ipairs(char:GetDescendants()) do
@@ -563,7 +606,15 @@ local function GFSetupCharacter(char, forceReload)
     GFHammerVisibilityFix(oldVisual or char, true)
 
     local mdl = GFLoadAsset(GFAssetId)
-    if not mdl then return end
+    if not mdl then
+        GFSetupInProgress = false
+        return
+    end
+    if generation ~= GFSetupGeneration or not GFIsScriptActive then
+        mdl:Destroy()
+        GFSetupInProgress = false
+        return
+    end
 
     if oldVisual then
         mdl.Parent = oldVisual
@@ -575,11 +626,15 @@ local function GFSetupCharacter(char, forceReload)
     local newHrp = mdl:FindFirstChild("HumanoidRootPart", true)
     if not hrp or not newHrp then
         mdl:Destroy()
+		GFSetupInProgress = false
         return
     end
 
     newHrp.Anchored = false
     newHrp.Transparency = 1
+    newHrp.CanCollide = false
+    newHrp.CanTouch = false
+    newHrp.CanQuery = false
 
     local mdlHum = mdl:FindFirstChildOfClass("Humanoid")
     if mdlHum then mdlHum:Destroy() end
@@ -588,9 +643,9 @@ local function GFSetupCharacter(char, forceReload)
 
     for _, v in ipairs(mdl:GetDescendants()) do
         if v:IsA("BasePart") then
-            if v.Name ~= "Sphere.002" and v.Name ~= "eye1" and v.Name ~= "eye2" then
-                v.CanCollide = false
-            end
+            v.CanCollide = false
+            v.CanTouch = false
+            v.CanQuery = false
             v.Massless = true
             v.Anchored = false
             if v.Name == "HumanoidRootPart" or v.Name == "Waist" or v.Name == "Weld" then
@@ -607,13 +662,15 @@ local function GFSetupCharacter(char, forceReload)
     physicalWeld.Part0 = hrp
     physicalWeld.Part1 = newHrp
     physicalWeld.Parent = newHrp
+    GFPhysicalWeld = physicalWeld
 
     GFCurrentModel = mdl
     GFUpdateInsertedShirt(oldVisual or char, mdl)
     GFSetupHeadSync(oldVisual or char, mdl, hrp)
+	GFSetupInProgress = false
 
     task.spawn(function()
-        while char and char.Parent and GFIsScriptActive and GFCurrentModel == mdl do
+        while char and char.Parent and GFIsScriptActive and GFSetupGeneration == generation and GFCurrentModel == mdl do
             GFRestoreCosmeticVisibility(oldVisual or char)
             GFUpdateInsertedShirt(oldVisual or char, mdl)
             task.wait(0.1)
@@ -624,6 +681,14 @@ local function GFSetupCharacter(char, forceReload)
         if not char or not char.Parent or not hrp or not hrp.Parent or not newHrp or not newHrp.Parent or not GFIsScriptActive then
             if GFSyncConn then GFSyncConn:Disconnect() GFSyncConn = nil end
             return
+        end
+
+        if not GFPhysicalWeld or not GFPhysicalWeld.Parent then
+            GFPhysicalWeld = Instance.new("WeldConstraint")
+            GFPhysicalWeld.Name = "SkinPhysicalAnchor"
+            GFPhysicalWeld.Part0 = hrp
+            GFPhysicalWeld.Part1 = newHrp
+            GFPhysicalWeld.Parent = newHrp
         end
 
         if GFSyncToggle and GFOriginalHead and GFOriginalHead.Parent and GFOriginalBody and GFOriginalBody.Parent and GFCustomHeadMotor and GFCustomHeadMotor.Parent then
@@ -663,9 +728,11 @@ local function GFStartScript()
 end
 
 local function GFStopScript()
+    GFSetupGeneration += 1
     if not GFIsScriptActive then return end
     GFIsScriptActive = false
     if GFSyncConn then GFSyncConn:Disconnect() GFSyncConn = nil end
+    GFPhysicalWeld = nil
     if GFCurrentModel and GFCurrentModel.Parent then GFCurrentModel:Destroy() GFCurrentModel = nil end
     if GFCharacter then
         GFRestoreHammerState(GFCharacter)

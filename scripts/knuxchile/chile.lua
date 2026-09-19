@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -7,6 +8,12 @@ local ASSET_ID = 125889169899075
 local isScriptActive = false
 local currentMdl = nil
 local syncConn = nil
+
+		game.StarterGui:SetCore("SendNotification", {
+        Title = "Chilean Knuckles Skin", 
+        Text = "Made by MisterSaiyan | Load into a round to use", 
+        Icon = "", Duration = 10
+    })
 
 local function loadAsset(id)
 	local ok, objects = pcall(game.GetObjects, game, "rbxassetid://" .. id)
@@ -197,3 +204,5 @@ if isKnuckles() then
 	isCurrentlyKnuckles = true
 	startScript()
 end
+
+

@@ -67,6 +67,16 @@
             font-weight: bold;
         }
 
+        .Cosmetic-Button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #066906;
+            color: #1b1717;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
         .Scriptblox-Button {
             display: inline-block;
             padding: 10px 20px;

@@ -31,7 +31,7 @@
 
 <h3>Saiyan's Silly Super Sonic</h3>
 <p class="version">Alpha Revision 2 | Outcome Memories</p>
-        <p><a href="https://mistersaiyan.github.io/cosas/scripts/SillySSonic/">
+        <p><a href="https://mistersaiyan.github.io/cosas/web/SSonicV2/">
             <img class="img-banner" src="ssonicv2.png" alt="Silly SSonic" width="650" height="200">
         </a></p>
 

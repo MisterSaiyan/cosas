@@ -56,8 +56,6 @@ You can also use your own custom model. Just make sure to hide the necessary par
 
 # Other Stuff
 
-[GitHub Gist](https://gist.github.com/MisterSaiyan/c0f9e449b94b761922221d93dece54cd)
-
 [Gameplay](https://www.youtube.com/watch?v=CW0NdDi4FPE)
 
 [Debug Tab Guide](https://www.youtube.com/watch?v=1MENuHJ_qLs)

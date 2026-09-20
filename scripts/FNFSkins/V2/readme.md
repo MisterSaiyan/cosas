@@ -62,3 +62,5 @@ Amy: Replaced by Pretence (FNF: Corruption IF)<br>
 # Other Stuff
 
 # [Return](https://mistersaiyan.github.io/cosas/web/)
+
+# [GF Showcase](https://www.youtube.com/watch?v=WiAgTkXF8jI&t)

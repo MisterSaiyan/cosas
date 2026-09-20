@@ -1,25 +1,3 @@
-# Saiyan's Silly Super Sonic (FT. Remodel Sonic)
-
-# ALPHA Revision 2
-
-## [Scriptblox Page](https://scriptblox.com/script/Outcome-Memories-v0.2-Silly-Transformable-Super-Sonic-Skin-244618)
-
-Fanmade OM cosmetic that gives Sonic his remodel, along with a keybind to transform into Sonic (Mid) Super Saiyan.<br>
-(Inspired by my old Super Sonic milestone skin idea)
-
-## loadstring
-
-```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/SillySSonic/SillySSonicLS.lua"))()
-```
-
-# What does it contain
-Rayfield GUI to manage toggles, cosmetic transparency, and model presets<br>
-LMS toggle between Super Sonic Hero and the current Sonic solo in-game.<br>
-Toggleable custom Sonic icon<br>
-A few Custom Cosmetics as an extra (credits found ingame) :]<br>
-Inputs for your own sonic model edits<br>
-
 # Cosmetics Guide Example
 
 Let’s say my Sonic uses front-studded shoes.<br>
@@ -52,12 +30,5 @@ Ta-da! Sonic looks consistent now :D<br>
 
 You can also use your own custom model. Just make sure to hide the necessary parts in studio.
 <img width="598" height="275" alt="debugtab" src="https://github.com/user-attachments/assets/91ec29b7-13b4-4dbe-85ff-cf1e1a6ffc1e" />
-
-
-# Other Stuff
-
-[Gameplay](https://www.youtube.com/watch?v=CW0NdDi4FPE)
-
-[Debug Tab Guide](https://www.youtube.com/watch?v=1MENuHJ_qLs)
 
 # [Return](https://mistersaiyan.github.io/cosas/web/)

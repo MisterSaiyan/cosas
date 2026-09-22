@@ -37,7 +37,7 @@
 
 <h3>Simple OM Model Replacer (OM v0.2)</h3>
 <p class="version">Funny Template | Outcome Memories</p>
-<a href="https://mistersaiyan.github.io/cosas/scripts/SimpleModelReplacer">
+<a href="https://mistersaiyan.github.io/cosas/web/SimpleOMReplacer/">
 <img class="img-banner" src="knux.png" alt="Model Replacer" width="650" height="200">
         </a>
 

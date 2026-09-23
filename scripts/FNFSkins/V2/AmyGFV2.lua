@@ -673,11 +673,19 @@ local function GFSetupCharacter(char, forceReload)
         while char and char.Parent and GFIsScriptActive and GFSetupGeneration == generation and GFCurrentModel == mdl do
             GFRestoreCosmeticVisibility(oldVisual or char)
             GFUpdateInsertedShirt(oldVisual or char, mdl)
-            task.wait(0.1)
+            if not GFPhysicalWeld or not GFPhysicalWeld.Parent then
+                GFPhysicalWeld = Instance.new("WeldConstraint")
+                GFPhysicalWeld.Name = "SkinPhysicalAnchor"
+                GFPhysicalWeld.Part0 = hrp
+                GFPhysicalWeld.Part1 = newHrp
+                GFPhysicalWeld.Parent = newHrp
+            end
+            task.wait(0.35)
         end
     end)
 
-    GFSyncConn = RunService.RenderStepped:Connect(function()
+    if GFSyncToggle then
+        GFSyncConn = RunService.RenderStepped:Connect(function()
         if not char or not char.Parent or not hrp or not hrp.Parent or not newHrp or not newHrp.Parent or not GFIsScriptActive then
             if GFSyncConn then GFSyncConn:Disconnect() GFSyncConn = nil end
             return
@@ -709,7 +717,8 @@ local function GFSetupCharacter(char, forceReload)
                 warn("[HeadSync] Error during rotation calculation:", result)
             end
         end
-    end)
+        end)
+    end
 end
 
 local function GFStartScript()
@@ -1076,3 +1085,33 @@ setGFConfigVisible(false)
 -- Loadstring para el tema lms
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/gflms.lua"))()
+
+-- Colores del martillo (creditos a lil2kki)
+
+local function updateHammer(model)
+    for _, v in ipairs(model:GetDescendants()) do
+        if v:IsA("BasePart") then
+            if v.Color == Color3.fromRGB(255, 217, 0) then v.Color = Color3.fromRGB(27, 42, 53) end
+            if v.Color == Color3.fromRGB(255, 0, 102) then v.Color = Color3.fromRGB(86, 36, 36) end
+            if v.Color == Color3.fromRGB(255, 0, 0) then v.Color = Color3.fromRGB(91, 93, 105) end
+        end
+    end
+end
+
+updateHammer(game:GetService("ReplicatedStorage").ClientAssets.Characters.Survivors.Amy.Skins.Default.Hammer)
+
+if _G.AmyHammerUpd then _G.AmyHammerUpd:Disconnect() end
+_G.AmyHammerUpd = workspace.Players.ChildAdded:Connect(function(child)
+    print("ChildAdded:", child.ClassName, child:GetFullName())
+    if game.Players.LocalPlayer.Name ~= child.Name then return end
+    
+    local lastCamCFrame = workspace.CurrentCamera.CFrame -- wait for camera first setup
+    repeat task.wait() until workspace.CurrentCamera.CFrame ~= lastCamCFrame
+
+    local Hammer = child:FindFirstChild("Hammer", true)
+    if not Hammer then return end
+    print(Hammer:GetFullName())
+    updateHammer(Hammer)
+end)
+
+print("hammer recolor comes!")

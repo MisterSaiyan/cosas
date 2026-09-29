@@ -10,6 +10,8 @@ local SUPER_ID = 138131908852771
 local isScriptActive = false
 local currentMdl = nil
 local syncConn = nil
+local setupInProgress = false
+local setupGeneration = 0
 
 --Iconos FirstLife
 
@@ -108,6 +110,8 @@ local sonicBaseRoots = {
 	-- Super parts
 	"superMoist_quillB", "superMoist_quillBotR", "superMoist_quillF", "superMoist_quillR",
 	"superMoist_quillTopR", "superMoist_wiskerss", "Weld",
+	-- 0.1a Parts
+	"topbottomquill", "Cone.002", "Cone.003", "Mouth2",
 }
 
 local sonicBasePartNames = {}
@@ -119,11 +123,16 @@ end
 
 local cosmetictoggle = true -- true to protect cosmetics from being hidden (Default: true)
 local hatCosmeticToggle = true -- separate toggle for hats only (Default: true)
+local shoesCosmeticToggle = true -- separate toggle for shoes only (Default: true)
 
-local cosmeticRootNames = {
+local cosmeticRootNames = -- Protected cosmetic root names that should not be hidden
+{ 
 	Shadow = true,
 	SHOVEL = true,
 	Bodyy = true,
+	-- Buckles
+	["Cube.001"] = true,
+	["Cube.014"] = true,
 }
 
 local cosmeticrootnamesHIDE = -- Cosmetics that are forced to hide
@@ -131,6 +140,10 @@ local cosmeticrootnamesHIDE = -- Cosmetics that are forced to hide
  superMoist_shoes = true,
     ["head new"] = true,
     headnewFocus = true,
+	hairpiece = true,
+	topquill = true,
+	quilllow = true,
+	quill = true,
 }
 
 local shirtCosmetics = 
@@ -142,12 +155,18 @@ local shirtCosmetics =
 	DevilHunter = true,
 	PostMortemCape = true,
 	superMoist_cape = true,
+	Bodyy = true,
+	SHORT = true,
 	BrownScarg = true,
 }
 
 local HatsCosmetics =
 	{
 	Hair = true,
+	hairpiece = true,
+	topquill = true,
+	quilllow = true,
+	quill = true,
 	Hat = true,
 	Bowtie = true,
 	PaceHat = true,
@@ -165,7 +184,89 @@ local HatsCosmetics =
 	ScoutHat = true,
 	}
 
-local function setProtectedCosmeticVisibility(model)
+	-- Debe ocultar todo lo que este dentro de la agrupacion (Shoes) del modelo custom
+	local ShoesCosmetics = {
+		superMoist_shoes = true,
+		-- Front Studded Shoes
+		["Right Shoe"] = true,
+		Weld = true,
+		["Sphere.018"] = true,
+	LFoot = true,
+	RFoot = true,
+	Cube = true,
+	}
+
+local shoeComponentPartNames = {
+	LFoot = true,
+	RFoot = true,
+	Cube = true,
+}
+
+local function isShoesCosmeticContainer(container)
+	if not container or not (container:IsA("Model") or container:IsA("Folder")) then
+		return false
+	end
+
+	local hasShoePart = false
+	local hasWeld = false
+	for _, child in ipairs(container:GetChildren()) do
+		if shoeComponentPartNames[child.Name]
+			and (child:IsA("BasePart") or child:IsA("Model") or child:IsA("Folder")) then
+			hasShoePart = true
+			if child:FindFirstChild("Weld", true) then
+				hasWeld = true
+			end
+		elseif child.Name == "Weld" then
+			hasWeld = true
+		end
+	end
+	return hasShoePart and hasWeld
+end
+
+local function belongsToShoesCosmetic(object, model)
+	local current = object
+	while current and current ~= model do
+		if isShoesCosmeticContainer(current) then
+			return true
+		end
+		current = current.Parent
+	end
+	return false
+end
+
+local function isOriginalHedCube001(object, model)
+	if not object or object.Name ~= "Cube.001" then
+		return false
+	end
+
+	local current = object.Parent
+	while current do
+		if current.Name == "hed" then
+			return true
+		end
+		if current == model then
+			break
+		end
+		current = current.Parent
+	end
+	return false
+end
+
+local function isShadowPartA(object, model)
+	local current = object
+	local foundA = false
+	while current and current ~= model do
+		if current.Name == "A" then
+			foundA = true
+		elseif current.Name == "Shadow" and foundA then
+			return true
+		end
+		current = current.Parent
+	end
+	return false
+end
+
+local function setProtectedCosmeticVisibility(model, cosmeticSource)
 	if not model then
 		return
 	end
@@ -182,22 +283,17 @@ local function setProtectedCosmeticVisibility(model)
 
 		for _, object in ipairs(objects) do
 			if object:IsA("BasePart") then
-				object.Transparency = visible and 0 or 1
+				if isShadowPartA(object, model) then
+					object.Transparency = 1
+				elseif object.Name == "Weld" or isSuperMoistCapeWeld(object) then
+					object.Transparency = 1
+				else
+					object.Transparency = visible and 0 or 1
+				end
 				object.CanCollide = false
 			elseif object:IsA("Decal") or object:IsA("Texture") then
-				object.Transparency = visible and 0 or 1
+				object.Transparency = isShadowPartA(object, model) and 1 or (visible and 0 or 1)
 			end
-
-			if object:IsA("BasePart") then
-    if isSuperMoistCapeWeld(object) then
-        object.Transparency = 1
-        object.CanCollide = false
-        return
-    end
-
-    object.Transparency = visible and 0 or 1
-    object.CanCollide = false
-		end
 
 		end
 	end
@@ -218,7 +314,12 @@ local function setProtectedCosmeticVisibility(model)
 
 	for _, object in ipairs(model:GetDescendants()) do
 		local name = object.Name
-		if protectedNames[name] then
+		if isOriginalHedCube001(object, model) then
+			if object:IsA("BasePart") then
+				object.Transparency = 1
+				object.CanCollide = false
+			end
+		elseif protectedNames[name] then
 			if object:IsA("Model") or object:IsA("Folder") or object:IsA("BasePart") then
 				local isHatCosmetic = HatsCosmetics[name] == true
 				local targetVisible = cosmetictoggle
@@ -227,6 +328,46 @@ local function setProtectedCosmeticVisibility(model)
 				end
 				applyToObject(object, targetVisible)
 			end
+		end
+	end
+
+	for _, object in ipairs(model:GetDescendants()) do
+		if isShoesCosmeticContainer(object) then
+			applyToObject(object, shoesCosmeticToggle)
+		end
+	end
+
+	local rootsToCheck = { model }
+	if cosmeticSource and cosmeticSource ~= model then
+		table.insert(rootsToCheck, cosmeticSource)
+	end
+
+	local hasShoesCosmetic = false
+	for _, root in ipairs(rootsToCheck) do
+		if (ShoesCosmetics[root.Name] and not shoeComponentPartNames[root.Name])
+			or isShoesCosmeticContainer(root) then
+			hasShoesCosmetic = true
+			break
+		end
+
+		for _, object in ipairs(root:GetDescendants()) do
+			if (ShoesCosmetics[object.Name] and not shoeComponentPartNames[object.Name])
+				or isShoesCosmeticContainer(object) then
+				hasShoesCosmetic = true
+				break
+			end
+		end
+
+		if hasShoesCosmetic then
+			break
+		end
+	end
+
+	local hideShoesGroups = hasShoesCosmetic and shoesCosmeticToggle
+	for _, group in ipairs(model:GetDescendants()) do
+		if (group.Name == "Shoes" or group.Name == "Thing2")
+			and (group:IsA("Model") or group:IsA("Folder")) then
+			applyToObject(group, not hideShoesGroups)
 		end
 	end
 end
@@ -350,9 +491,14 @@ local function hideModelParts(model, exceptModel)
 		local isCosmeticPart = belongsToCosmeticRoot(object, model)
 		local isForcedHiddenCosmetic = belongsToForcedHideCosmetic(object, model)
 		local isBasePart = sonicBasePartNames[object.Name]
-		local shouldHide = isForcedHiddenCosmetic
+		local isShoesCosmetic = shoesCosmeticToggle and belongsToShoesCosmetic(object, model)
+		local shouldHide = not isShoesCosmetic and (
+			isShadowPartA(object, model)
+			or isOriginalHedCube001(object, model)
+			or isForcedHiddenCosmetic
 			or (cosmetictoggle and isBasePart and not isCosmeticPart)
 			or (not cosmetictoggle and (isBasePart or isCosmeticPart))
+		)
 
 		if object:IsA("BasePart")
 			and shouldHide
@@ -589,9 +735,12 @@ local function applyLoadedModelRules(sourceModel, model)
 
 	if sourceModel then
 		hideModelParts(sourceModel, model)
+		setProtectedCosmeticVisibility(sourceModel)
 		updateInsertedHat(sourceModel, model)
 		updateInsertedShirt(sourceModel, model)
 	end
+
+	setProtectedCosmeticVisibility(model, sourceModel)
 
 	forceHideProblemHeadParts(model)
 
@@ -607,7 +756,6 @@ local function loadModelSelection(sourceModel)
 	if hasSuperMoistQuills(sourceModel) then
 		local superModel = loadAsset(SUPER_ID)
 		if superModel then
-			applyLoadedModelRules(sourceModel, superModel)
 			return superModel
 		end
 	end
@@ -626,7 +774,6 @@ local function loadModelSelection(sourceModel)
 	end
 
 	local model = path:Clone()
-	applyLoadedModelRules(sourceModel, model)
 	return model
 end
 
@@ -634,6 +781,12 @@ local function setupCharacter(char, forceReload)
 	if not isScriptActive and not forceReload then
 			return
 	end
+	if setupInProgress then
+		return
+	end
+	setupInProgress = true
+	setupGeneration += 1
+	local generation = setupGeneration
 
 	if forceReload then
 			isScriptActive = true
@@ -660,10 +813,16 @@ local function setupCharacter(char, forceReload)
 	end
 
 	local mdl = loadModelSelection(sourceRoot) or loadAsset(activeAssetId)
-	if not mdl then return end
-	if not mdl.Parent then
-		applyLoadedModelRules(sourceRoot, mdl)
+	if not mdl then
+		setupInProgress = false
+		return
 	end
+	if generation ~= setupGeneration or not isScriptActive then
+		mdl:Destroy()
+		setupInProgress = false
+		return
+	end
+	applyLoadedModelRules(sourceRoot, mdl)
 	mdl:SetAttribute("AssetId", activeAssetId)
 
 	if oldVisual then
@@ -682,6 +841,7 @@ local function setupCharacter(char, forceReload)
 	local newHrp = mdl:FindFirstChild("HumanoidRootPart", true)
 	if not hrp or not newHrp then
 		mdl:Destroy()
+		setupInProgress = false
 		return
 	end
 
@@ -715,8 +875,10 @@ local function setupCharacter(char, forceReload)
 
 	currentMdl = mdl
 	setupHeadSync(oldVisual or char, mdl, hrp)
+	setupInProgress = false
 
-	syncConn = RunService.RenderStepped:Connect(function()
+	if synctoggle then
+		syncConn = RunService.RenderStepped:Connect(function()
 		if not char or not char.Parent or not hrp or not hrp.Parent or not newHrp or not newHrp.Parent or not isScriptActive then
 			if syncConn then syncConn:Disconnect() syncConn = nil end
 			return
@@ -740,41 +902,9 @@ local function setupCharacter(char, forceReload)
 				warn("[HeadSync] Error during rotation calculation:", result)
 			end
 		end
-	end)
+		end)
+	end
 
-	task.spawn(function()
-		local lastAssetCheck = 0
-		while char and char.Parent and isScriptActive do
-			local now = os.clock()
-			if now - lastAssetCheck >= 0.75 then
-				lastAssetCheck = now
-				local sourceForLoop = oldVisual or char
-				local detectedAssetId = getActiveAssetId(sourceForLoop)
-				if currentMdl and currentMdl:GetAttribute("AssetId") ~= detectedAssetId then
-					setupCharacter(char, true)
-					return
-				end
-			end
-
-			local sourceForLoop = oldVisual or char
-			setProtectedCosmeticVisibility(sourceForLoop)
-			setProtectedCosmeticVisibility(mdl)
-			updateInsertedHat(sourceForLoop, mdl)
-			updateInsertedShirt(sourceForLoop, mdl)
-			forceHideProblemHeadParts(mdl)
-			forceHideProblemHeadParts(sourceForLoop)
-			if oldVisual and oldVisual.Parent then
-				local defaultFolder = oldVisual:FindFirstChild("Default")
-				if defaultFolder then
-					local waist = defaultFolder:FindFirstChild("Waist")
-					local hrpDef = defaultFolder:FindFirstChild("HumanoidRootPart")
-					if waist and waist:IsA("BasePart") then waist.Transparency = 1 end
-					if hrpDef and hrpDef:IsA("BasePart") then hrpDef.Transparency = 1 end
-				end
-			end
-			task.wait(0.1)
-		end
-	end)
 end
 
 local ApplyIcon
@@ -794,6 +924,7 @@ local function startScript()
 end
 
 local function stopScript()
+	setupGeneration += 1
 	if not isScriptActive then return end
 	isScriptActive = false
 	if syncConn then syncConn:Disconnect() syncConn = nil end
@@ -1184,6 +1315,13 @@ local function toggleHatCosmeticState()
     end
 end
 
+local function toggleShoesCosmeticState()
+	shoesCosmeticToggle = not shoesCosmeticToggle
+	if player.Character and player.Character.Parent and isScriptActive then
+		setupCharacter(player.Character, true)
+	end
+end
+
 local function makeConfigButton(label, callback)
     local button = Instance.new("TextButton")
     button.Name = label
@@ -1217,6 +1355,7 @@ end
 
 createToggleRow(bfConfigPanel, "Cosmetic Comp.", function() return cosmetictoggle end, toggleCosmeticState)
 createToggleRow(bfConfigPanel, "Hat Cosmetics", function() return hatCosmeticToggle end, toggleHatCosmeticState)
+createToggleRow(bfConfigPanel, "Shoes Cosmetics", function() return shoesCosmeticToggle end, toggleShoesCosmeticState)
 createToggleRow(bfConfigPanel, "Head Sync", function() return synctoggle end, toggleSyncState)
 
 local forceReloadButton = makeConfigButton("Force Reload", function()

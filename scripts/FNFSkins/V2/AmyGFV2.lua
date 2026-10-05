@@ -17,22 +17,21 @@ local GFSyncConn = nil
 local GFSetupInProgress = false
 local GFSetupGeneration = 0
 local GFLastEyesState = nil
-local GFPhysicalWeld = nil
 local GFChasedVisible = false
 local GFChasedLostAt = nil
 
 -- Amy Iconos
 
-local IconNormalGF = "rbxassetid://71742134603425" -- Expression.Regular
-local ExpressionNormalGF = "rbxassetid://84044297426855" -- Eyes.Regular
-local ExpressionChasedGF = "rbxassetid://129477061313180" -- Eyes.Chased
+local IconNormalGF = "rbxassetid://73222561332765" -- Expression.Regular
+local ExpressionNormalGF = "rbxassetid://79752501485749" -- Eyes.Regular
+local ExpressionChasedGF = "rbxassetid://113659883065962" -- Eyes.Chased
 
 -- LastLife Iconos Amy
 
-local DownedIconGF = "rbxassetid://73290527991494" -- Expression.Downed
+local DownedIconGF = "rbxassetid://91117693958700" -- Expression.Downed
 
-local IconLastLifeGF = "rbxassetid://123405413536790" -- Expression.LastLife
-local ExpressionLastLifeGF = "rbxassetid://129477061313180" -- Reemplaza Eyes.Regular si estas en lastlife
+local IconLastLifeGF = "rbxassetid://119311173785729" -- Expression.LastLife
+local ExpressionLastLifeGF = "rbxassetid://86029426878323" -- Reemplaza Eyes.Regular si estas en lastlife
 
 -- force reload without a gui
 local GFForceReload = false
@@ -302,11 +301,14 @@ GFFunctionApplyIcon = function()
     end
 
     local model = GFGetPlayerModel() or player.Character
-        local isDowned = GFGetBooleanState(model, { "Downed", "IsDowned" })
+        local isDowned = GFGetBooleanState(model, { "Downed", "IsDowned", "BeingDowned" })
+        or GFGetBooleanState(player.Character, { "Downed", "IsDowned", "BeingDowned" })
         or GFGetBooleanState(player, { "Downed", "IsDowned", "BeingDowned" })
     local isLastLife = GFGetBooleanState(model, { "LastLife", "IsLastLife", "SecondLife" })
+        or GFGetBooleanState(player.Character, { "LastLife", "IsLastLife", "SecondLife" })
         or GFGetBooleanState(player, { "LastLife", "IsLastLife", "SecondLife" })
     local isChased = GFGetBooleanState(model, { "Chased", "IsChased", "InChase", "BeingChased" })
+        or GFGetBooleanState(player.Character, { "Chased", "IsChased", "InChase", "BeingChased" })
         or GFGetBooleanState(player, { "Chased", "IsChased", "InChase", "BeingChased" })
 
     if isChased then
@@ -345,9 +347,9 @@ GFFunctionApplyIcon = function()
 
     local layout = {
         position = UDim2.fromScale(0.45, 0.39),
-        size = UDim2.fromScale(0.55, 0.49),
+        size = UDim2.fromScale(0.60, 0.60),
     }
-    GFSetFolderState(characterGui:FindFirstChild("Eyes"), eyesState, eyesImage, true, layout, 10)
+    GFSetFolderState(characterGui:FindFirstChild("Eyes"), isDowned and "" or eyesState, eyesImage, true, layout, 10)
     GFSetFolderState(characterGui:FindFirstChild("Expression"), expressionState, expressionImage, true, layout, 5)
 end
 
@@ -578,7 +580,6 @@ local function GFSetupCharacter(char, forceReload)
 		end
 
     if GFSyncConn then GFSyncConn:Disconnect() GFSyncConn = nil end
-    GFPhysicalWeld = nil
     if GFCurrentModel and GFCurrentModel.Parent then GFCurrentModel:Destroy() GFCurrentModel = nil end
 
     for _, v in ipairs(char:GetDescendants()) do
@@ -662,7 +663,6 @@ local function GFSetupCharacter(char, forceReload)
     physicalWeld.Part0 = hrp
     physicalWeld.Part1 = newHrp
     physicalWeld.Parent = newHrp
-    GFPhysicalWeld = physicalWeld
 
     GFCurrentModel = mdl
     GFUpdateInsertedShirt(oldVisual or char, mdl)
@@ -673,13 +673,6 @@ local function GFSetupCharacter(char, forceReload)
         while char and char.Parent and GFIsScriptActive and GFSetupGeneration == generation and GFCurrentModel == mdl do
             GFRestoreCosmeticVisibility(oldVisual or char)
             GFUpdateInsertedShirt(oldVisual or char, mdl)
-            if not GFPhysicalWeld or not GFPhysicalWeld.Parent then
-                GFPhysicalWeld = Instance.new("WeldConstraint")
-                GFPhysicalWeld.Name = "SkinPhysicalAnchor"
-                GFPhysicalWeld.Part0 = hrp
-                GFPhysicalWeld.Part1 = newHrp
-                GFPhysicalWeld.Parent = newHrp
-            end
             task.wait(0.35)
         end
     end)
@@ -689,14 +682,6 @@ local function GFSetupCharacter(char, forceReload)
         if not char or not char.Parent or not hrp or not hrp.Parent or not newHrp or not newHrp.Parent or not GFIsScriptActive then
             if GFSyncConn then GFSyncConn:Disconnect() GFSyncConn = nil end
             return
-        end
-
-        if not GFPhysicalWeld or not GFPhysicalWeld.Parent then
-            GFPhysicalWeld = Instance.new("WeldConstraint")
-            GFPhysicalWeld.Name = "SkinPhysicalAnchor"
-            GFPhysicalWeld.Part0 = hrp
-            GFPhysicalWeld.Part1 = newHrp
-            GFPhysicalWeld.Parent = newHrp
         end
 
         if GFSyncToggle and GFOriginalHead and GFOriginalHead.Parent and GFOriginalBody and GFOriginalBody.Parent and GFCustomHeadMotor and GFCustomHeadMotor.Parent then
@@ -741,12 +726,13 @@ local function GFStopScript()
     if not GFIsScriptActive then return end
     GFIsScriptActive = false
     if GFSyncConn then GFSyncConn:Disconnect() GFSyncConn = nil end
-    GFPhysicalWeld = nil
     if GFCurrentModel and GFCurrentModel.Parent then GFCurrentModel:Destroy() GFCurrentModel = nil end
     if GFCharacter then
         GFRestoreHammerState(GFCharacter)
         for _, v in ipairs(GFCharacter:GetDescendants()) do
-            if v:IsA("BasePart") then v.Transparency = 0 end
+            if v:IsA("BasePart") then
+                v.Transparency = 0
+            end
         end
     end
 end

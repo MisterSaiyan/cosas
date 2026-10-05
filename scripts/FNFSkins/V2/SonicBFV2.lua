@@ -15,16 +15,16 @@ local setupGeneration = 0
 
 --Iconos FirstLife
 
-local IconNormal = "rbxassetid://88534919957810" -- Expression.Regular
-local ExpressionNormal = "rbxassetid://105224083812202" -- Eyes.Regular
-local ExpressionChased = "rbxassetid://134712413253361" -- Eyes.Chased
+local IconNormal = "rbxassetid://70591552067670" -- Expression.Regular
+local ExpressionNormal = "rbxassetid://97503507235837" -- Eyes.Regular
+local ExpressionChased = "rbxassetid://74170907471721" -- Eyes.Chased
 
 -- LastLife Iconos
 
-local DownedIcon = "rbxassetid://97120638843605" -- Expression.Downed
+local DownedIcon = "rbxassetid://82487791860646" -- Expression.Downed
 
-local IconLastLife = "rbxassetid://91850457535074" -- Expression.LastLife
-local ExpressionLastLife = "rbxassetid://80325412154894" -- Reemplaza Eyes.Regular si estas en lastlife
+local IconLastLife = "rbxassetid://80808006481637" -- Expression.LastLife
+local ExpressionLastLife = "rbxassetid://126888188456611" -- Reemplaza Eyes.Regular si estas en lastlife
 
 -- force reload without a gui
 local forceReload = false
@@ -1035,6 +1035,7 @@ ApplyIcon = function()
 
 	local model = getPlayerModel() or player.Character
 		local isDowned = getBooleanState(model, { "Downed", "IsDowned", "BeingDowned" })
+		or getBooleanState(player.Character, { "Downed", "IsDowned", "BeingDowned" })
 		or getBooleanState(player, { "Downed", "IsDowned", "BeingDowned" })
 	local isLastLife = getBooleanState(model, { "LastLife", "IsLastLife", "SecondLife" })
 		or getBooleanState(player, { "LastLife", "IsLastLife", "SecondLife" })
@@ -1054,14 +1055,16 @@ ApplyIcon = function()
 		expressionState = "LastLife"
 		eyesImage = ExpressionLastLife
 		expressionImage = IconLastLife
-	elseif isChased then
+	end
+
+	if isChased and not isDowned then
 		eyesState = "Chased"
 		eyesImage = ExpressionChased
 	end
 
 	setFolderState(
 		characterGui:FindFirstChild("Eyes"),
-		eyesState,
+		isDowned and "" or eyesState,
 		eyesImage,
 		false,
 		Color3.new(0, 0, 0),

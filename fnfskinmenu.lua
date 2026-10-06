@@ -17,7 +17,7 @@
 	imageLabel.Size = UDim2.new(0, 150, 0, 150)
 	imageLabel.Position = UDim2.new(0, 550, 0, 290)
 	imageLabel.BackgroundTransparency = 1
-	imageLabel.Image = "rbxassetid://75296394588681"
+	imageLabel.Image = "rbxassetid://10386102032"
 	imageLabel.Parent = screenGui
 	imageLabel.ZIndex = 9
 

@@ -13,81 +13,126 @@
 	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	screenGui.Parent = CoreGui
 
-	local imageLabel = Instance.new("ImageLabel")
-	imageLabel.Size = UDim2.new(0, 150, 0, 150)
-	imageLabel.Position = UDim2.new(0, 550, 0, 290)
-	imageLabel.BackgroundTransparency = 1
-	imageLabel.Image = "rbxassetid://10386102032"
-	imageLabel.Parent = screenGui
-	imageLabel.ZIndex = 9
-
 	local frame = Instance.new("Frame")
 	frame.Name = "Frame"
 	frame.Size = UDim2.new(0, 500, 0, 350)
-	frame.Position = UDim2.new(0.5, -250, 0.5, -175)
-	frame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-	frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	frame.AnchorPoint = Vector2.new(0.5, 0.5)
+	frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+	frame.BackgroundColor3 = Color3.fromRGB(38, 40, 48)
+	frame.BorderColor3 = Color3.fromRGB(75, 82, 100)
 	frame.BorderSizePixel = 0
 	frame.Parent = screenGui
 
 	local uiCorner = Instance.new("UICorner")
-	uiCorner.CornerRadius = UDim.new(0, 8)
+	uiCorner.CornerRadius = UDim.new(0, 12)
 	uiCorner.Parent = frame
 
 	local uiStroke = Instance.new("UIStroke")
-	uiStroke.Color = Color3.fromRGB(30, 30, 30)
-	uiStroke.Thickness = 2
+	uiStroke.Color = Color3.fromRGB(112, 126, 160)
+	uiStroke.Thickness = 1.5
 	uiStroke.Parent = frame
+
+	local imageLabel = Instance.new("ImageLabel")
+	imageLabel.Size = UDim2.new(0, 68, 0, 68)
+	imageLabel.Position = UDim2.new(0, 24, 0, 20)
+	imageLabel.BackgroundTransparency = 1
+	imageLabel.Image = "rbxassetid://10386102032"
+	imageLabel.ScaleType = Enum.ScaleType.Fit
+	imageLabel.Parent = frame
+
+	local titleLabel = Instance.new("TextLabel")
+	titleLabel.Size = UDim2.new(1, -120, 0, 42)
+	titleLabel.Position = UDim2.new(0, 108, 0, 24)
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Text = "FNF Skins V2"
+	titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	titleLabel.TextSize = 27
+	titleLabel.Font = Enum.Font.GothamBold
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	titleLabel.Parent = frame
+
+	local subtitleLabel = Instance.new("TextLabel")
+	subtitleLabel.Size = UDim2.new(1, -120, 0, 24)
+	subtitleLabel.Position = UDim2.new(0, 109, 0, 62)
+	subtitleLabel.BackgroundTransparency = 1
+	subtitleLabel.Text = "Select a version to continue"
+	subtitleLabel.TextColor3 = Color3.fromRGB(176, 184, 202)
+	subtitleLabel.TextSize = 14
+	subtitleLabel.Font = Enum.Font.Gotham
+	subtitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	subtitleLabel.Parent = frame
+
+	local divider = Instance.new("Frame")
+	divider.Size = UDim2.new(1, -48, 0, 1)
+	divider.Position = UDim2.new(0, 24, 0, 105)
+	divider.BackgroundColor3 = Color3.fromRGB(75, 82, 100)
+	divider.BorderSizePixel = 0
+	divider.Parent = frame
 
 	local CurrentVersion = Instance.new("TextButton")
 	CurrentVersion.Name = "Base Game"
-	CurrentVersion.Size = UDim2.new(0, 160, 0, 40)
-	CurrentVersion.Position = UDim2.new(0.5, 20, 0.8, -10)
-	CurrentVersion.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	CurrentVersion.Text = "Execute for Base Game (0.2)"
-	CurrentVersion.TextColor3 = Color3.fromRGB(0, 0, 0)
-	CurrentVersion.TextSize = 14
-	CurrentVersion.Font = Enum.Font.SourceSansBold
-	local closeCorner = Instance.new("UICorner")
-	closeCorner.CornerRadius = UDim.new(0, 6)
-	closeCorner.Parent = CurrentVersion
+	CurrentVersion.Size = UDim2.new(0, 205, 0, 52)
+	CurrentVersion.Position = UDim2.new(0, 30, 0, 142)
+	CurrentVersion.BackgroundColor3 = Color3.fromRGB(76, 112, 190)
+	CurrentVersion.Text = "Base Game  ·  0.2"
+	CurrentVersion.TextColor3 = Color3.fromRGB(255, 255, 255)
+	CurrentVersion.TextSize = 15
+	CurrentVersion.Font = Enum.Font.GothamBold
+	CurrentVersion.AutoButtonColor = true
+	CurrentVersion.BorderSizePixel = 0
 	CurrentVersion.Parent = frame
+
+	local currentCorner = Instance.new("UICorner")
+	currentCorner.CornerRadius = UDim.new(0, 8)
+	currentCorner.Parent = CurrentVersion
 
 	local SobbeVersion = Instance.new("TextButton")
 	SobbeVersion.Name = "Sobbe"
-	SobbeVersion.Size = UDim2.new(0, 160, 0, 40)
-	SobbeVersion.Position = UDim2.new(0.5, -180, 0.8, -10)
-	SobbeVersion.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	SobbeVersion.Text = "Execute for Sobbe's 0.1A"
-	SobbeVersion.TextColor3 = Color3.fromRGB(0, 0, 0)
-	SobbeVersion.TextSize = 14
-	SobbeVersion.Font = Enum.Font.SourceSansBold
-	local sobbeCorner = Instance.new("UICorner")
-	sobbeCorner.CornerRadius = UDim.new(0, 6)
-	sobbeCorner.Parent = SobbeVersion
+	SobbeVersion.Size = UDim2.new(0, 205, 0, 52)
+	SobbeVersion.Position = UDim2.new(1, -235, 0, 142)
+	SobbeVersion.BackgroundColor3 = Color3.fromRGB(84, 88, 105)
+	SobbeVersion.Text = "Sobbe  ·  0.1A"
+	SobbeVersion.TextColor3 = Color3.fromRGB(255, 255, 255)
+	SobbeVersion.TextSize = 15
+	SobbeVersion.Font = Enum.Font.GothamBold
+	SobbeVersion.AutoButtonColor = true
+	SobbeVersion.BorderSizePixel = 0
 	SobbeVersion.Parent = frame
 
-	local titleLabel = Instance.new("TextLabel")
-	titleLabel.Size = UDim2.new(1, 0, 0, 50)
-	titleLabel.BackgroundTransparency = 1
-	titleLabel.Text = "FNF Skins V2 - Version Selector"
-	titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-	titleLabel.TextSize = 28
-	titleLabel.Font = Enum.Font.FredokaOne
-	titleLabel.Parent = frame
+	local sobbeCorner = Instance.new("UICorner")
+	sobbeCorner.CornerRadius = UDim.new(0, 8)
+	sobbeCorner.Parent = SobbeVersion
 
 	local infoLabel = Instance.new("TextLabel")
-	infoLabel.Size = UDim2.new(0, 260, 0, 180)
-	infoLabel.Position = UDim2.new(0, 210, 0, 60)
+	infoLabel.Size = UDim2.new(1, -60, 0, 54)
+	infoLabel.Position = UDim2.new(0, 30, 0, 210)
 	infoLabel.BackgroundTransparency = 1
-	infoLabel.Text = "Hello! Due to the 0.1A's lms nature, just wanted to let you choose which version do you wish to execute\n\nThis is merely for the lms song side of the script, shouldn't be any visual changes aside hammer recoloring not working for amy in 0.1A\n\n"
-	infoLabel.TextColor3 = Color3.fromRGB(230, 230, 230)
-	infoLabel.TextSize = 12
+	infoLabel.Text = "Choose the version that matches your game. The 0.1A option uses its own LMS audio setup."
+	infoLabel.TextColor3 = Color3.fromRGB(190, 196, 210)
+	infoLabel.TextSize = 13
 	infoLabel.TextWrapped = true
 	infoLabel.TextXAlignment = Enum.TextXAlignment.Left
 	infoLabel.TextYAlignment = Enum.TextYAlignment.Top
-	infoLabel.Font = Enum.Font.SourceSans
+	infoLabel.Font = Enum.Font.Gotham
 	infoLabel.Parent = frame
+
+	local closeButton = Instance.new("TextButton")
+	closeButton.Name = "Close"
+	closeButton.Size = UDim2.new(0, 120, 0, 36)
+	closeButton.AnchorPoint = Vector2.new(0.5, 0)
+	closeButton.Position = UDim2.new(0.5, 0, 1, -52)
+	closeButton.BackgroundColor3 = Color3.fromRGB(52, 55, 66)
+	closeButton.Text = "Close"
+	closeButton.TextColor3 = Color3.fromRGB(220, 224, 234)
+	closeButton.TextSize = 14
+	closeButton.Font = Enum.Font.GothamSemibold
+	closeButton.AutoButtonColor = true
+	closeButton.BorderSizePixel = 0
+	closeButton.Parent = frame
+
+	local closeButtonCorner = Instance.new("UICorner")
+	closeButtonCorner.CornerRadius = UDim.new(0, 8)
+	closeButtonCorner.Parent = closeButton
 
 	local function executeVersion(url)
 		screenGui:Destroy()
@@ -127,4 +172,8 @@
 
 	SobbeVersion.MouseButton1Click:Connect(function()
 		executeVersion("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/fnfskinsv2A.lua")
+	end)
+
+	closeButton.MouseButton1Click:Connect(function()
+		screenGui:Destroy()
 	end)

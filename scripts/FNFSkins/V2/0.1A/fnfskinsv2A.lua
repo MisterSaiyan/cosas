@@ -1,3 +1,4 @@
+-- FNF Skins for 0.1A Loader
 local CoreGui = game:GetService("CoreGui")
         
 		game.StarterGui:SetCore("SendNotification", {

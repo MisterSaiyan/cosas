@@ -15,7 +15,7 @@
 
 	local frame = Instance.new("Frame")
 	frame.Name = "Frame"
-	frame.Size = UDim2.new(0, 500, 0, 350)
+	frame.Size = UDim2.new(0, 500, 0, 450)
 	frame.AnchorPoint = Vector2.new(0.5, 0.5)
 	frame.Position = UDim2.new(0.5, 0, 0.5, 0)
 	frame.BackgroundColor3 = Color3.fromRGB(38, 40, 48)
@@ -81,6 +81,31 @@
 	CurrentVersion.AutoButtonColor = true
 	CurrentVersion.BorderSizePixel = 0
 	CurrentVersion.Parent = frame
+
+	local ChangeLog = Instance.new("TextLabel")
+	ChangeLog.Size = UDim2.new(1, -60, 0, 22)
+	ChangeLog.Position = UDim2.new(0, 30, 0, 260)
+	ChangeLog.BackgroundTransparency = 1
+	ChangeLog.Text = "Change Log"
+	ChangeLog.TextColor3 = Color3.fromRGB(255, 255, 255)
+	ChangeLog.TextSize = 14
+	ChangeLog.Font = Enum.Font.GothamBold
+	ChangeLog.TextXAlignment = Enum.TextXAlignment.Left
+	ChangeLog.TextYAlignment = Enum.TextYAlignment.Top
+	ChangeLog.Parent = frame
+
+	local ChangeLogContent = Instance.new("TextLabel")
+	ChangeLogContent.Size = UDim2.new(1, -60, 0, 72)
+	ChangeLogContent.Position = UDim2.new(0, 30, 0, 284)
+	ChangeLogContent.BackgroundTransparency = 1
+	ChangeLogContent.Text = "• Updated Icons\n• Tried to fix fps drops with sonic\n• Added the Version Selector GUI"
+	ChangeLogContent.TextColor3 = Color3.fromRGB(190, 196, 210)
+	ChangeLogContent.TextSize = 13
+	ChangeLogContent.TextWrapped = true
+	ChangeLogContent.TextXAlignment = Enum.TextXAlignment.Left
+	ChangeLogContent.TextYAlignment = Enum.TextYAlignment.Top
+	ChangeLogContent.Font = Enum.Font.Gotham
+	ChangeLogContent.Parent = frame
 
 	local currentCorner = Instance.new("UICorner")
 	currentCorner.CornerRadius = UDim.new(0, 8)
@@ -167,7 +192,7 @@
 	end
 
 	CurrentVersion.MouseButton1Click:Connect(function()
-		executeVersion("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/fnfskinsv2loader.lua")
+		executeVersion("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/fnfskinsv2.lua")
 	end)
 
 	SobbeVersion.MouseButton1Click:Connect(function()

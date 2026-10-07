@@ -1376,5 +1376,7 @@ setBFConfigVisible(false)
 
 -- Loadstring para el tema lms (Movido al final)
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/bflms0.1a.lua"))()
-
+task.spawn(function()
+	task.wait()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/bflms0.1a.lua"))()
+end)

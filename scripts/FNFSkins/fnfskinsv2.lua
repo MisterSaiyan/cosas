@@ -192,7 +192,7 @@
 	end
 
 	CurrentVersion.MouseButton1Click:Connect(function()
-		executeVersion("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/fnfskinsv2.lua")
+		executeVersion("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/fnfskinsv2loader.lua")
 	end)
 
 	SobbeVersion.MouseButton1Click:Connect(function()

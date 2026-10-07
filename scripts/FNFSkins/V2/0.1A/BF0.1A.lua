@@ -1373,10 +1373,3 @@ btnBFV2.MouseButton1Click:Connect(function()
 end)
 
 setBFConfigVisible(false)
-
--- Loadstring para el tema lms (Movido al final)
-
-task.spawn(function()
-	task.wait()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/bflms0.1a.lua"))()
-end)

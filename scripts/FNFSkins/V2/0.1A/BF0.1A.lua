@@ -5,7 +5,7 @@ local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
 local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
+local character = player.Character
 local ASSET_ID = 137895615579863
 local SUPER_ID = 138131908852771
 local isScriptActive = false
@@ -13,6 +13,8 @@ local currentMdl = nil
 local syncConn = nil
 local setupInProgress = false
 local setupGeneration = 0
+local startGeneration = 0
+local startPending = false
 
 --Iconos FirstLife
 
@@ -911,20 +913,36 @@ end
 local ApplyIcon
 
 local function startScript()
-	if isScriptActive then return end
-	task.wait(3)
-	isScriptActive = true
-	if character then setupCharacter(character) end
+	if isScriptActive or startPending then return end
+	startPending = true
+	startGeneration += 1
+	local generation = startGeneration
 
-	task.spawn(function()
-		while isScriptActive and isSonic() do
-			ApplyIcon()
-			task.wait(0.25)
+	task.delay(3, function()
+		if generation ~= startGeneration then
+			return
 		end
+
+		startPending = false
+		if not isSonic() then
+			return
+		end
+
+		isScriptActive = true
+		if character then setupCharacter(character) end
+
+		task.spawn(function()
+			while generation == startGeneration and isScriptActive and isSonic() do
+				ApplyIcon()
+				task.wait(0.25)
+			end
+		end)
 	end)
 end
 
 local function stopScript()
+	startGeneration += 1
+	startPending = false
 	setupGeneration += 1
 	if not isScriptActive then return end
 	isScriptActive = false
@@ -948,6 +966,7 @@ player.CharacterAdded:Connect(function(newChar)
 		setupCharacter(newChar)
 	end
 end)
+character = player.Character or character
 
 local isCurrentlySonic = false
 RunService.Heartbeat:Connect(function()
@@ -1153,7 +1172,14 @@ local success = pcall(function()
     screenGui.Parent = CoreGui
 end)
 if not success then
-    screenGui.Parent = player:WaitForChild("PlayerGui")
+    local playerGui = player:FindFirstChildOfClass("PlayerGui")
+    if playerGui then
+        screenGui.Parent = playerGui
+    else
+        task.spawn(function()
+            screenGui.Parent = player:WaitForChild("PlayerGui")
+        end)
+    end
 end
 
 local gui = Instance.new("Frame")

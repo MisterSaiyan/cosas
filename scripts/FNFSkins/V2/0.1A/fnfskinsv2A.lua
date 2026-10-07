@@ -15,7 +15,31 @@ local CoreGui = game:GetService("CoreGui")
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/GF0.1A.lua"))()
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/BF0.1A.lua"))()
+local function loadAsync(label, url)
+    task.spawn(function()
+        local ok, err = pcall(function()
+            local source = game:HttpGet(url)
+            local chunk, compileError = loadstring(source)
 
--- Moved here so it doesn't bother with bf
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/bflms0.1a.lua"))()
+            if not chunk then
+                error(compileError)
+            end
+
+            chunk()
+        end)
+
+        if not ok then
+            warn("[FNF Skins][" .. label .. "] " .. tostring(err))
+        end
+    end)
+end
+
+loadAsync(
+    "BF",
+    "https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/BF0.1A.lua"
+)
+
+loadAsync(
+    "LMS",
+    "https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/bflms0.1a.lua"
+)

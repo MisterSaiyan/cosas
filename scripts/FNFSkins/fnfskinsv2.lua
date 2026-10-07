@@ -98,7 +98,7 @@
 	ChangeLogContent.Size = UDim2.new(1, -60, 0, 72)
 	ChangeLogContent.Position = UDim2.new(0, 30, 0, 284)
 	ChangeLogContent.BackgroundTransparency = 1
-	ChangeLogContent.Text = "• Updated Icons\n• Tried to fix fps drops with sonic\n• Added the Version Selector GUI"
+	ChangeLogContent.Text = "• Updated Icons\n• Tried to fix fps drops with sonic\n• Added the Version Selector GUI\n• Fixed BF LMS in 0.1a"
 	ChangeLogContent.TextColor3 = Color3.fromRGB(190, 196, 210)
 	ChangeLogContent.TextSize = 13
 	ChangeLogContent.TextWrapped = true

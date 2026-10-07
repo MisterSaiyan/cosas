@@ -20,11 +20,9 @@ local function loadAsync(label, url)
         local ok, err = pcall(function()
             local source = game:HttpGet(url)
             local chunk, compileError = loadstring(source)
-
             if not chunk then
                 error(compileError)
             end
-
             chunk()
         end)
 
@@ -34,12 +32,5 @@ local function loadAsync(label, url)
     end)
 end
 
-loadAsync(
-    "BF",
-    "https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/BF0.1A.lua"
-)
-
-loadAsync(
-    "LMS",
-    "https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/bflms0.1a.lua"
-)
+loadAsync("BF", "https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/BF0.1A.lua")
+loadAsync("LMS", "https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/bflms0.1a.lua")

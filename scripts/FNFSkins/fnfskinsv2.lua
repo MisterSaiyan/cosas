@@ -191,12 +191,61 @@
 		end)
 	end
 
+	local function executeSobbeVersion()
+		screenGui:Destroy()
+
+		local function executeScriptAsync(label, url)
+			task.spawn(function()
+				local ok, err = pcall(function()
+					local source = game:HttpGet(url)
+					local chunk, compileError = loadstring(source)
+					if not chunk then
+						error(compileError)
+					end
+					chunk()
+				end)
+
+				if not ok then
+					warn("[FNF Skins][" .. label .. "] Error al ejecutar el script:", err)
+				end
+			end)
+		end
+
+		executeScriptAsync(
+			"GF 0.1A",
+			"https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/GF0.1A.lua"
+		)
+		executeScriptAsync(
+			"BF 0.1A",
+			"https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/BF0.1A.lua"
+		)
+		executeScriptAsync(
+			"BF LMS 0.1A",
+			"https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/bflms0.1a.lua"
+		)
+
+		task.spawn(function()
+			game.StarterGui:SetCore("SendNotification", {
+				Title = "FNF Skins V2",
+				Text = "Made by MisterSaiyan | Head sync comes disabled by default, enable it if you use head cosmetics",
+				Icon = "",
+				Duration = 10
+			})
+			game.StarterGui:SetCore("SendNotification", {
+				Title = "Version Check",
+				Text = "This is intended for 0.1A (Sobbe's Copy)",
+				Icon = "",
+				Duration = 10
+			})
+		end)
+	end
+
 	CurrentVersion.MouseButton1Click:Connect(function()
 		executeVersion("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/fnfskinsv2loader.lua")
 	end)
 
 	SobbeVersion.MouseButton1Click:Connect(function()
-		executeVersion("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/fnfskinsv2A.lua")
+		executeSobbeVersion()
 	end)
 
 	closeButton.MouseButton1Click:Connect(function()

@@ -2,8 +2,11 @@
 	local BFTheme = true
 
 	local Workspace = game:GetService("Workspace")
+	local Players = game:GetService("Players")
+	local player = Players.LocalPlayer
 	local theme80
 	local theme80Connection
+	local ModernLMS
 	
 	local function loadCustomAsset(url, filename)
 		local ok, asset = pcall(function()
@@ -25,11 +28,6 @@
 
 		return asset
 	end
-
-	local ModernLMS = loadCustomAsset(
-		"https://raw.githubusercontent.com/MisterSaiyan/cosas/main/bflmsFIX.mp3",
-		"bflmsFIX.mp3"
-	)
 
     local function canUseModernLMS()
 		local soloFolder = game:GetService("ReplicatedStorage"):FindFirstChild("ClientAssets")
@@ -80,47 +78,33 @@
 		sonicSolo.Looped = false
 	end
 
-				if BFTheme and not canUseModernLMS() then
-					BFTheme = false
-					SetTheme()
-				end
-			SetTheme()
+local function configureReplicatedLMS()
+	if BFTheme and not canUseModernLMS() then
+		BFTheme = false
+	end
+	SetTheme()
 
-			-- Detener
-				local soloFolder = game:GetService("ReplicatedStorage"):FindFirstChild("ClientAssets")
-				and game.ReplicatedStorage.ClientAssets:FindFirstChild("Sounds")
-				and game.ReplicatedStorage.ClientAssets.Sounds:FindFirstChild("mus")
-				and game.ReplicatedStorage.ClientAssets.Sounds.mus:FindFirstChild("Game")
-				and game.ReplicatedStorage.ClientAssets.Sounds.mus.Game:FindFirstChild("Round")
-				and game.ReplicatedStorage.ClientAssets.Sounds.mus.Game.Round:FindFirstChild("SoloTheme")
+	local soloFolder = game:GetService("ReplicatedStorage"):FindFirstChild("ClientAssets")
+		and game.ReplicatedStorage.ClientAssets:FindFirstChild("Sounds")
+		and game.ReplicatedStorage.ClientAssets.Sounds:FindFirstChild("mus")
+		and game.ReplicatedStorage.ClientAssets.Sounds.mus:FindFirstChild("Game")
+		and game.ReplicatedStorage.ClientAssets.Sounds.mus.Game:FindFirstChild("Round")
+		and game.ReplicatedStorage.ClientAssets.Sounds.mus.Game.Round:FindFirstChild("SoloTheme")
+	local lmsSound = soloFolder and soloFolder:FindFirstChild("SonicSolo")
+	if not lmsSound then
+		warn("No se encontró SonicSolo")
+		return
+	end
 
-			local LMSsound = soloFolder and soloFolder:FindFirstChild("SonicSolo")
-			if not LMSsound then
-				warn("No se encontró SonicSolo")
-				return
-			end
-
-			LMSsound:Stop()
-
-local Workspace = game:GetService("Workspace")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local theme80
-local theme80Connection
-local spawnCheckGeneration = 0
-local spawnWaitThread
+	lmsSound:Stop()
+end
 
 local function applyTheme80()
-	if not theme80 or not theme80.Parent then
+	if not theme80 or not theme80.Parent or not ModernLMS then
 		return
 	end
 
 	if theme80.SoundId ~= originalSonicSoloID then
-		return
-	end
-
-	if not ModernLMS then
-		warn("[LMS] No se cargó el audio de reemplazo")
 		return
 	end
 
@@ -134,8 +118,11 @@ local function bindTheme80()
 	local assets = Workspace:FindFirstChild("Assets")
 	local songs = assets and assets:FindFirstChild("Songs")
 	local candidate = songs and songs:FindFirstChild("Theme80s")
+	if not candidate or not candidate:IsA("Sound") then
+		return
+	end
 
-	if not candidate or not candidate:IsA("Sound") or candidate == theme80 then
+	if candidate == theme80 then
 		applyTheme80()
 		return
 	end
@@ -145,89 +132,40 @@ local function bindTheme80()
 	end
 
 	theme80 = candidate
-	theme80Connection = theme80:GetPropertyChangedSignal("SoundId"):Connect(applyTheme80)
+	theme80Connection = candidate:GetPropertyChangedSignal("SoundId"):Connect(applyTheme80)
 	applyTheme80()
 end
 
-local function checkTheme80AfterSpawn()
-	spawnCheckGeneration += 1
-	local generation = spawnCheckGeneration
-
-	if spawnWaitThread and coroutine.status(spawnWaitThread) == "suspended" then
-		task.cancel(spawnWaitThread)
-	end
-
-	spawnWaitThread = task.spawn(function()
-		local assets = Workspace:WaitForChild("Assets")
-		if generation ~= spawnCheckGeneration then
-			return
-		end
-
-		local songs = assets:WaitForChild("Songs")
-		if generation ~= spawnCheckGeneration then
-			return
-		end
-
-		local candidate = songs:WaitForChild("Theme80s")
-		if generation ~= spawnCheckGeneration then
-			return
-		end
-
-		if candidate:IsA("Sound") then
-			if theme80Connection then
-				theme80Connection:Disconnect()
-			end
-
-			theme80 = candidate
-			theme80Connection = theme80:GetPropertyChangedSignal("SoundId"):Connect(applyTheme80)
-			applyTheme80()
-		end
-	end)
-end
-
-	local function applyTheme80()
-		if not theme80 or not theme80.Parent then
-			return
-		end
-
-		if theme80.SoundId ~= originalSonicSoloID then
-			return
-		end
-
-		if not ModernLMS then
-			warn("[LMS] No se cargó el audio de reemplazo")
-			return
-		end
-
-		theme80.SoundId = ModernLMS
-		theme80.Volume = 1.5
-		theme80.Looped = false
-		print("[LMS] Theme80s LMS reemplazado")
-	end
-
-	local function bindTheme80()
-    local assets = Workspace:FindFirstChild("Assets")
-    local songs = assets and assets:FindFirstChild("Songs")
-    local candidate = songs and songs:FindFirstChild("Theme80s")
-
-    if not candidate or not candidate:IsA("Sound") or candidate == theme80 then
-        return
-    end
-
-    if theme80Connection then
-        theme80Connection:Disconnect()
-    end
-
-    theme80 = candidate
-    theme80Connection = theme80:GetPropertyChangedSignal("SoundId"):Connect(applyTheme80)
-    applyTheme80()
-end
-
 Workspace.DescendantAdded:Connect(function(instance)
-    if instance.Name == "Theme80s" then
-        task.defer(bindTheme80)
-    end
+	if instance.Name == "Theme80s" then
+		task.defer(bindTheme80)
+	end
 end)
 
-player.CharacterAdded:Connect(checkTheme80AfterSpawn)
-checkTheme80AfterSpawn()
+Workspace.DescendantRemoving:Connect(function(instance)
+	if instance == theme80 then
+		if theme80Connection then
+			theme80Connection:Disconnect()
+			theme80Connection = nil
+		end
+		theme80 = nil
+	end
+end)
+
+player.CharacterAdded:Connect(bindTheme80)
+bindTheme80()
+
+task.spawn(function()
+	ModernLMS = loadCustomAsset(
+		"https://raw.githubusercontent.com/MisterSaiyan/cosas/main/bflmsFIX.mp3",
+		"bflmsFIX.mp3"
+	)
+
+	if not ModernLMS then
+		warn("[LMS] No se cargó el audio de reemplazo; el menú puede continuar")
+		return
+	end
+
+	configureReplicatedLMS()
+	applyTheme80()
+end)

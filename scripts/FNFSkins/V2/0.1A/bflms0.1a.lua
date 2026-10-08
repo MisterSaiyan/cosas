@@ -157,8 +157,8 @@ bindTheme80()
 
 task.spawn(function()
 	ModernLMS = loadCustomAsset(
-		"https://raw.githubusercontent.com/MisterSaiyan/cosas/main/bflmsFIX.mp3",
-		"bflmsFIX.mp3"
+		"https://raw.githubusercontent.com/MisterSaiyan/cosas/main/01lms.mp3",
+		"01lms.mp3"
 	)
 
 	if not ModernLMS then

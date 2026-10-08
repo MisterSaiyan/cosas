@@ -20,6 +20,9 @@ local GFLastEyesState = nil
 local GFChasedVisible = false
 local GFChasedLostAt = nil
 
+local HideJacketaswell = false 
+local GFJacketOriginalColors = setmetatable({}, { __mode = "k" })
+
 -- Amy Iconos
 
 local IconNormalGF = "rbxassetid://73222561332765" -- Expression.Regular
@@ -43,6 +46,9 @@ local shirtCosmetics = {
     Cosmetic = true,
     AmyChristmasDress = true,
     coatthingy = true,
+	Sleeve = true,
+	lowerleg = true,
+	upperleg = true,
 }
 shirtCosmetics["modern dress"] = true
 
@@ -173,7 +179,15 @@ local function GFHammerVisibilityFix(targetModel, visible)
 end
 
 local function GFUpdateInsertedShirt(model, insertedModel)
-    if not GFCosmeticToggle then return end
+    if not GFCosmeticToggle then
+        for part, originalColor in pairs(GFJacketOriginalColors) do
+            if part.Parent then
+                part.Color = originalColor
+            end
+            GFJacketOriginalColors[part] = nil
+        end
+        return
+    end
     if not model or not insertedModel then
         return
     end
@@ -186,7 +200,25 @@ local function GFUpdateInsertedShirt(model, insertedModel)
         end
     end
 
-    local shirtModel = insertedModel:FindFirstChild("Vestido", true)
+    local vestidoModel = insertedModel:FindFirstChild("Vestido", true)
+    local chaquetaModel = insertedModel:FindFirstChild("Chaqueta", true)
+
+    local white = Color3.fromRGB(255, 255, 255)
+    local protectedSleeves = {
+        LSleeve = true,
+        RSleeve = true,
+    }
+
+    local function isProtectedSleeve(object, root)
+        local current = object
+        while current and current ~= root do
+            if protectedSleeves[current.Name] then
+                return true
+            end
+            current = current.Parent
+        end
+        return false
+    end
 
     local function setShirtVisibility(shirtGroup, visible)
         if not shirtGroup then
@@ -199,16 +231,73 @@ local function GFUpdateInsertedShirt(model, insertedModel)
         end
 
         for _, object in ipairs(objects) do
-            if object:IsA("BasePart") then
+            if not isProtectedSleeve(object, shirtGroup) and object:IsA("BasePart") then
                 object.Transparency = visible and 0 or 1
                 object.CanCollide = false
-            elseif object:IsA("Decal") or object:IsA("Texture") then
+            elseif not isProtectedSleeve(object, shirtGroup)
+                and (object:IsA("Decal") or object:IsA("Texture")) then
                 object.Transparency = visible and 0 or 1
             end
         end
     end
 
-    setShirtVisibility(shirtModel, not hasShirtCosmetic)
+    local function setJacketRelatedColors()
+        if not HideJacketaswell then
+            for part, originalColor in pairs(GFJacketOriginalColors) do
+                if part.Parent then
+                    part.Color = originalColor
+                end
+                GFJacketOriginalColors[part] = nil
+            end
+        else
+            local colorTargets = {}
+            for _, name in ipairs({ "LSleeve", "RSleeve", "Arms" }) do
+                local target = insertedModel:FindFirstChild(name, true)
+                if target then
+                    table.insert(colorTargets, target)
+                end
+            end
+
+            for _, target in ipairs(colorTargets) do
+                local objects = { target }
+                for _, object in ipairs(target:GetDescendants()) do
+                    table.insert(objects, object)
+                end
+
+                for _, object in ipairs(objects) do
+                    if object:IsA("BasePart") then
+                        if GFJacketOriginalColors[object] == nil then
+                            GFJacketOriginalColors[object] = object.Color
+                        end
+                        object.Color = white
+                    end
+                end
+            end
+        end
+
+        for _, name in ipairs({ "LSleeve", "RSleeve" }) do
+            local sleeve = insertedModel:FindFirstChild(name, true)
+            if sleeve then
+                local objects = { sleeve }
+                for _, object in ipairs(sleeve:GetDescendants()) do
+                    table.insert(objects, object)
+                end
+
+                for _, object in ipairs(objects) do
+                    if object:IsA("BasePart") then
+                        object.Transparency = 0
+                        object.CanCollide = false
+                    elseif object:IsA("Decal") or object:IsA("Texture") then
+                        object.Transparency = 0
+                    end
+                end
+            end
+        end
+    end
+
+    setShirtVisibility(vestidoModel, not hasShirtCosmetic)
+    setShirtVisibility(chaquetaModel, not (hasShirtCosmetic and HideJacketaswell))
+    setJacketRelatedColors()
 end
 
 local function GFLoadAsset(id)
@@ -1057,6 +1146,9 @@ end
 
 createGFConfigRow(GFPanel, "Cosmetic Comp.", function() return GFCosmeticToggle end, toggleGFCosmeticState)
 createGFConfigRow(GFPanel, "Head Sync", function() return GFSyncToggle end, toggleGFSyncState)
+createGFConfigRow(GFPanel, "Hide Jacket", function() return HideJacketaswell end, function()
+    HideJacketaswell = not HideJacketaswell
+end)
 
 makeGFConfigButton("Force Reload", function()
     GFTriggerForceReload()

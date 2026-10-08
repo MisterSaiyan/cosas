@@ -98,7 +98,7 @@
 	ChangeLogContent.Size = UDim2.new(1, -60, 0, 72)
 	ChangeLogContent.Position = UDim2.new(0, 30, 0, 284)
 	ChangeLogContent.BackgroundTransparency = 1
-	ChangeLogContent.Text = "• Updated Icons\n• Tried to fix fps drops with sonic\n• Added the Version Selector GUI\n• Fixed BF model not loading till lms started in 0.1a\n• Added a Hide Jacket Toggle to GF + kylie set early compatibilty"
+	ChangeLogContent.Text = "• Updated Icons\n• Tried to fix fps drops with sonic\n• Added the Version Selector GUI\n• Fixed BF model not loading till lms started in 0.1a\n• Added a Hide Jacket Toggle to GF + kylie set early compatibilty\n• 0.1A uses a different song for lms"
 	ChangeLogContent.TextColor3 = Color3.fromRGB(190, 196, 210)
 	ChangeLogContent.TextSize = 13
 	ChangeLogContent.TextWrapped = true

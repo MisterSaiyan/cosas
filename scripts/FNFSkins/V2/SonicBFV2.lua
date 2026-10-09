@@ -1,10 +1,14 @@
+-- Roblox Services to Use
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
+-- Initial Setup
+
 local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
+local character = player.Character
 local ASSET_ID = 137895615579863
 local SUPER_ID = 138131908852771
 local isScriptActive = false
@@ -12,16 +16,22 @@ local currentMdl = nil
 local syncConn = nil
 local setupInProgress = false
 local setupGeneration = 0
+local startGeneration = 0
+local startPending = false
 
---Iconos FirstLife
+-- Icons --
+
+-- Default Icons
 
 local IconNormal = "rbxassetid://70591552067670" -- Expression.Regular
 local ExpressionNormal = "rbxassetid://97503507235837" -- Eyes.Regular
 local ExpressionChased = "rbxassetid://74170907471721" -- Eyes.Chased
 
--- LastLife Iconos
+-- DownedIcon (WIP) that replaces when you're downed (10hp i guess, but that would be complicated)
 
 local DownedIcon = "rbxassetid://82487791860646" -- Expression.Downed
+
+-- Last Life 
 
 local IconLastLife = "rbxassetid://80808006481637" -- Expression.LastLife
 local ExpressionLastLife = "rbxassetid://126888188456611" -- Reemplaza Eyes.Regular si estas en lastlife
@@ -29,6 +39,11 @@ local ExpressionLastLife = "rbxassetid://126888188456611" -- Reemplaza Eyes.Regu
 -- force reload without a gui
 local forceReload = false
 local keyDebounce = false
+
+-- We load the asset from the id
+-- and clone it to avoid modifying the original asset in ReplicatedStorage.
+-- This is important because we want to keep the original asset
+-- intact for other players and for future use.
 
 local function loadAsset(id)
 	local ok, objects = pcall(game.GetObjects, game, "rbxassetid://" .. id)
@@ -49,6 +64,9 @@ local function hasNamedDescendant(root, name)
 
 	return false
 end
+
+-- Check for the main Super Sonic quills present in player
+-- To determine in future which asset to load (normal or super sonic)
 
 local function hasSuperMoistQuills(root)
 	local roots = {}
@@ -146,7 +164,7 @@ local cosmeticrootnamesHIDE = -- Cosmetics that are forced to hide
 	quill = true,
 }
 
-local shirtCosmetics = 
+local shirtCosmetics = -- Body Cosmetics, these will hide BF's sweatshirt
 {
 	HyperCape = true,
 	RedCape = true,
@@ -160,7 +178,7 @@ local shirtCosmetics =
 	BrownScarg = true,
 }
 
-local HatsCosmetics =
+local HatsCosmetics = -- Cosmetics that requiere hiding BF's hat
 	{
 	Hair = true,
 	hairpiece = true,
@@ -184,7 +202,8 @@ local HatsCosmetics =
 	ScoutHat = true,
 	}
 
-	-- Debe ocultar todo lo que este dentro de la agrupacion (Shoes) del modelo custom
+	-- Debe ocultar todo lo que este dentro de
+	-- la agrupacion (Shoes) del modelo custom
 	local ShoesCosmetics = {
 		superMoist_shoes = true,
 		-- Front Studded Shoes
@@ -202,6 +221,8 @@ local shoeComponentPartNames = {
 	Cube = true,
 }
 
+-- Functions to manage cosmetic visibility and model setup
+
 local function isShoesCosmeticContainer(container)
 	if not container or not (container:IsA("Model") or container:IsA("Folder")) then
 		return false
@@ -209,6 +230,8 @@ local function isShoesCosmeticContainer(container)
 
 	local hasShoePart = false
 	local hasWeld = false
+	-- Container must have at least one shoe part and
+	-- a weld to be considered a shoes cosmetic container
 	for _, child in ipairs(container:GetChildren()) do
 		if shoeComponentPartNames[child.Name]
 			and (child:IsA("BasePart") or child:IsA("Model") or child:IsA("Folder")) then
@@ -223,6 +246,9 @@ local function isShoesCosmeticContainer(container)
 	return hasShoePart and hasWeld
 end
 
+-- Check if an object belongs to a shoes cosmetic container
+-- within the model hierarchy
+
 local function belongsToShoesCosmetic(object, model)
 	local current = object
 	while current and current ~= model do
@@ -234,11 +260,15 @@ local function belongsToShoesCosmetic(object, model)
 	return false
 end
 
+-- Check if an object is the original "Cube.001" part of the "hed" group in the model hierarchy
+
 local function isOriginalHedCube001(object, model)
 	if not object or object.Name ~= "Cube.001" then
 		return false
 	end
 
+	-- Check if the object is a descendant of the original "hed part
+	-- in the model hierarchy
 	local current = object.Parent
 	while current do
 		if current.Name == "hed" then
@@ -910,20 +940,36 @@ end
 local ApplyIcon
 
 local function startScript()
-	if isScriptActive then return end
-	task.wait(3)
-	isScriptActive = true
-	if character then setupCharacter(character) end
+	if isScriptActive or startPending then return end
+	startPending = true
+	startGeneration += 1
+	local generation = startGeneration
 
-	task.spawn(function()
-		while isScriptActive and isSonic() do
-			ApplyIcon()
-			task.wait(0.25)
+	task.delay(3, function()
+		if generation ~= startGeneration then
+			return
 		end
+
+		startPending = false
+		if not isSonic() then
+			return
+		end
+
+		isScriptActive = true
+		if character then setupCharacter(character) end
+
+		task.spawn(function()
+			while generation == startGeneration and isScriptActive and isSonic() do
+				ApplyIcon()
+				task.wait(0.25)
+			end
+		end)
 	end)
 end
 
 local function stopScript()
+	startGeneration += 1
+	startPending = false
 	setupGeneration += 1
 	if not isScriptActive then return end
 	isScriptActive = false
@@ -947,6 +993,7 @@ player.CharacterAdded:Connect(function(newChar)
 		setupCharacter(newChar)
 	end
 end)
+character = player.Character or character
 
 local isCurrentlySonic = false
 RunService.Heartbeat:Connect(function()
@@ -1141,10 +1188,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     triggerForceReload()
 end)
 
--- Loadstring para el tema lms
-
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/bflms.lua"))()
-
 -- Configuracion BFV2
 
 local screenGui = Instance.new("ScreenGui")
@@ -1156,7 +1199,14 @@ local success = pcall(function()
     screenGui.Parent = CoreGui
 end)
 if not success then
-    screenGui.Parent = player:WaitForChild("PlayerGui")
+    local playerGui = player:FindFirstChildOfClass("PlayerGui")
+    if playerGui then
+        screenGui.Parent = playerGui
+    else
+        task.spawn(function()
+            screenGui.Parent = player:WaitForChild("PlayerGui")
+        end)
+    end
 end
 
 local gui = Instance.new("Frame")

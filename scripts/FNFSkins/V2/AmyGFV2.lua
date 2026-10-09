@@ -19,8 +19,14 @@ local GFSetupGeneration = 0
 local GFLastEyesState = nil
 local GFChasedVisible = false
 local GFChasedLostAt = nil
+local GFChasedReleaseDelay = 1.5
+local GFChasedGeneration = 0
 local HideJacketaswell = false
 local GFJacketOriginalColors = setmetatable({}, { __mode = "k" })
+local GFIconConnections = {}
+local GFCosmeticConnections = {}
+local GFModeConnections = {}
+local GFStartPending = false
 
 -- Amy Iconos
 
@@ -399,13 +405,25 @@ GFFunctionApplyIcon = function()
         or GFGetBooleanState(player, { "Chased", "IsChased", "InChase", "BeingChased" })
 
     if isChased then
-        GFChasedVisible = true
-        GFChasedLostAt = nil
+        if not GFChasedVisible or GFChasedLostAt then
+            GFChasedVisible = true
+            GFChasedLostAt = nil
+            GFChasedGeneration += 1
+        end
     elseif GFChasedVisible then
-        GFChasedLostAt = GFChasedLostAt or os.clock()
-        if os.clock() - GFChasedLostAt >= 0.75 then
+        if not GFChasedLostAt then
+            GFChasedLostAt = os.clock()
+            GFChasedGeneration += 1
+            local generation = GFChasedGeneration
+            task.delay(GFChasedReleaseDelay, function()
+                if GFIsScriptActive and GFChasedGeneration == generation then
+                    GFFunctionApplyIcon()
+                end
+            end)
+        elseif os.clock() - GFChasedLostAt >= GFChasedReleaseDelay then
             GFChasedVisible = false
             GFChasedLostAt = nil
+            GFChasedGeneration += 1
         end
     end
 
@@ -438,6 +456,112 @@ GFFunctionApplyIcon = function()
     }
     GFSetFolderState(characterGui:FindFirstChild("Eyes"), isDowned and "" or eyesState, eyesImage, true, layout, 10)
     GFSetFolderState(characterGui:FindFirstChild("Expression"), expressionState, expressionImage, true, layout, 5)
+end
+
+local GFIconStateNames = {
+    LastLife = true,
+    IsLastLife = true,
+    SecondLife = true,
+    Downed = true,
+    IsDowned = true,
+    BeingDowned = true,
+    Chased = true,
+    IsChased = true,
+    InChase = true,
+    BeingChased = true,
+}
+
+local function GFDisconnectIconWatchers()
+    for _, connection in ipairs(GFIconConnections) do
+        connection:Disconnect()
+    end
+    table.clear(GFIconConnections)
+end
+
+local function GFWatchIconStateRoot(root, watchedRoots, watchedValues)
+    if not root or watchedRoots[root] then
+        return
+    end
+    watchedRoots[root] = true
+
+    local function refresh()
+        if GFIsScriptActive then
+            GFFunctionApplyIcon()
+        end
+    end
+
+    local function watchValue(object)
+        if not GFIconStateNames[object.Name]
+            or not object:IsA("ValueBase")
+            or watchedValues[object] then
+            return
+        end
+        watchedValues[object] = true
+        table.insert(GFIconConnections, object.Changed:Connect(refresh))
+    end
+
+    for stateName in pairs(GFIconStateNames) do
+        table.insert(
+            GFIconConnections,
+            root:GetAttributeChangedSignal(stateName):Connect(refresh)
+        )
+    end
+    for _, descendant in ipairs(root:GetDescendants()) do
+        watchValue(descendant)
+    end
+    table.insert(GFIconConnections, root.DescendantAdded:Connect(function(descendant)
+        watchValue(descendant)
+        if GFIconStateNames[descendant.Name] then
+            refresh()
+        end
+    end))
+    table.insert(GFIconConnections, root.DescendantRemoving:Connect(function(descendant)
+        if GFIconStateNames[descendant.Name] then
+            task.defer(refresh)
+        end
+    end))
+end
+
+local function GFSetupIconWatchers()
+    GFDisconnectIconWatchers()
+    local watchedRoots = setmetatable({}, { __mode = "k" })
+    local watchedValues = setmetatable({}, { __mode = "k" })
+
+    GFWatchIconStateRoot(player, watchedRoots, watchedValues)
+    GFWatchIconStateRoot(player.Character, watchedRoots, watchedValues)
+    GFWatchIconStateRoot(GFGetPlayerModel(), watchedRoots, watchedValues)
+
+    local function watchPlayersFolder(folder)
+        GFWatchIconStateRoot(folder:FindFirstChild(player.Name), watchedRoots, watchedValues)
+        table.insert(GFIconConnections, folder.ChildAdded:Connect(function(child)
+            if child.Name == player.Name then
+                GFWatchIconStateRoot(child, watchedRoots, watchedValues)
+                GFFunctionApplyIcon()
+            end
+        end))
+    end
+
+    local playersFolder = workspace:FindFirstChild("Players")
+    if playersFolder then
+        watchPlayersFolder(playersFolder)
+    end
+    table.insert(GFIconConnections, workspace.ChildAdded:Connect(function(child)
+        if child.Name == "Players" then
+            watchPlayersFolder(child)
+        end
+    end))
+
+    local playerGui = player:FindFirstChildOfClass("PlayerGui")
+    if playerGui then
+        table.insert(GFIconConnections, playerGui.DescendantAdded:Connect(function(descendant)
+            if descendant.Name == "Character"
+                or descendant.Name == "Eyes"
+                or descendant.Name == "Expression" then
+                GFFunctionApplyIcon()
+            end
+        end))
+    end
+    GFFunctionApplyIcon()
 end
 
 -- Head Sync
@@ -659,6 +783,10 @@ local function GFSetupCharacter(char, forceReload)
     if not GFIsScriptActive and not forceReload then return end
     if GFSetupInProgress then return end
     GFSetupInProgress = true
+	for _, connection in ipairs(GFCosmeticConnections) do
+		connection:Disconnect()
+	end
+	table.clear(GFCosmeticConnections)
     GFSetupGeneration += 1
     local generation = GFSetupGeneration
 
@@ -756,13 +884,35 @@ local function GFSetupCharacter(char, forceReload)
     GFSetupHeadSync(oldVisual or char, mdl, hrp)
 	GFSetupInProgress = false
 
-    task.spawn(function()
-        while char and char.Parent and GFIsScriptActive and GFSetupGeneration == generation and GFCurrentModel == mdl do
-            GFRestoreCosmeticVisibility(oldVisual or char)
-            GFUpdateInsertedShirt(oldVisual or char, mdl)
-            task.wait(0.35)
-        end
-    end)
+	local cosmeticSource = oldVisual or char
+	local cosmeticUpdatePending = false
+	local function queueCosmeticUpdate(object)
+		local current = object
+		local isCosmetic = false
+		while current and current ~= cosmeticSource do
+			if cosmeticRootNames[current.Name] or shirtCosmetics[current.Name] then
+				isCosmetic = true
+				break
+			end
+			current = current.Parent
+		end
+		if not isCosmetic or cosmeticUpdatePending then
+			return
+		end
+
+		cosmeticUpdatePending = true
+		task.defer(function()
+			cosmeticUpdatePending = false
+			if not GFIsScriptActive or GFSetupGeneration ~= generation
+				or GFCurrentModel ~= mdl or not cosmeticSource.Parent then
+				return
+			end
+			GFRestoreCosmeticVisibility(cosmeticSource)
+			GFUpdateInsertedShirt(cosmeticSource, mdl)
+		end)
+	end
+	table.insert(GFCosmeticConnections, cosmeticSource.DescendantAdded:Connect(queueCosmeticUpdate))
+	table.insert(GFCosmeticConnections, cosmeticSource.DescendantRemoving:Connect(queueCosmeticUpdate))
 
     if GFSyncToggle then
         GFSyncConn = RunService.RenderStepped:Connect(function()
@@ -794,24 +944,34 @@ local function GFSetupCharacter(char, forceReload)
 end
 
 local function GFStartScript()
-    if GFIsScriptActive then return end
+    if GFIsScriptActive or GFStartPending then return end
+    GFStartPending = true
     task.wait(1.5) -- Reducido de 3 a 1 para agilizar la entrada
+	if not GFIsAmy() then
+		GFStartPending = false
+		return
+	end
     GFSetupAmyViewport()
+    GFChasedVisible = false
+    GFChasedLostAt = nil
+    GFChasedGeneration += 1
+    GFLastEyesState = nil
     GFIsScriptActive = true
+	GFStartPending = false
+	GFSetupIconWatchers()
     if GFCharacter then GFSetupCharacter(GFCharacter) end
-
-    task.spawn(function()
-        while GFIsScriptActive and GFIsAmy() do
-            GFFunctionApplyIcon()
-            task.wait(0.25)
-        end
-    end)
 end
 
 local function GFStopScript()
     GFSetupGeneration += 1
     if not GFIsScriptActive then return end
     GFIsScriptActive = false
+	GFStartPending = false
+	GFDisconnectIconWatchers()
+	for _, connection in ipairs(GFCosmeticConnections) do
+		connection:Disconnect()
+	end
+	table.clear(GFCosmeticConnections)
     if GFSyncConn then GFSyncConn:Disconnect() GFSyncConn = nil end
     if GFCurrentModel and GFCurrentModel.Parent then GFCurrentModel:Destroy() GFCurrentModel = nil end
     if GFCharacter then
@@ -826,6 +986,9 @@ end
 
 player.CharacterAdded:Connect(function(newChar)
     GFCharacter = newChar
+	if GFIsScriptActive then
+		GFSetupIconWatchers()
+	end
     if GFIsScriptActive then
         task.wait(1.5)
         GFSetupCharacter(newChar)
@@ -835,20 +998,56 @@ end)
 local GFIsCurrentlyAmy = false
 local GFIsPlaying = false
 
-RunService.Heartbeat:Connect(function()
-    local check = GFIsAmy()
-    if check ~= GFIsCurrentlyAmy then
-        GFIsCurrentlyAmy = check
-        GFIsPlaying = check
-        if GFIsPlaying then GFStartScript() else GFStopScript() end
-    end
-end)
+local watchedAmyModels = setmetatable({}, { __mode = "k" })
+local function GFUpdateCharacterMode()
+	local check = GFIsAmy() == true
+	if check == GFIsCurrentlyAmy then
+		return
+	end
 
-if GFIsAmy() then
-    GFIsCurrentlyAmy = true
-    GFIsPlaying = true
-    GFStartScript()
+	GFIsCurrentlyAmy = check
+	GFIsPlaying = check
+	if check then
+		GFStartScript()
+	else
+		GFStopScript()
+	end
 end
+
+local function GFWatchAmyModel(model)
+	if not model or watchedAmyModels[model] then
+		return
+	end
+	watchedAmyModels[model] = true
+	table.insert(GFModeConnections, model:GetAttributeChangedSignal("Character"):Connect(function()
+		task.defer(GFUpdateCharacterMode)
+	end))
+end
+
+local function GFWatchPlayersFolder(folder)
+	local visual = folder:FindFirstChild(player.Name)
+	if visual then
+		GFWatchAmyModel(visual)
+	end
+	table.insert(GFModeConnections, folder.ChildAdded:Connect(function(child)
+		if child.Name == player.Name then
+			GFWatchAmyModel(child)
+			task.defer(GFUpdateCharacterMode)
+		end
+	end))
+end
+
+local playersFolder = workspace:FindFirstChild("Players")
+if playersFolder then
+	GFWatchPlayersFolder(playersFolder)
+end
+table.insert(GFModeConnections, workspace.ChildAdded:Connect(function(child)
+	if child.Name == "Players" then
+		GFWatchPlayersFolder(child)
+	end
+end))
+
+GFUpdateCharacterMode()
 
 -- Keybind para forcereload de debug
 

@@ -1,274 +1,1390 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local localPlayer = Players.LocalPlayer
 
-	local CoreGui = game:GetService("CoreGui")
-	local Players = game:GetService("Players")
-	local LocalPlayer = Players.LocalPlayer
+		game.StarterGui:SetCore("SendNotification", {
+        Title = "FNF Skins V2", 
+        Text = "Observer Enabled | Made by MisterSaiyan", 
+        Icon = "", Duration = 10
+    })
 
-	if CoreGui:FindFirstChild("SaiyanUpdateNotice") then
-		CoreGui.SaiyanUpdateNotice:Destroy()
+local ASSET_ID = 137895615579863
+local SUPER_ID = 138131908852771
+local CosmeticCompToggle = true
+local HatCosmeticToggle = true
+local ShoesCosmeticToggle = true
+local HeadSyncToggle = false
+local CHASE_RELEASE_DELAY = 1.5
+
+local GFHideJacketaswell = false
+local GFJacketOriginalColors = setmetatable({}, { __mode = "k" })
+
+--Iconos FirstLife BF
+
+local IconNormalBF = "rbxassetid://70591552067670" -- Expression.Regular
+local ExpressionNormalBF = "rbxassetid://97503507235837" -- Eyes.Regular
+local ExpressionChasedBF = "rbxassetid://74170907471721" -- Eyes.Chased
+
+-- LastLife BF
+
+local DownedIconBF = "rbxassetid://82487791860646" -- Expression.Downed
+
+local IconLastLifeBF = "rbxassetid://80808006481637" -- Expression.LastLife
+local ExpressionLastLifeBF = "rbxassetid://126888188456611" -- Reemplaza Eyes.Regular si estas en lastlife
+
+local characterConfigs = {
+	Amy = {
+		assetId = 73695760388601,
+		alwaysVisibleObjectNames = {
+			"Hammer",
+			"Axe",
+			"MagicalAmy",
+		},
+		weaponColorReplacements = {
+			{
+				from = Color3.fromRGB(255, 217, 0),
+				to = Color3.fromRGB(27, 42, 53),
+			},
+			{
+				from = Color3.fromRGB(255, 0, 102),
+				to = Color3.fromRGB(86, 36, 36),
+			},
+			{
+				from = Color3.fromRGB(255, 0, 0),
+				to = Color3.fromRGB(91, 93, 105),
+			},
+		},
+		icons = {
+			normal = "rbxassetid://73222561332765",
+			eyesNormal = "rbxassetid://79752501485749",
+			eyesChased = "rbxassetid://113659883065962",
+			downed = "rbxassetid://91117693958700",
+			lastLife = "rbxassetid://119311173785729",
+			eyesLastLife = "rbxassetid://86029426878323",
+			layout = {
+				eyes = {
+					position = UDim2.fromScale(0.45, 0.39),
+					size = UDim2.fromScale(0.60, 0.60),
+				},
+				expression = {
+					position = UDim2.fromScale(0.45, 0.39),
+					size = UDim2.fromScale(0.60, 0.60),
+				},
+			},
+		},
+		cosmeticRoots = {
+			TMOSTH = true,
+		},
+		shirtCosmetics = {
+			TMOSTH = true,
+			Cosmetic = true,
+			AmyChristmasDress = true,
+			coatthingy = true,
+			Sleeve = true,
+			lowerleg = true,
+			upperleg = true,
+			["modern dress"] = true,
+		},
+		hatCosmetics = {},
+		shoesCosmetics = {},
+		shirtGroup = "Vestido",
+		jacketGroup = "Chaqueta",
+	},
+	Sonic = {
+		assetId = ASSET_ID,
+		hideShadowPartA = true,
+		destroyPartNames = {
+			["head new"] = true,
+			headnewfocus = true,
+		},
+		basePartNames = {
+			"hed", "Cube.001", "Cube.002", "Cube.003", "Cube.004",
+			"Ear1", "Ear2", "Sphere.017", "Sphere.030", "eye1", "eye2",
+			"eyes", "joy1", "joy2", "muzzl", "normal", "nose", "Body",
+			"RIndex1", "RIndex2", "RMiddle1", "RMiddle2", "RPinky1", "RPinky2",
+			"RThumb1", "RThumb2", "Right Hand", "LIndex1", "LIndex2",
+			"LMiddle1", "LMiddle2", "LPinky1", "LPinky2", "LThumb1", "LThumb2",
+			"Left Hand", "LArm1", "LArm2", "LArm3", "LArm4", "LArm5",
+			"RArm1", "RArm2", "RArm3", "RArm4", "RArm5", "LFoot",
+			"RFoot", "LFoot1", "LFoot2", "LFoot3", "LFoot4", "LFoot5",
+			"RLeg1", "RLeg2", "RLeg3", "RLeg4", "RLeg5", "RSleeve", "Cape",
+			"LSleeve", "tail", "belly", "Sphere.003", "Sphere.006",
+			"Sphere.007", "Sphere.010", "left backspike", "right backspike",
+			"angry", "Coloreye1", "Coloreye2",
+			"Cube.015", "Cube.016", "burger", "Cube.009", "Cube.014",
+			"exportme", "Cube.011", "ears", "ears.001", "ears.002", "ears.003",
+			"replace", "aah", "head new", "headnewFocus", "altedxport.005",
+			"altedxport.006", "Cube", "muzzle new", "sdgdsagsd",
+			"altedxport.001", "altedxport.003", "remodelSphere.010",
+			"Cube.017", "Cube.008",
+			"superMoist_quillB", "superMoist_quillBotR", "superMoist_quillF",
+			"superMoist_quillR", "superMoist_quillTopR", "superMoist_wiskerss",
+			"Weld", "topbottomquill", "Cone.002", "Cone.003", "Mouth2",
+		},
+		icons = {
+			normal = IconNormalBF,
+			eyesNormal = ExpressionNormalBF,
+			eyesChased = ExpressionChasedBF,
+			downed = DownedIconBF,
+			lastLife = IconLastLifeBF,
+			eyesLastLife = ExpressionLastLifeBF,
+			layout = {
+				eyes = {
+					position = UDim2.fromScale(0.171, 0.126643255),
+					imageColor = Color3.new(0, 0, 0),
+				},
+				expression = {
+					preserveLayout = true,
+				},
+			},
+		},
+		cosmeticRoots = {
+			Shadow = true,
+			SHOVEL = true,
+			Bodyy = true,
+			["Cube.001"] = true,
+			["Cube.014"] = true,
+		},
+		shirtCosmetics = {
+			HyperCape = true,
+			RedCape = true,
+			PacedCape = true,
+			EnergyCape = true,
+			DevilHunter = true,
+			PostMortemCape = true,
+			superMoist_cape = true,
+			Bodyy = true,
+			SHORT = true,
+			BrownScarg = true,
+		},
+		hatCosmetics = {
+			Hair = true,
+			hairpiece = true,
+			topquill = true,
+			quilllow = true,
+			quill = true,
+			Hat = true,
+			Bowtie = true,
+			PaceHat = true,
+			StrawCowboy = true,
+			AnniFlowers = true,
+			AnniversaryCombo = true,
+			AnniDoll = true,
+			AnniNo1Hat = true,
+			AnniHat = true,
+			OvaHat = true,
+			BrokenCrown = true,
+			SANTA_HAT = true,
+			TrevorsHat = true,
+			Crown = true,
+			ScoutHat = true,
+		},
+		shoesCosmetics = {
+			superMoist_shoes = true,
+			["Right Shoe"] = true,
+			Weld = true,
+			["Sphere.018"] = true,
+			LFoot = true,
+			RFoot = true,
+			Cube = true,
+		},
+		shirtGroup = "Camisa",
+		shirtModel = "poleronmodel",
+		forcedHideRoots = {
+			["superMoist_shoes"] = true,
+			["head new"] = true,
+			["headnewFocus"] = true,
+		},
+	},
+}
+
+local sonicBasePartNames = {}
+for _, partName in ipairs(characterConfigs.Sonic.basePartNames) do
+	sonicBasePartNames[partName] = true
+end
+characterConfigs.Sonic.basePartNames = sonicBasePartNames
+
+local trackedPlayers = {}
+local playerConnections = {}
+local spawnConnections = {}
+local activeModels = {}
+
+local function loadAsset(id)
+	local ok, objects = pcall(game.GetObjects, game, "rbxassetid://" .. id)
+	if not ok or not objects or #objects == 0 then return nil end
+	return objects[1]:Clone()
+end
+
+local function hasNamedDescendant(root, name)
+	if not root then
+		return false
 	end
 
-	local screenGui = Instance.new("ScreenGui")
-	screenGui.Name = "FNFSkinsv2Menu"
-	screenGui.IgnoreGuiInset = true
-	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	screenGui.Parent = CoreGui
+	for _, descendant in ipairs(root:GetDescendants()) do
+		if descendant.Name == name then
+			return true
+		end
+	end
 
-	local frame = Instance.new("Frame")
-	frame.Name = "Frame"
-	frame.Size = UDim2.new(0, 700, 0, 450)
-	frame.AnchorPoint = Vector2.new(0.5, 0.5)
-	frame.Position = UDim2.new(0.5, 0, 0.5, 0)
-	frame.BackgroundColor3 = Color3.fromRGB(38, 40, 48)
-	frame.BorderColor3 = Color3.fromRGB(75, 82, 100)
-	frame.BorderSizePixel = 0
-	frame.Parent = screenGui
+	return false
+end
 
-	local uiCorner = Instance.new("UICorner")
-	uiCorner.CornerRadius = UDim.new(0, 12)
-	uiCorner.Parent = frame
+local function getActiveAssetId(root, config)
+	if config == characterConfigs.Sonic and hasNamedDescendant(root, "superMoist_quills") then
+		return SUPER_ID
+	end
+	return config.assetId
+end
 
-	local uiStroke = Instance.new("UIStroke")
-	uiStroke.Color = Color3.fromRGB(112, 126, 160)
-	uiStroke.Thickness = 1.5
-	uiStroke.Parent = frame
+local function isSuperMoistCapeWeld(part)
+	return part
+		and part.Name == "Weld"
+		and part.Parent
+		and part.Parent.Name == "superMoist_cape"
+end
 
-	local imageLabel = Instance.new("ImageLabel")
-	imageLabel.Size = UDim2.new(0, 68, 0, 68)
-	imageLabel.Position = UDim2.new(0, 24, 0, 20)
-	imageLabel.BackgroundTransparency = 1
-	imageLabel.Image = "rbxassetid://10386102032"
-	imageLabel.ScaleType = Enum.ScaleType.Fit
-	imageLabel.Parent = frame
+local function getCharacterConfig(player)
+	local models = { player.Character }
+	local playersFolder = workspace:FindFirstChild("Players")
+	if playersFolder then
+		table.insert(models, playersFolder:FindFirstChild(player.Name))
+	end
 
-	local titleLabel = Instance.new("TextLabel")
-	titleLabel.Size = UDim2.new(1, -120, 0, 42)
-	titleLabel.Position = UDim2.new(0, 108, 0, 24)
-	titleLabel.BackgroundTransparency = 1
-	titleLabel.Text = "FNF Skins V2"
-	titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-	titleLabel.TextSize = 27
-	titleLabel.Font = Enum.Font.GothamBold
-	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-	titleLabel.Parent = frame
-
-	local subtitleLabel = Instance.new("TextLabel")
-	subtitleLabel.Size = UDim2.new(1, -120, 0, 24)
-	subtitleLabel.Position = UDim2.new(0, 109, 0, 62)
-	subtitleLabel.BackgroundTransparency = 1
-	subtitleLabel.Text = "Select a version to continue"
-	subtitleLabel.TextColor3 = Color3.fromRGB(176, 184, 202)
-	subtitleLabel.TextSize = 14
-	subtitleLabel.Font = Enum.Font.Gotham
-	subtitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-	subtitleLabel.Parent = frame
-
-	local divider = Instance.new("Frame")
-	divider.Size = UDim2.new(1, -48, 0, 1)
-	divider.Position = UDim2.new(0, 24, 0, 105)
-	divider.BackgroundColor3 = Color3.fromRGB(75, 82, 100)
-	divider.BorderSizePixel = 0
-	divider.Parent = frame
-
-	local CurrentVersion = Instance.new("TextButton")
-	CurrentVersion.Name = "Base Game"
-	CurrentVersion.Size = UDim2.new(0, 205, 0, 52)
-	CurrentVersion.Position = UDim2.new(0, 30, 0, 142)
-	CurrentVersion.BackgroundColor3 = Color3.fromRGB(76, 112, 190)
-	CurrentVersion.Text = "Base Game  ·  0.2"
-	CurrentVersion.TextColor3 = Color3.fromRGB(255, 255, 255)
-	CurrentVersion.TextSize = 15
-	CurrentVersion.Font = Enum.Font.GothamBold
-	CurrentVersion.AutoButtonColor = true
-	CurrentVersion.BorderSizePixel = 0
-	CurrentVersion.Parent = frame
-
-	local ChangeLog = Instance.new("TextLabel")
-	ChangeLog.Size = UDim2.new(1, -60, 0, 22)
-	ChangeLog.Position = UDim2.new(0, 30, 0, 260)
-	ChangeLog.BackgroundTransparency = 1
-	ChangeLog.Text = "Change Log"
-	ChangeLog.TextColor3 = Color3.fromRGB(255, 255, 255)
-	ChangeLog.TextSize = 14
-	ChangeLog.Font = Enum.Font.GothamBold
-	ChangeLog.TextXAlignment = Enum.TextXAlignment.Left
-	ChangeLog.TextYAlignment = Enum.TextYAlignment.Top
-	ChangeLog.Parent = frame
-
-	local ChangeLogContent = Instance.new("TextLabel")
-	ChangeLogContent.Size = UDim2.new(1, -60, 0, 72)
-	ChangeLogContent.Position = UDim2.new(0, 30, 0, 284)
-	ChangeLogContent.BackgroundTransparency = 1
-	ChangeLogContent.Text = "• Updated Icons\n• Tried to fix fps drops with sonic\n• Added the Version Selector GUI\n• Fixed BF model not loading till lms started in 0.1a\n• Added a Hide Jacket Toggle to GF + kylie set early compatibilty\n• 0.1A uses a different rendition of discharge for lms\n• Added the observer (transform other players)"
-	ChangeLogContent.TextColor3 = Color3.fromRGB(190, 196, 210)
-	ChangeLogContent.TextSize = 13
-	ChangeLogContent.TextWrapped = true
-	ChangeLogContent.TextXAlignment = Enum.TextXAlignment.Left
-	ChangeLogContent.TextYAlignment = Enum.TextYAlignment.Top
-	ChangeLogContent.Font = Enum.Font.Gotham
-	ChangeLogContent.Parent = frame
-
-	local currentCorner = Instance.new("UICorner")
-	currentCorner.CornerRadius = UDim.new(0, 8)
-	currentCorner.Parent = CurrentVersion
-
-	local SobbeVersion = Instance.new("TextButton")
-	SobbeVersion.Name = "Sobbe"
-	SobbeVersion.Size = UDim2.new(0, 205, 0, 52)
-	SobbeVersion.Position = UDim2.new(1, -235, 0, 142)
-	SobbeVersion.BackgroundColor3 = Color3.fromRGB(84, 88, 105)
-	SobbeVersion.Text = "Sobbe  ·  0.1A"
-	SobbeVersion.TextColor3 = Color3.fromRGB(255, 255, 255)
-	SobbeVersion.TextSize = 15
-	SobbeVersion.Font = Enum.Font.GothamBold
-	SobbeVersion.AutoButtonColor = true
-	SobbeVersion.BorderSizePixel = 0
-	SobbeVersion.Parent = frame
-
-	local Observer = Instance.new("TextButton")
-	Observer.Name = "Observer"
-	Observer.Size = UDim2.new(0, 205, 0, 52)
-	Observer.Position = UDim2.new(0.5, -102.5, 0, 142)
-	Observer.BackgroundColor3 = Color3.fromRGB(45, 128, 155)
-	Observer.Text = "Transform Other Players"
-	Observer.TextColor3 = Color3.fromRGB(255, 255, 255)
-	Observer.TextSize = 15
-	Observer.Font = Enum.Font.GothamBold
-	Observer.AutoButtonColor = true
-	Observer.BorderSizePixel = 0
-	Observer.Parent = frame
-
-	local sobbeCorner = Instance.new("UICorner")
-	sobbeCorner.CornerRadius = UDim.new(0, 8)
-	sobbeCorner.Parent = SobbeVersion
-
-	local observerCorner = Instance.new("UICorner")
-	observerCorner.CornerRadius = UDim.new(0, 8)
-	observerCorner.Parent = Observer
-
-	local infoLabel = Instance.new("TextLabel")
-	infoLabel.Size = UDim2.new(1, -60, 0, 54)
-	infoLabel.Position = UDim2.new(0, 30, 0, 210)
-	infoLabel.BackgroundTransparency = 1
-	infoLabel.Text = "Choose the version that matches your game. Due to 0.1A's Nature, i've decided to split the script in two versions, each one should be 100% similar except for the lms replacer and amy's hammer."
-	infoLabel.TextColor3 = Color3.fromRGB(190, 196, 210)
-	infoLabel.TextSize = 13
-	infoLabel.TextWrapped = true
-	infoLabel.TextXAlignment = Enum.TextXAlignment.Left
-	infoLabel.TextYAlignment = Enum.TextYAlignment.Top
-	infoLabel.Font = Enum.Font.Gotham
-	infoLabel.Parent = frame
-
-	local closeButton = Instance.new("TextButton")
-	closeButton.Name = "Close"
-	closeButton.Size = UDim2.new(0, 120, 0, 36)
-	closeButton.AnchorPoint = Vector2.new(0.5, 0)
-	closeButton.Position = UDim2.new(0.5, 0, 1, -52)
-	closeButton.BackgroundColor3 = Color3.fromRGB(52, 55, 66)
-	closeButton.Text = "Close"
-	closeButton.TextColor3 = Color3.fromRGB(220, 224, 234)
-	closeButton.TextSize = 14
-	closeButton.Font = Enum.Font.GothamSemibold
-	closeButton.AutoButtonColor = true
-	closeButton.BorderSizePixel = 0
-	closeButton.Parent = frame
-
-	local closeButtonCorner = Instance.new("UICorner")
-	closeButtonCorner.CornerRadius = UDim.new(0, 8)
-	closeButtonCorner.Parent = closeButton
-
-	local function executeVersion(url)
-		screenGui:Destroy()
-
-		task.spawn(function()
-			local ok, source = pcall(function()
-				return game:HttpGet(url)
+	for _, model in ipairs(models) do
+		if model then
+			local ok, characterName = pcall(function()
+				return model:GetAttribute("Character")
 			end)
-			if not ok then
-				warn("[FNF Skins] No se pudo descargar el script:", source)
-				return
+			if ok and characterConfigs[characterName] then
+				return characterConfigs[characterName]
 			end
-
-			local compileError
-			local chunk
-			if type(loadstring) ~= "function" then
-				warn("[FNF Skins] loadstring no está disponible en este entorno")
-				return
-			end
-
-			chunk, compileError = loadstring(source)
-			if not chunk then
-				warn("[FNF Skins] Error al compilar el script:", compileError)
-				return
-			end
-
-			local ran, runtimeError = pcall(chunk)
-			if not ran then
-				warn("[FNF Skins] Error al ejecutar el script:", runtimeError)
-			end
-		end)
+		end
 	end
 
-	local function executeSobbeVersion()
-		screenGui:Destroy()
+	return nil
+end
 
-		local function executeScriptAsync(label, url)
-			task.spawn(function()
-				local ok, err = pcall(function()
-					local source = game:HttpGet(url)
-					local chunk, compileError = loadstring(source)
-					if not chunk then
-						error(compileError)
-					end
-					chunk()
-				end)
+local shoeComponentPartNames = {
+	LFoot = true,
+	RFoot = true,
+	Cube = true,
+}
 
-				if not ok then
-					warn("[FNF Skins][" .. label .. "] Error al ejecutar el script:", err)
+local function isShoesCosmeticContainer(container)
+	if not container or not (container:IsA("Model") or container:IsA("Folder")) then
+		return false
+	end
+
+	local hasShoePart = false
+	local hasWeld = false
+	for _, child in ipairs(container:GetChildren()) do
+		if shoeComponentPartNames[child.Name]
+			and (child:IsA("BasePart") or child:IsA("Model") or child:IsA("Folder")) then
+			hasShoePart = true
+			if child:FindFirstChild("Weld", true) then
+				hasWeld = true
+			end
+		elseif child.Name == "Weld" then
+			hasWeld = true
+		end
+	end
+	return hasShoePart and hasWeld
+end
+
+local function getCosmeticType(object, model, config)
+	if not object or not model then
+		return nil
+	end
+
+	local current = object
+	while current and current ~= model do
+		if config then
+			local isBasePartName = current == object
+				and current:IsA("BasePart")
+				and config.basePartNames
+				and config.basePartNames[current.Name]
+			if not isBasePartName and config.hatCosmetics and config.hatCosmetics[current.Name] then
+				return "hat"
+			elseif isShoesCosmeticContainer(current) then
+				return "shoes"
+			elseif not isBasePartName and ((config.cosmeticRoots and config.cosmeticRoots[current.Name])
+				or (config.shirtCosmetics and config.shirtCosmetics[current.Name])) then
+				return "cosmetic"
+			end
+		end
+		current = current.Parent
+	end
+	return nil
+end
+
+local function belongsToCosmeticRoot(object, model, config)
+	local cosmeticType = getCosmeticType(object, model, config)
+	if cosmeticType == "hat" then
+		return CosmeticCompToggle and HatCosmeticToggle
+	elseif cosmeticType == "shoes" then
+		return ShoesCosmeticToggle
+	elseif cosmeticType == "cosmetic" then
+		return CosmeticCompToggle
+	end
+	return false
+end
+
+local function isOriginalHedCube001(object, model)
+	if object.Name ~= "Cube.001" then
+		return false
+	end
+
+	local current = object.Parent
+	while current and current ~= model do
+		if current.Name == "hed" then
+			return true
+		end
+		current = current.Parent
+	end
+	return false
+end
+
+local function isShadowPartA(object, model, config)
+	if not config or not config.hideShadowPartA then
+		return false
+	end
+
+	local current = object
+	local foundA = false
+	while current and current ~= model do
+		if current.Name == "A" then
+			foundA = true
+		elseif current.Name == "Shadow" and foundA then
+			return true
+		end
+		current = current.Parent
+	end
+	return false
+end
+
+local function belongsToShoesCosmetic(object, model)
+	local current = object
+	while current and current ~= model do
+		if isShoesCosmeticContainer(current) then
+			return true
+		end
+		current = current.Parent
+	end
+	return false
+end
+
+local function hasHatCosmetic(model, config, exceptModel)
+	if not model then return false end
+	for _, object in ipairs(model:GetDescendants()) do
+		if (not exceptModel or not object:IsDescendantOf(exceptModel))
+			and config.hatCosmetics[object.Name] then
+			return true
+		end
+	end
+	return false
+end
+
+local function hasShirtCosmetic(model, config, exceptModel)
+	if not model then return false end
+	for _, object in ipairs(model:GetDescendants()) do
+		if config.shirtCosmetics[object.Name]
+			and (not exceptModel or not object:IsDescendantOf(exceptModel)) then
+			return true
+		end
+	end
+	return false
+end
+
+local function hasShoesCosmetic(model, config, exceptModel)
+	if not model then return false end
+	for _, object in ipairs(model:GetDescendants()) do
+		if (not exceptModel or not object:IsDescendantOf(exceptModel))
+			and ((config.shoesCosmetics and config.shoesCosmetics[object.Name]
+			and not shoeComponentPartNames[object.Name])
+			or isShoesCosmeticContainer(object)) then
+			return true
+		end
+	end
+	return false
+end
+
+local function restoreJacketColors(insertedModel)
+	for part, originalColor in pairs(GFJacketOriginalColors) do
+		if not part.Parent then
+			GFJacketOriginalColors[part] = nil
+		elseif part:IsDescendantOf(insertedModel) then
+			part.Color = originalColor
+			GFJacketOriginalColors[part] = nil
+		end
+	end
+end
+
+local function setGroupVisibility(group, visible)
+	if not group then return end
+
+	local objects = { group }
+	for _, object in ipairs(group:GetDescendants()) do
+		table.insert(objects, object)
+	end
+
+	for _, object in ipairs(objects) do
+		if object:IsA("BasePart") then
+			object.Transparency = (object.Name == "Weld" or isSuperMoistCapeWeld(object))
+				and 1 or (visible and 0 or 1)
+			object.CanCollide = false
+		elseif object:IsA("Decal") or object:IsA("Texture") then
+			object.Transparency = visible and 0 or 1
+		end
+	end
+end
+
+local function updateInsertedHat(model, insertedModel, config)
+	if not model or not insertedModel then return end
+
+	local visible = not (CosmeticCompToggle and HatCosmeticToggle
+		and hasHatCosmetic(model, config, insertedModel))
+	for _, object in ipairs(insertedModel:GetDescendants()) do
+		if object:IsA("BasePart")
+			and (object.Name == "bhat" or object.Name == "hat" or object.Name == "sas") then
+			object.Transparency = visible and 0 or 1
+			object.CanCollide = false
+		end
+	end
+end
+
+local function updateInsertedShoes(model, insertedModel, config)
+	if not model or not insertedModel then return end
+
+	local hideShoesGroups = ShoesCosmeticToggle and hasShoesCosmetic(model, config, insertedModel)
+	for _, object in ipairs(insertedModel:GetDescendants()) do
+		if (object.Name == "Shoes" or object.Name == "Thing2")
+			and (object:IsA("Model") or object:IsA("Folder")) then
+			setGroupVisibility(object, not hideShoesGroups)
+		end
+	end
+end
+
+local function restoreCosmeticVisibility(model, config, exceptModel)
+	if not model then return end
+
+	for _, cosmeticNames in ipairs({
+		config.cosmeticRoots or {},
+		config.shirtCosmetics or {},
+		config.hatCosmetics or {},
+	}) do
+		for cosmeticName in pairs(cosmeticNames) do
+			for _, cosmetic in ipairs(model:GetDescendants()) do
+				if cosmetic.Name == cosmeticName
+					and (not exceptModel or not cosmetic:IsDescendantOf(exceptModel)) then
+					setGroupVisibility(cosmetic, belongsToCosmeticRoot(cosmetic, model, config))
 				end
-			end)
+			end
+		end
+	end
+	for _, cosmetic in ipairs(model:GetDescendants()) do
+		if (not exceptModel or not cosmetic:IsDescendantOf(exceptModel))
+			and isShoesCosmeticContainer(cosmetic) then
+			setGroupVisibility(cosmetic, ShoesCosmeticToggle)
+		end
+	end
+end
+
+local function updateShirt(model, insertedModel, config)
+	if not model or not insertedModel or not config then
+		return
+	end
+
+	local hasCosmetic = CosmeticCompToggle and hasShirtCosmetic(model, config, insertedModel)
+
+	local shirtGroup = config.shirtGroup and insertedModel:FindFirstChild(config.shirtGroup, true)
+	if config.shirtModel then
+		setGroupVisibility(insertedModel:FindFirstChild(config.shirtModel, true), not hasCosmetic)
+		setGroupVisibility(shirtGroup, hasCosmetic)
+	elseif config.jacketGroup then
+		setGroupVisibility(shirtGroup, not hasCosmetic)
+		setGroupVisibility(
+			insertedModel:FindFirstChild(config.jacketGroup, true),
+			not (hasCosmetic and GFHideJacketaswell)
+		)
+
+		if hasCosmetic and GFHideJacketaswell then
+			for _, name in ipairs({ "LSleeve", "RSleeve", "Arms" }) do
+				local target = insertedModel:FindFirstChild(name, true)
+				if target then
+					local objects = { target }
+					for _, object in ipairs(target:GetDescendants()) do
+						table.insert(objects, object)
+					end
+					for _, object in ipairs(objects) do
+						if object:IsA("BasePart") then
+							if GFJacketOriginalColors[object] == nil then
+								GFJacketOriginalColors[object] = object.Color
+							end
+							object.Color = Color3.fromRGB(255, 255, 255)
+						end
+					end
+				end
+			end
+		else
+			restoreJacketColors(insertedModel)
 		end
 
-		executeScriptAsync(
-			"GF 0.1A",
-			"https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/GF0.1A.lua"
-		)
-		executeScriptAsync(
-			"BF 0.1A",
-			"https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/BF0.1A.lua"
-		)
-		executeScriptAsync(
-			"BF LMS 0.1A",
-			"https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/0.1A/bflms0.1a.lua"
-		)
+		for _, name in ipairs({ "LSleeve", "RSleeve" }) do
+			local sleeve = insertedModel:FindFirstChild(name, true)
+			if sleeve then
+				setGroupVisibility(sleeve, true)
+			end
+		end
+	else
+		setGroupVisibility(shirtGroup, true)
+	end
+end
 
-		task.spawn(function()
-			game.StarterGui:SetCore("SendNotification", {
-				Title = "FNF Skins V2",
-				Text = "Made by MisterSaiyan | Head sync comes disabled by default, enable it if you use head cosmetics",
-				Icon = "",
-				Duration = 10
-			})
-			game.StarterGui:SetCore("SendNotification", {
-				Title = "Version Check",
-				Text = "This is intended for 0.1A (Sobbe's Copy)",
-				Icon = "",
-				Duration = 10
-			})
-		end)
+local function shouldHideSourcePart(object, model, exceptModel, config)
+	if not object:IsA("BasePart") or (exceptModel and object:IsDescendantOf(exceptModel)) then
+		return false
 	end
 
-	CurrentVersion.MouseButton1Click:Connect(function()
-		executeVersion("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/fnfskinsv2loader.lua")
-	end)
+	local forcedHide = config and config.forcedHideRoots and config.forcedHideRoots[object.Name]
+	local protectedShoe = ShoesCosmeticToggle and belongsToShoesCosmetic(object, model)
+	local cosmeticType = getCosmeticType(object, model, config)
+	local isProtectedCosmetic = belongsToCosmeticRoot(object, model, config)
+	local isBasePart = config and config.basePartNames and config.basePartNames[object.Name]
+	local isOriginalBasePart = isBasePart
+		and object.Name == "Cube.001"
+		and isOriginalHedCube001(object, model)
 
-	SobbeVersion.MouseButton1Click:Connect(function()
-		executeSobbeVersion()
-	end)
+	if isShadowPartA(object, model, config) then
+		return true
+	end
 
-	Observer.MouseButton1Click:Connect(function()
-		executeVersion("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/observerfnf.lua")
-	end)
+	if config and config.basePartNames then
+		return (forcedHide and not protectedShoe)
+			or isOriginalBasePart
+			or ((isBasePart or cosmeticType ~= nil) and not isProtectedCosmetic)
+	end
+	return (forcedHide and not protectedShoe) or not isProtectedCosmetic
+end
 
-	closeButton.MouseButton1Click:Connect(function()
-		screenGui:Destroy()
-	end)
+local function showAmyWeapon(model, config, object)
+	if not model or not config or not config.alwaysVisibleObjectNames then
+		return
+	end
+
+	local weaponRoot
+	if object then
+		local current = object
+		while current and current ~= model do
+			for _, name in ipairs(config.alwaysVisibleObjectNames) do
+				if current.Name == name then
+					weaponRoot = current
+					break
+				end
+			end
+			if weaponRoot then
+				break
+			end
+			current = current.Parent
+		end
+		if not weaponRoot then
+			return
+		end
+	else
+		for _, name in ipairs(config.alwaysVisibleObjectNames) do
+			weaponRoot = model:FindFirstChild(name, true)
+			if weaponRoot then
+				break
+			end
+		end
+	end
+	if not weaponRoot then
+		return
+	end
+
+	local parts = {}
+	if weaponRoot:IsA("BasePart") then
+		table.insert(parts, weaponRoot)
+	end
+	for _, descendant in ipairs(weaponRoot:GetDescendants()) do
+		if descendant:IsA("BasePart") then
+			table.insert(parts, descendant)
+		end
+	end
+	for _, part in ipairs(parts) do
+		part.Transparency = 0
+		part.CanCollide = false
+		for _, replacement in ipairs(config.weaponColorReplacements or {}) do
+			if part.Color == replacement.from then
+				part.Color = replacement.to
+				break
+			end
+		end
+	end
+end
+
+local function applyInsertedModelFixes(model, config)
+	if not model or not config then
+		return
+	end
+
+	for _, object in ipairs(model:GetDescendants()) do
+		if object:IsA("BasePart") then
+			if config.destroyPartNames
+				and config.destroyPartNames[string.lower(object.Name)] then
+				object:Destroy()
+			elseif isShadowPartA(object, model, config) then
+				object.Transparency = 1
+				object.CanCollide = false
+			end
+		end
+	end
+end
+
+local function hideSourcePartIfNeeded(object, model, exceptModel, config)
+	if shouldHideSourcePart(object, model, exceptModel, config) then
+		object.Transparency = 1
+		object.CanCollide = false
+	end
+end
+
+local function hideModelParts(model, exceptModel, config)
+	if not model then
+		return
+	end
+
+	for _, object in ipairs(model:GetDescendants()) do
+		hideSourcePartIfNeeded(object, model, exceptModel, config)
+	end
+end
+
+local function setupCharacter(modelInfo)
+	if not modelInfo or not modelInfo.source.Parent or not modelInfo.inserted.Parent then
+		return
+	end
+
+	restoreCosmeticVisibility(modelInfo.source, modelInfo.config, modelInfo.inserted)
+	hideModelParts(modelInfo.source, modelInfo.inserted, modelInfo.config)
+	showAmyWeapon(modelInfo.source, modelInfo.config)
+	updateShirt(modelInfo.source, modelInfo.inserted, modelInfo.config)
+	updateInsertedHat(modelInfo.source, modelInfo.inserted, modelInfo.config)
+	updateInsertedShoes(modelInfo.source, modelInfo.inserted, modelInfo.config)
+end
+
+local function getBooleanState(root, names)
+	if not root then return false end
+
+	for _, name in ipairs(names) do
+		local value = root:GetAttribute(name)
+		if value == true or value == "true" or value == "True" then
+			return true
+		end
+
+		local stateObject = root:FindFirstChild(name, true)
+		if stateObject then
+			if stateObject:IsA("BoolValue") and stateObject.Value then
+				return true
+			end
+			if stateObject:IsA("ObjectValue") and stateObject.Value ~= nil then
+				return true
+			end
+			if stateObject:IsA("StringValue") and (stateObject.Value == "true" or stateObject.Value == "True") then
+				return true
+			end
+			if stateObject:IsA("IntValue") and stateObject.Value > 0 then
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
+local iconGuiDefaults = setmetatable({}, { __mode = "k" })
+
+local function setFolderState(folder, activeName, imageId, zIndex, layout)
+	if not folder then return end
+
+	for _, child in ipairs(folder:GetChildren()) do
+		if child:IsA("ImageLabel") or child:IsA("ImageButton") then
+			local defaults = iconGuiDefaults[child]
+			if not defaults then
+				defaults = {
+					position = child.Position,
+					size = child.Size,
+					anchorPoint = child.AnchorPoint,
+					scaleType = child.ScaleType,
+					imageColor = child.ImageColor3,
+				}
+				iconGuiDefaults[child] = defaults
+			end
+			child.Position = defaults.position
+			child.Size = defaults.size
+			child.AnchorPoint = defaults.anchorPoint
+			child.ScaleType = defaults.scaleType
+			child.ImageColor3 = defaults.imageColor
+
+			local isActive = child.Name == activeName
+			child.Visible = isActive
+			if isActive then
+				child.Image = imageId
+				child.ZIndex = zIndex
+				if layout and layout.imageColor then
+					child.ImageColor3 = layout.imageColor
+				end
+				if not (layout and layout.preserveLayout) then
+					if layout and layout.position then
+						child.Position = layout.position
+					end
+					if layout and layout.size then
+						child.AnchorPoint = Vector2.new(0.5, 0.5)
+						child.Size = layout.size
+						child.ScaleType = Enum.ScaleType.Fit
+					end
+				end
+			end
+		end
+	end
+end
+
+local chasedIconState = setmetatable({}, { __mode = "k" })
+
+local function applyObservedIcon(targetPlayer)
+	local playerGui = localPlayer:FindFirstChildOfClass("PlayerGui")
+	local round = playerGui and playerGui:FindFirstChild("Round")
+	local gameGui = round and round:FindFirstChild("Game")
+	local teams = gameGui and gameGui:FindFirstChild("Teams")
+	local playerFrame = teams and teams:FindFirstChild(targetPlayer.Name)
+	local frame = playerFrame and playerFrame:FindFirstChild("Frame")
+	local characterGui = frame and frame:FindFirstChild("Character")
+	if not characterGui then return end
+
+	local config = getCharacterConfig(targetPlayer)
+	if not config or not config.icons then return end
+
+	local model = targetPlayer.Character
+	local playersFolder = workspace:FindFirstChild("Players")
+	local visualModel = playersFolder and playersFolder:FindFirstChild(targetPlayer.Name)
+	local function hasState(names)
+		return getBooleanState(visualModel, names)
+			or getBooleanState(model, names)
+			or getBooleanState(targetPlayer, names)
+	end
+
+	local isLastLife = hasState({ "LastLife", "IsLastLife", "SecondLife" })
+	local isDowned = hasState({ "Downed", "IsDowned", "BeingDowned" })
+	local isChased = hasState({ "Chased", "IsChased", "InChase", "BeingChased" })
+	local chasedState = chasedIconState[targetPlayer]
+	if not chasedState then
+		chasedState = { visible = false, lostAt = nil, generation = 0 }
+		chasedIconState[targetPlayer] = chasedState
+	end
+	if isChased then
+		if not chasedState.visible or chasedState.lostAt then
+			chasedState.visible = true
+			chasedState.lostAt = nil
+			chasedState.generation += 1
+		end
+	elseif chasedState.visible then
+		if not chasedState.lostAt then
+			chasedState.lostAt = os.clock()
+			chasedState.generation += 1
+			local generation = chasedState.generation
+			task.delay(CHASE_RELEASE_DELAY, function()
+				if chasedIconState[targetPlayer] == chasedState
+					and chasedState.generation == generation then
+					applyObservedIcon(targetPlayer)
+				end
+			end)
+		elseif os.clock() - chasedState.lostAt >= CHASE_RELEASE_DELAY then
+			chasedState.visible = false
+			chasedState.lostAt = nil
+			chasedState.generation += 1
+		end
+	end
+
+	local eyesState = chasedState.visible and "Chased" or "Regular"
+	local expressionState = isLastLife and "LastLife" or "Regular"
+	local eyesImage = chasedState.visible and config.icons.eyesChased or config.icons.eyesNormal
+	local expressionImage = isLastLife and config.icons.lastLife or config.icons.normal
+
+	if isLastLife and not chasedState.visible then
+		eyesImage = config.icons.eyesLastLife
+	end
+	if isDowned then
+		expressionState = "Downed"
+		expressionImage = config.icons.downed
+	end
+
+	local layout = config.icons.layout
+	setFolderState(
+		characterGui:FindFirstChild("Eyes"),
+		isDowned and "" or eyesState,
+		eyesImage,
+		10,
+		layout and layout.eyes
+	)
+	setFolderState(
+		characterGui:FindFirstChild("Expression"),
+		expressionState,
+		expressionImage,
+		5,
+		layout and layout.expression
+	)
+end
+
+local stateNames = {
+	LastLife = true,
+	IsLastLife = true,
+	SecondLife = true,
+	Downed = true,
+	IsDowned = true,
+	BeingDowned = true,
+	Chased = true,
+	IsChased = true,
+	InChase = true,
+	BeingChased = true,
+}
+
+local function connectStateWatchers(player, character, connections, watchedRoots)
+	local watchedValues = {}
+	watchedRoots = watchedRoots or setmetatable({}, { __mode = "k" })
+	local function refreshIcon()
+		applyObservedIcon(player)
+	end
+
+	local function watchValueObject(object)
+		if not stateNames[object.Name] or not object:IsA("ValueBase") or watchedValues[object] then
+			return
+		end
+		watchedValues[object] = true
+		table.insert(connections, object.Changed:Connect(refreshIcon))
+	end
+
+	local function watchRoot(root)
+		if not root or watchedRoots[root] then
+			return
+		end
+		watchedRoots[root] = true
+
+		for stateName in pairs(stateNames) do
+			table.insert(connections, root:GetAttributeChangedSignal(stateName):Connect(refreshIcon))
+		end
+		for _, descendant in ipairs(root:GetDescendants()) do
+			watchValueObject(descendant)
+		end
+		table.insert(connections, root.DescendantAdded:Connect(function(descendant)
+			watchValueObject(descendant)
+			if stateNames[descendant.Name] then
+				refreshIcon()
+			end
+		end))
+		table.insert(connections, root.DescendantRemoving:Connect(function(descendant)
+			if stateNames[descendant.Name] then
+				task.defer(refreshIcon)
+			end
+		end))
+	end
+
+	watchRoot(player)
+	watchRoot(character)
+	return watchedRoots
+end
+
+local function setupPlayerModel(player)
+	if trackedPlayers[player] then return end
+	trackedPlayers[player] = true
+	playerConnections[player] = {}
+
+	local function onCharacterAdded(character)
+		chasedIconState[player] = nil
+		for _, connection in ipairs(spawnConnections[player] or {}) do
+			connection:Disconnect()
+		end
+		spawnConnections[player] = {}
+		local connections = spawnConnections[player]
+		local watchedStateRoots = connectStateWatchers(player, character, connections)
+
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if not humanoid then
+			humanoid = character:WaitForChild("Humanoid", 5)
+			if not humanoid or player.Character ~= character then return end
+		end
+
+		local setupStarted = false
+		local function trySetup()
+			if setupStarted or not character.Parent or player.Character ~= character then return end
+			local config = getCharacterConfig(player)
+			if not config then return end
+			setupStarted = true
+
+			local players_folder = workspace:FindFirstChild("Players")
+			local old_visual = players_folder and players_folder:FindFirstChild(player.Name)
+
+			local sourceRoot = old_visual or character
+			local activeAssetId = getActiveAssetId(sourceRoot, config)
+			local mdl = loadAsset(activeAssetId)
+			if not mdl then
+				warn("[ObserverFNF] Failed to load replacement asset:", activeAssetId)
+				setupStarted = false
+				return
+			end
+
+			applyInsertedModelFixes(mdl, config)
+
+			for _, object in ipairs(mdl:GetDescendants()) do
+				local protectedShoe = ShoesCosmeticToggle
+					and belongsToShoesCosmetic(object, mdl)
+				if object:IsA("BasePart")
+					and config.forcedHideRoots
+					and config.forcedHideRoots[object.Name]
+					and not protectedShoe then
+					object.Transparency = 1
+					object.CanCollide = false
+				end
+			end
+
+			if old_visual then
+				mdl.Parent = old_visual
+			else
+				mdl.Parent = character
+			end
+			mdl:SetAttribute("AssetId", activeAssetId)
+			local hrp = character:WaitForChild("HumanoidRootPart", 5)
+			local new_hrp = mdl:WaitForChild("HumanoidRootPart", 5)
+			if not hrp or not new_hrp then
+				warn("[ObserverFNF] Character or replacement asset is missing HumanoidRootPart:", player.Name)
+				mdl:Destroy()
+				setupStarted = false
+				return
+			end
+
+			new_hrp.Anchored = true
+			local mdlHum = mdl:FindFirstChildOfClass("Humanoid")
+			if mdlHum then mdlHum:Destroy() end
+			local mdlAnim = mdl:FindFirstChildOfClass("Animator")
+			if mdlAnim then mdlAnim:Destroy() end
+
+			for _, v in ipairs(mdl:GetDescendants()) do
+				if v:IsA("BasePart") then
+					v.CanCollide = false
+					if v.Name == "HumanoidRootPart" or v.Name == "RootPart" or isSuperMoistCapeWeld(v) then
+						v.Transparency = 1
+					end
+				end
+			end
+			new_hrp.Transparency = 1
+			local new_waist = mdl:FindFirstChild("Waist", true)
+			if new_waist and new_waist:IsA("BasePart") then new_waist.Transparency = 1 end
+			activeModels[player] = {
+				source = sourceRoot,
+				inserted = mdl,
+				config = config,
+			}
+			setupCharacter(activeModels[player])
+
+			local motorMap = {}
+			for _, oldMotor in ipairs(character:GetDescendants()) do
+				if oldMotor:IsA("Motor6D") then
+					local newMotor = nil
+					-- First try: search within same parent name in mdl
+					if oldMotor.Parent then
+						local parentName = oldMotor.Parent.Name
+						local mdlParent = mdl:FindFirstChild(parentName, true)
+						if mdlParent then
+							newMotor = mdlParent:FindFirstChild(oldMotor.Name)
+							if not (newMotor and newMotor:IsA("Motor6D")) then
+								newMotor = nil
+							end
+						end
+					end
+					-- Fallback: global search
+					if not newMotor then
+						newMotor = mdl:FindFirstChild(oldMotor.Name, true)
+						if not (newMotor and newMotor:IsA("Motor6D")) then
+							newMotor = nil
+						end
+					end
+					if newMotor then
+						motorMap[oldMotor] = newMotor
+					end
+				end
+			end
+
+			new_hrp.CFrame = hrp.CFrame
+
+			local syncConnection
+			syncConnection = RunService.PreSimulation:Connect(function()
+				if not character.Parent or not hrp.Parent or not new_hrp.Parent then
+					syncConnection:Disconnect()
+					return
+				end
+				new_hrp.CFrame = hrp.CFrame
+				if HeadSyncToggle then
+					for oldMotor, newMotor in pairs(motorMap) do
+						if oldMotor.Parent and newMotor.Parent then
+							newMotor.Transform = oldMotor.Transform
+						end
+					end
+				end
+			end)
+			table.insert(connections, syncConnection)
+
+			local cosmeticNames = {}
+			for cosmeticName in pairs(config.cosmeticRoots) do
+				cosmeticNames[cosmeticName] = true
+			end
+			for cosmeticName in pairs(config.shirtCosmetics) do
+				cosmeticNames[cosmeticName] = true
+			end
+			for cosmeticName in pairs(config.hatCosmetics or {}) do
+				cosmeticNames[cosmeticName] = true
+			end
+			for cosmeticName in pairs(config.shoesCosmetics or {}) do
+				cosmeticNames[cosmeticName] = true
+			end
+			table.insert(connections, sourceRoot.DescendantAdded:Connect(function(object)
+				if object:IsA("BasePart") then
+					hideSourcePartIfNeeded(object, sourceRoot, mdl, config)
+				end
+				showAmyWeapon(sourceRoot, config, object)
+
+				local root = object
+				while root and root ~= sourceRoot
+					and not cosmeticNames[root.Name]
+					and not isShoesCosmeticContainer(root) do
+					root = root.Parent
+				end
+				if not root or root == sourceRoot or root:IsDescendantOf(mdl) then return end
+
+				setGroupVisibility(root, belongsToCosmeticRoot(root, sourceRoot, config))
+				if config.shirtCosmetics[root.Name] then
+					updateShirt(sourceRoot, mdl, config)
+				end
+				updateInsertedHat(sourceRoot, mdl, config)
+				updateInsertedShoes(sourceRoot, mdl, config)
+			end))
+
+			applyObservedIcon(player)
+		end
+
+		local function watchCharacterConfig(model)
+			table.insert(connections, model:GetAttributeChangedSignal("Character"):Connect(trySetup))
+			connectStateWatchers(player, model, connections, watchedStateRoots)
+		end
+
+		watchCharacterConfig(character)
+		local playersFolder = workspace:FindFirstChild("Players")
+		if playersFolder then
+			local visual = playersFolder:FindFirstChild(player.Name)
+			if visual then
+				watchCharacterConfig(visual)
+			end
+			table.insert(connections, playersFolder.ChildAdded:Connect(function(child)
+				if child.Name == player.Name then
+					watchCharacterConfig(child)
+					trySetup()
+				end
+			end))
+		end
+		table.insert(connections, workspace.ChildAdded:Connect(function(child)
+			if child.Name == "Players" then
+				local visual = child:FindFirstChild(player.Name)
+				if visual then
+					watchCharacterConfig(visual)
+				end
+				table.insert(connections, child.ChildAdded:Connect(function(added)
+					if added.Name == player.Name then
+						watchCharacterConfig(added)
+						trySetup()
+					end
+				end))
+				trySetup()
+			end
+		end))
+
+		trySetup()
+
+		table.insert(connections, character.AncestryChanged:Connect(function()
+			if not character.Parent then
+				for _, connection in ipairs(connections) do
+					connection:Disconnect()
+				end
+				spawnConnections[player] = nil
+				activeModels[player] = nil
+			end
+		end))
+	end
+
+	if player.Character then onCharacterAdded(player.Character) end
+	table.insert(playerConnections[player], player.CharacterAdded:Connect(onCharacterAdded))
+end
+
+local playerGui = localPlayer:FindFirstChildOfClass("PlayerGui") or localPlayer:WaitForChild("PlayerGui")
+playerGui.DescendantAdded:Connect(function(descendant)
+	if descendant.Name == "Character" or descendant.Name == "Eyes" or descendant.Name == "Expression" then
+		for player in pairs(trackedPlayers) do
+			applyObservedIcon(player)
+		end
+	end
+end)
+
+for _, p in ipairs(Players:GetPlayers()) do
+	if p ~= localPlayer then setupPlayerModel(p) end
+end
+Players.PlayerAdded:Connect(function(p)
+	if p ~= localPlayer then setupPlayerModel(p) end
+end)
+Players.PlayerRemoving:Connect(function(player)
+	for _, connection in ipairs(playerConnections[player] or {}) do
+		connection:Disconnect()
+	end
+	for _, connection in ipairs(spawnConnections[player] or {}) do
+		connection:Disconnect()
+	end
+	playerConnections[player] = nil
+	spawnConnections[player] = nil
+	activeModels[player] = nil
+	trackedPlayers[player] = nil
+end)
+
+-- Observer configuration
+
+local function createObserverTabButton(texto, orden)
+    local boton = Instance.new("TextButton")
+    boton.Name = "Panel_" .. (texto:gsub("%s+", ""))
+    boton.Size = UDim2.new(0, 0, 0, 42)
+    boton.AutomaticSize = Enum.AutomaticSize.X
+    boton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    boton.BackgroundTransparency = 0.1
+    boton.AutoButtonColor = true
+    boton.LayoutOrder = orden
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0.5, 0)
+    corner.Parent = boton
+
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 22)
+    padding.PaddingRight = UDim.new(0, 22)
+    padding.Parent = boton
+
+    boton.Text = texto
+    boton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    boton.Font = Enum.Font.GothamBold
+    boton.TextSize = 15
+
+    return boton
+end
+
+local function getSharedConfigTopBar()
+    local bfGui = CoreGui:FindFirstChild("ConfiguracionesBF")
+    if bfGui then
+        local bar = bfGui:FindFirstChild("ContenedorHorizontal")
+        if bar then
+            return bar
+        end
+    end
+    return nil
+end
+
+local ObserverSharedBar = getSharedConfigTopBar()
+local ObsConfigOpen = false
+
+local function ensureObserverButton()
+    if ObserverSharedBar and ObserverSharedBar:FindFirstChild("Observer") then
+        return ObserverSharedBar:FindFirstChild("Observer")
+    end
+
+    local bar = ObserverSharedBar or (function()
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Name = "ObserverConfigButtons"
+        screenGui.ResetOnSpawn = false
+        screenGui.IgnoreGuiInset = true
+        screenGui.Parent = CoreGui
+
+        local topBar = Instance.new("Frame")
+        topBar.Name = "ContenedorHorizontal"
+        topBar.Size = UDim2.new(0, 0, 0, 42)
+        topBar.AutomaticSize = Enum.AutomaticSize.X
+        topBar.Position = UDim2.new(0, 500, 0, 12)
+        topBar.BackgroundTransparency = 1
+        topBar.Parent = screenGui
+
+        local listLayout = Instance.new("UIListLayout")
+        listLayout.Parent = topBar
+        listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        listLayout.FillDirection = Enum.FillDirection.Horizontal
+        listLayout.Padding = UDim.new(0, 12)
+        listLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+
+        return topBar
+    end)()
+
+    local existingButton = bar:FindFirstChild("Observer")
+    if existingButton then
+        return existingButton
+    end
+
+    local observerButton = createObserverTabButton("Observer", 3)
+    observerButton.Name = "Observer"
+    observerButton.Parent = bar
+
+    return observerButton
+end
+
+local ObserverButton = ensureObserverButton()
+
+local function ensureObserverPanel()
+    local panel = rawget(_G, "ObserverConfigPanel")
+    if panel and panel.Parent then
+        return panel
+    end
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "ObserverConfigMenu"
+    screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true
+    screenGui.Parent = CoreGui
+
+    local panel = Instance.new("Frame")
+    panel.Name = "ObserverConfigPanel"
+    panel.Size = UDim2.new(0, 250, 0, 222)
+    panel.Position = UDim2.new(0, 400, 0, 60)
+    panel.BackgroundColor3 = Color3.fromRGB(17, 17, 17)
+    panel.BorderSizePixel = 0
+    panel.Visible = false
+    panel.Parent = screenGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 14)
+    corner.Parent = panel
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 255, 255)
+    stroke.Thickness = 1.5
+    stroke.Transparency = 1
+    stroke.LineJoinMode = Enum.LineJoinMode.Miter
+    stroke.Parent = panel
+
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0, 8)
+    layout.FillDirection = Enum.FillDirection.Vertical
+    layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Parent = panel
+
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 10)
+    padding.PaddingRight = UDim.new(0, 10)
+    padding.PaddingTop = UDim.new(0, 10)
+    padding.PaddingBottom = UDim.new(0, 10)
+    padding.Parent = panel
+
+    _G.ObserverConfigPanel = panel
+    return panel
+end
+
+local ObsPanel = ensureObserverPanel()
+
+local function createObserverConfigRow(parent, labelText, valueRef, onToggle)
+    local row = Instance.new("Frame")
+    row.Name = labelText .. "Row"
+    row.Size = UDim2.new(1, 0, 0, 32)
+    row.BackgroundColor3 = Color3.fromRGB(27, 27, 27)
+    row.Parent = parent
+
+    local rowCorner = Instance.new("UICorner")
+    rowCorner.CornerRadius = UDim.new(0, 8)
+    rowCorner.Parent = row
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(0.6, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = labelText
+    textLabel.TextColor3 = Color3.fromRGB(245, 245, 245)
+    textLabel.Font = Enum.Font.GothamSemibold
+    textLabel.TextSize = 14
+    textLabel.TextXAlignment = Enum.TextXAlignment.Left
+    textLabel.Parent = row
+
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Size = UDim2.new(0.34, 0, 1, 0)
+    toggleButton.Position = UDim2.new(0.64, 0, 0, 0)
+    toggleButton.BackgroundColor3 = valueRef() and Color3.fromRGB(34, 197, 94) or Color3.fromRGB(120, 120, 120)
+    toggleButton.Text = tostring(valueRef())
+    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleButton.Font = Enum.Font.GothamBold
+    toggleButton.TextSize = 12
+    toggleButton.AutoButtonColor = false
+    toggleButton.BorderSizePixel = 0
+    toggleButton.Parent = row
+
+    local toggleCorner = Instance.new("UICorner")
+    toggleCorner.CornerRadius = UDim.new(0, 8)
+    toggleCorner.Parent = toggleButton
+
+    local toggleStroke = Instance.new("UIStroke")
+    toggleStroke.Color = Color3.fromRGB(0, 0, 0)
+    toggleStroke.Thickness = 1
+    toggleStroke.Transparency = 1
+    toggleStroke.Parent = toggleButton
+
+    toggleButton.MouseButton1Click:Connect(function()
+        if onToggle then
+            onToggle()
+        end
+        local nextValue = valueRef()
+        toggleButton.Text = tostring(nextValue)
+        toggleButton.BackgroundColor3 = nextValue and Color3.fromRGB(34, 197, 94) or Color3.fromRGB(120, 120, 120)
+    end)
+
+    return row
+end
+
+local function refreshTrackedCosmetics()
+	for _, modelInfo in pairs(activeModels) do
+		setupCharacter(modelInfo)
+	end
+end
+
+local function toggleCosmeticComp()
+	CosmeticCompToggle = not CosmeticCompToggle
+	refreshTrackedCosmetics()
+end
+
+local function toggleHatCosmetics()
+	HatCosmeticToggle = not HatCosmeticToggle
+	refreshTrackedCosmetics()
+end
+
+local function toggleShoesCosmetics()
+	ShoesCosmeticToggle = not ShoesCosmeticToggle
+	refreshTrackedCosmetics()
+end
+
+local function toggleHideAmyJacket()
+	GFHideJacketaswell = not GFHideJacketaswell
+	refreshTrackedCosmetics()
+end
+
+local function toggleHeadSync()
+	HeadSyncToggle = not HeadSyncToggle
+end
+
+local function setObserverConfigVisible(visible)
+	ObsConfigOpen = visible
+	ObsPanel.Visible = visible
+	ObserverButton.Text = visible and "Close" or "Observer"
+end
+
+createObserverConfigRow(ObsPanel, "Cosmetic Comp.", function() return CosmeticCompToggle end, toggleCosmeticComp)
+createObserverConfigRow(ObsPanel, "Hat Cosmetics (BF)", function() return HatCosmeticToggle end, toggleHatCosmetics)
+createObserverConfigRow(ObsPanel, "Shoes Cosmetics (BF)", function() return ShoesCosmeticToggle end, toggleShoesCosmetics)
+createObserverConfigRow(ObsPanel, "Hide Amy Jacket (GF)", function() return GFHideJacketaswell end, toggleHideAmyJacket)
+
+ObserverButton.MouseButton1Click:Connect(function()
+	setObserverConfigVisible(not ObsConfigOpen)
+end)
+
+setObserverConfigVisible(false)

@@ -15,7 +15,7 @@
 
 	local frame = Instance.new("Frame")
 	frame.Name = "Frame"
-	frame.Size = UDim2.new(0, 500, 0, 450)
+	frame.Size = UDim2.new(0, 700, 0, 500)
 	frame.AnchorPoint = Vector2.new(0.5, 0.5)
 	frame.Position = UDim2.new(0.5, 0, 0.5, 0)
 	frame.BackgroundColor3 = Color3.fromRGB(38, 40, 48)
@@ -95,10 +95,10 @@
 	ChangeLog.Parent = frame
 
 	local ChangeLogContent = Instance.new("TextLabel")
-	ChangeLogContent.Size = UDim2.new(1, -60, 0, 72)
+	ChangeLogContent.Size = UDim2.new(1, -60, 0, 110)
 	ChangeLogContent.Position = UDim2.new(0, 30, 0, 284)
 	ChangeLogContent.BackgroundTransparency = 1
-	ChangeLogContent.Text = "• Updated Icons\n• Tried to fix fps drops with sonic\n• Added the Version Selector GUI\n• Fixed BF model not loading till lms started in 0.1a\n• Added a Hide Jacket Toggle to GF + kylie set early compatibilty\n• 0.1A uses a different rendition of discharge for lms"
+	ChangeLogContent.Text = "• Updated Icons\n• Tried to fix fps drops with sonic\n• Added the Version Selector GUI\n• Fixed BF model not loading till lms started in 0.1a\n• Added a Hide Jacket Toggle to GF + kylie set early compatibilty\n• 0.1A uses a different rendition of discharge for lms\n• Added the observer script (STILL WIP)"
 	ChangeLogContent.TextColor3 = Color3.fromRGB(190, 196, 210)
 	ChangeLogContent.TextSize = 13
 	ChangeLogContent.TextWrapped = true
@@ -124,9 +124,26 @@
 	SobbeVersion.BorderSizePixel = 0
 	SobbeVersion.Parent = frame
 
+	local Observer = Instance.new("TextButton")
+	Observer.Name = "Observer"
+	Observer.Size = UDim2.new(0, 205, 0, 52)
+	Observer.Position = UDim2.new(0.5, -102.5, 0, 142)
+	Observer.BackgroundColor3 = Color3.fromRGB(45, 128, 155)
+	Observer.Text = "Transform Other Players"
+	Observer.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Observer.TextSize = 15
+	Observer.Font = Enum.Font.GothamBold
+	Observer.AutoButtonColor = true
+	Observer.BorderSizePixel = 0
+	Observer.Parent = frame
+
 	local sobbeCorner = Instance.new("UICorner")
 	sobbeCorner.CornerRadius = UDim.new(0, 8)
 	sobbeCorner.Parent = SobbeVersion
+
+	local observerCorner = Instance.new("UICorner")
+	observerCorner.CornerRadius = UDim.new(0, 8)
+	observerCorner.Parent = Observer
 
 	local infoLabel = Instance.new("TextLabel")
 	infoLabel.Size = UDim2.new(1, -60, 0, 54)
@@ -227,7 +244,7 @@
 		task.spawn(function()
 			game.StarterGui:SetCore("SendNotification", {
 				Title = "FNF Skins V2",
-				Text = "Made by MisterSaiyan | Head sync comes disabled by default, enable it if you use head cosmetics",
+				Text = "Made by MisterSaiyan | Head sync comes disabled by default",
 				Icon = "",
 				Duration = 10
 			})
@@ -246,6 +263,10 @@
 
 	SobbeVersion.MouseButton1Click:Connect(function()
 		executeSobbeVersion()
+	end)
+
+	Observer.MouseButton1Click:Connect(function()
+		executeVersion("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/observerfnf.lua")
 	end)
 
 	closeButton.MouseButton1Click:Connect(function()

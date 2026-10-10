@@ -1420,6 +1420,8 @@ _G.AmyHammerUpd = workspace.Players.ChildAdded:Connect(function(child)
         if camera.CFrame ~= initialCFrame then applyHammer() end
     end
 
+		-- hi
+
     currentCameraConnection = workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchCamera)
     watchCamera()
 end)

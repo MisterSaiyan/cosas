@@ -1584,4 +1584,6 @@ ObserverButton.MouseButton1Click:Connect(function()
 	setObserverConfigVisible(not ObsConfigOpen)
 end)
 
+-- hi
+
 setObserverConfigVisible(false)

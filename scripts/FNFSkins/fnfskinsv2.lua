@@ -95,10 +95,10 @@
 	ChangeLog.Parent = frame
 
 	local ChangeLogContent = Instance.new("TextLabel")
-	ChangeLogContent.Size = UDim2.new(1, -60, 0, 110)
+	ChangeLogContent.Size = UDim2.new(1, -60, 0, 210)
 	ChangeLogContent.Position = UDim2.new(0, 30, 0, 284)
 	ChangeLogContent.BackgroundTransparency = 1
-	ChangeLogContent.Text = "• Updated Icons\n• Tried to fix fps drops with sonic\n• Added the Version Selector GUI\n• Fixed BF model not loading till lms started in 0.1a\n• Added a Hide Jacket Toggle to GF + kylie set early compatibilty\n• 0.1A uses a different rendition of discharge for lms\n• Added the observer script (STILL WIP)"
+	ChangeLogContent.Text = "• Updated Icons\n• Tried to fix fps drops with sonic\n• Added the Version Selector GUI\n• Fixed BF model not loading till lms started in 0.1a\n• Added a Hide Jacket Toggle to GF + kylie set early compatibilty\n• 0.1A uses a different rendition of discharge for lms\n• Added the observer script (STILL WIP)\n• Bolt/Romeo Cosmetics are now fully working for BF on 0.1 Director Cut\n• Added Shop Icons Replacer for 0.2"
 	ChangeLogContent.TextColor3 = Color3.fromRGB(190, 196, 210)
 	ChangeLogContent.TextSize = 13
 	ChangeLogContent.TextWrapped = true
@@ -244,7 +244,7 @@
 		task.spawn(function()
 			game.StarterGui:SetCore("SendNotification", {
 				Title = "FNF Skins V2",
-				Text = "Made by MisterSaiyan | Head sync comes disabled by default",
+				Text = "Made by MisterSaiyan | Head sync comes disabled by default, enable it if you use head cosmetics",
 				Icon = "",
 				Duration = 10
 			})

@@ -73,14 +73,8 @@ local function hasSuperMoistQuills(root)
 	if root then
 		table.insert(roots, root)
 	end
-	if player.Character then
+	if player.Character and player.Character ~= root then
 		table.insert(roots, player.Character)
-	end
-	if currentMdl then
-		table.insert(roots, currentMdl)
-	end
-	if player.Character and player.Character.Parent then
-		table.insert(roots, player.Character.Parent)
 	end
 
 	for _, candidate in ipairs(roots) do
@@ -782,8 +776,8 @@ local function applyLoadedModelRules(sourceModel, model)
 	end
 end
 
-local function loadModelSelection(sourceModel)
-	if hasSuperMoistQuills(sourceModel) then
+local function loadModelSelection(sourceModel, activeAssetId)
+	if activeAssetId == SUPER_ID then
 		local superModel = loadAsset(SUPER_ID)
 		if superModel then
 			return superModel
@@ -842,7 +836,7 @@ local function setupCharacter(char, forceReload)
 		end
 	end
 
-	local mdl = loadModelSelection(sourceRoot) or loadAsset(activeAssetId)
+	local mdl = loadModelSelection(sourceRoot, activeAssetId) or loadAsset(activeAssetId)
 	if not mdl then
 		setupInProgress = false
 		return
@@ -957,13 +951,7 @@ local function startScript()
 
 		isScriptActive = true
 		if character then setupCharacter(character) end
-
-		task.spawn(function()
-			while generation == startGeneration and isScriptActive and isSonic() do
-				ApplyIcon()
-				task.wait(0.25)
-			end
-		end)
+		ApplyIcon()
 	end)
 end
 
@@ -986,23 +974,61 @@ local function stopScript()
 	end
 end
 
+local isCurrentlySonic = false
+local modeModels = setmetatable({}, { __mode = "k" })
+local playersFolders = setmetatable({}, { __mode = "k" })
+local watchStateRoot
+
+local function updateCharacterMode()
+	local check = isSonic() == true
+	if check == isCurrentlySonic then return end
+	isCurrentlySonic = check
+	if check then startScript() else stopScript() end
+end
+
+local function watchModeModel(model)
+	if not model or modeModels[model] then return end
+	modeModels[model] = true
+	model:GetAttributeChangedSignal("Character"):Connect(updateCharacterMode)
+	if watchStateRoot then watchStateRoot(model) end
+end
+
+local function watchPlayersFolder(folder)
+	if not folder or playersFolders[folder] then return end
+	playersFolders[folder] = true
+	folder.ChildAdded:Connect(function(child)
+		if child.Name == player.Name then
+			watchModeModel(child)
+			updateCharacterMode()
+		end
+	end)
+	folder.ChildRemoved:Connect(function(child)
+		if child.Name == player.Name then updateCharacterMode() end
+	end)
+	watchModeModel(folder:FindFirstChild(player.Name))
+end
+
+local currentPlayersFolder = workspace:FindFirstChild("Players")
+if currentPlayersFolder then watchPlayersFolder(currentPlayersFolder) end
+workspace.ChildAdded:Connect(function(child)
+	if child.Name == "Players" then watchPlayersFolder(child) end
+end)
+
 player.CharacterAdded:Connect(function(newChar)
 	character = newChar
+	if watchStateRoot then watchStateRoot(newChar) end
+	updateCharacterMode()
 	if isScriptActive then
-		task.wait(1)
-		setupCharacter(newChar)
+		task.delay(1, function()
+			if isScriptActive and character == newChar and isSonic() then
+				setupCharacter(newChar)
+			end
+		end)
 	end
 end)
 character = player.Character or character
-
-local isCurrentlySonic = false
-RunService.Heartbeat:Connect(function()
-	local check = isSonic()
-	if check ~= isCurrentlySonic then
-		isCurrentlySonic = check
-		if isCurrentlySonic then startScript() else stopScript() end
-	end
-end)
+watchModeModel(getPlayerModel())
+if character and watchStateRoot then watchStateRoot(character) end
 
 local function getBooleanState(root, names)
 	if not root then
@@ -1133,6 +1159,91 @@ ApplyIcon = function()
 		5
 	)
 end
+
+local iconRefreshPending = false
+local stateNames = {
+	Downed = true,
+	IsDowned = true,
+	BeingDowned = true,
+	LastLife = true,
+	IsLastLife = true,
+	SecondLife = true,
+	Chased = true,
+	IsChased = true,
+	InChase = true,
+	BeingChased = true,
+}
+local watchedStateRoots = setmetatable({}, { __mode = "k" })
+local watchedStateValues = setmetatable({}, { __mode = "k" })
+local watchedGuiRoots = setmetatable({}, { __mode = "k" })
+
+local function queueIconRefresh()
+	if iconRefreshPending then return end
+	iconRefreshPending = true
+	task.defer(function()
+		iconRefreshPending = false
+		if isScriptActive and isCurrentlySonic then ApplyIcon() end
+	end)
+end
+
+local function watchStateValue(value)
+	if watchedStateValues[value] or not value:IsA("ValueBase") then return end
+	watchedStateValues[value] = true
+	value.Changed:Connect(queueIconRefresh)
+end
+
+watchStateRoot = function(root)
+	if not root or watchedStateRoots[root] then return end
+	watchedStateRoots[root] = true
+	root.AttributeChanged:Connect(queueIconRefresh)
+	local descendants
+	if root == player then
+		descendants = {}
+		for _, child in ipairs(root:GetChildren()) do
+			if not child:IsA("PlayerGui") then
+				table.insert(descendants, child)
+				for _, descendant in ipairs(child:GetDescendants()) do
+					table.insert(descendants, descendant)
+				end
+			end
+		end
+	else
+		descendants = root:GetDescendants()
+	end
+	for _, descendant in ipairs(descendants) do
+		if stateNames[descendant.Name] then watchStateValue(descendant) end
+	end
+	root.DescendantAdded:Connect(function(descendant)
+		if stateNames[descendant.Name] then
+			watchStateValue(descendant)
+			queueIconRefresh()
+		end
+	end)
+	root.DescendantRemoving:Connect(function(descendant)
+		if stateNames[descendant.Name] then queueIconRefresh() end
+	end)
+end
+
+local function watchGuiRoot(root)
+	if not root or watchedGuiRoots[root] then return end
+	watchedGuiRoots[root] = true
+	root.DescendantAdded:Connect(function(descendant)
+		if descendant.Name == "Character" or descendant:FindFirstAncestor("Character") then
+			queueIconRefresh()
+		end
+	end)
+end
+
+watchStateRoot(player)
+watchStateRoot(getPlayerModel())
+watchStateRoot(character)
+watchGuiRoot(player:FindFirstChildOfClass("PlayerGui"))
+player.ChildAdded:Connect(function(child)
+	if child:IsA("PlayerGui") then
+		watchGuiRoot(child)
+		queueIconRefresh()
+	end
+end)
 
 if isSonic() then
 	isCurrentlySonic = true
@@ -1430,4 +1541,3 @@ setBFConfigVisible(false)
 -- Loadstring para el tema lms
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/bflms.lua"))()
-

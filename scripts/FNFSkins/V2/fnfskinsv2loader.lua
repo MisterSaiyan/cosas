@@ -8,7 +8,7 @@ local CoreGui = game:GetService("CoreGui")
 
     		game.StarterGui:SetCore("SendNotification", {
         Title = "Version Check", 
-        Text = "This is intended for 0.22 (Base Game)", 
+        Text = "This is intended for 0.2 (Base Game)", 
         Icon = "", Duration = 10
     })
 

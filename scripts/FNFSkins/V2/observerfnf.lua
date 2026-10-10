@@ -1152,6 +1152,10 @@ local function setupPlayerModel(player)
 					cosmeticNames[cosmeticName] = true
 				end
 			end
+			local alwaysVisibleObjectNames = {}
+			for _, name in ipairs(config.alwaysVisibleObjectNames or {}) do
+				alwaysVisibleObjectNames[name] = true
+			end
 			local cosmeticRefreshQueued = false
 			local function queueCosmeticRefresh()
 				if cosmeticRefreshQueued then return end
@@ -1165,31 +1169,87 @@ local function setupPlayerModel(player)
 				end)
 			end
 
-			table.insert(connections, sourceRoot.DescendantAdded:Connect(function(object)
-				if object:IsA("BasePart") then
-					hideSourcePartIfNeeded(object, sourceRoot, mdl, config)
-				end
-				showAmyWeapon(sourceRoot, config, object)
+			local pendingAddedObjects = {}
+			local addedRefreshQueued = false
+			local function queueAddedObject(object)
+				pendingAddedObjects[object] = true
+				if addedRefreshQueued then return end
+				addedRefreshQueued = true
+				task.defer(function()
+					addedRefreshQueued = false
+					local modelInfo = activeModels[player]
+					if not sourceRoot.Parent or not mdl.Parent
+						or not modelInfo or modelInfo.source ~= sourceRoot
+						or modelInfo.inserted ~= mdl then
+						pendingAddedObjects = {}
+						return
+					end
+					local addedObjects = pendingAddedObjects
+					pendingAddedObjects = {}
+					local weaponRoots = {}
+					local cosmeticRoots = {}
+					local hasBoltSleeves = false
 
-				local root = object
-				while root and root ~= sourceRoot
-					and not cosmeticNames[root.Name]
-					and not isShoesCosmeticContainer(root) do
-					root = root.Parent
-				end
-				if not root or root == sourceRoot or root:IsDescendantOf(mdl) then return end
+					for addedObject in pairs(addedObjects) do
+						if not addedObject.Parent or not addedObject:IsDescendantOf(sourceRoot) then
+							continue
+						end
+						if addedObject:IsA("BasePart") then
+							hideSourcePartIfNeeded(addedObject, sourceRoot, mdl, config)
+						end
 
-				if config.boltSleeveCosmetics and config.boltSleeveCosmetics[root.Name] then
-					updateInsertedBoltSleeves(sourceRoot, mdl, config)
-				else
-					setGroupVisibility(root, belongsToCosmeticRoot(root, sourceRoot, config))
-				end
-				if isShirtCosmeticName(root.Name, config) then
-					updateShirt(sourceRoot, mdl, config)
-				end
-				updateInsertedHat(sourceRoot, mdl, config)
-				updateInsertedShoes(sourceRoot, mdl, config)
-			end))
+						local weaponRoot = addedObject
+						while weaponRoot and weaponRoot ~= sourceRoot do
+							if alwaysVisibleObjectNames[weaponRoot.Name] then
+								weaponRoots[weaponRoot] = true
+								break
+							end
+							weaponRoot = weaponRoot.Parent
+						end
+
+						local cosmeticRoot = addedObject
+						while cosmeticRoot and cosmeticRoot ~= sourceRoot
+							and not cosmeticNames[cosmeticRoot.Name]
+							and not isShoesCosmeticContainer(cosmeticRoot) do
+							cosmeticRoot = cosmeticRoot.Parent
+						end
+						if cosmeticRoot and cosmeticRoot ~= sourceRoot
+							and not cosmeticRoot:IsDescendantOf(mdl) then
+							cosmeticRoots[cosmeticRoot] = true
+						end
+					end
+
+					for weaponRoot in pairs(weaponRoots) do
+						showAmyWeapon(sourceRoot, config, weaponRoot)
+					end
+
+					local hasCosmeticChanges = false
+					for cosmeticRoot in pairs(cosmeticRoots) do
+						hasCosmeticChanges = true
+						if config.boltSleeveCosmetics
+							and config.boltSleeveCosmetics[cosmeticRoot.Name] then
+							hasBoltSleeves = true
+						else
+							setGroupVisibility(
+								cosmeticRoot,
+								belongsToCosmeticRoot(cosmeticRoot, sourceRoot, config)
+							)
+						end
+						if isShirtCosmeticName(cosmeticRoot.Name, config) then
+							updateShirt(sourceRoot, mdl, config)
+						end
+					end
+					if hasBoltSleeves then
+						updateInsertedBoltSleeves(sourceRoot, mdl, config)
+					end
+					if hasCosmeticChanges then
+						updateInsertedHat(sourceRoot, mdl, config)
+						updateInsertedShoes(sourceRoot, mdl, config)
+					end
+				end)
+			end
+
+			table.insert(connections, sourceRoot.DescendantAdded:Connect(queueAddedObject))
 			table.insert(connections, sourceRoot.DescendantRemoving:Connect(function(object)
 				local root = object
 				while root and root ~= sourceRoot
@@ -1344,7 +1404,7 @@ local function ensureObserverButton()
         topBar.Name = "ContenedorHorizontal"
         topBar.Size = UDim2.new(0, 0, 0, 42)
         topBar.AutomaticSize = Enum.AutomaticSize.X
-        topBar.Position = UDim2.new(0, 500, 0, 12)
+        topBar.Position = UDim2.new(0, 600, 0, 12)
         topBar.BackgroundTransparency = 1
         topBar.Parent = screenGui
 

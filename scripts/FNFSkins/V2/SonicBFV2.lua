@@ -1536,6 +1536,8 @@ btnBFV2.MouseButton1Click:Connect(function()
     setBFConfigVisible(not bfConfigOpen)
 end)
 
+-- test
+
 setBFConfigVisible(false)
 
 -- Loadstring para el tema lms

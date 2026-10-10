@@ -197,6 +197,23 @@ local HatsCosmetics =
 	LFoot = true,
 	RFoot = true,
 	Cube = true,
+	-- Soap Shoes
+	SOAPSHOES = true,
+	sock = true,
+	}
+
+	local BoltCosmeticsSleeves = {
+		sleevlow = true, -- Sleeve de los pantalones
+		sleev = true, -- Sleeve de los guantes
+		Bodyy = true, -- Chaqueta para que no se oculte
+	}
+
+	local boltSleeveInsertedGroups = {
+		Shirt = true,
+		GloveSleeves = true,
+		Thing = true,
+		Pants = true,
+		camiseta = false,
 	}
 
 local shoeComponentPartNames = {
@@ -420,6 +437,62 @@ local function updateInsertedShirt(model, insertedModel)
 
 	setShirtVisibility(shirtModel, not hasShirtCosmetic)
 	setShirtVisibility(baseShirtModel, hasShirtCosmetic)
+end
+
+local function updateInsertedBoltSleeves(sourceModel, insertedModel)
+	if not sourceModel or not insertedModel then
+		return
+	end
+
+	local hasBoltSleeves = BoltCosmeticsSleeves[sourceModel.Name] == true
+	if not hasBoltSleeves then
+		for _, object in ipairs(sourceModel:GetDescendants()) do
+			if BoltCosmeticsSleeves[object.Name] then
+				hasBoltSleeves = true
+				break
+			end
+		end
+	end
+
+	if not hasBoltSleeves then
+		return
+	end
+
+	local function hideGroup(group)
+		local objects = { group }
+		for _, object in ipairs(group:GetDescendants()) do
+			table.insert(objects, object)
+		end
+
+		for _, object in ipairs(objects) do
+			local current = object
+			local isProtectedCamiseta = false
+			while current do
+				if current.Name == "camiseta" then
+					isProtectedCamiseta = true
+					break
+				end
+				if current == group then
+					break
+				end
+				current = current.Parent
+			end
+
+			if not isProtectedCamiseta and object:IsA("BasePart") then
+				object.Transparency = 1
+				object.CanCollide = false
+			elseif not isProtectedCamiseta and (object:IsA("Decal") or object:IsA("Texture")) then
+				object.Transparency = 1
+			end
+		end
+	end
+
+	for _, object in ipairs(insertedModel:GetDescendants()) do
+		if boltSleeveInsertedGroups[object.Name]
+			and (object:IsA("Model") or object:IsA("Folder") or object:IsA("BasePart")) then
+			hideGroup(object)
+		end
+	end
 end
 
 local function updateInsertedHat(model, insertedModel)
@@ -741,6 +814,7 @@ local function applyLoadedModelRules(sourceModel, model)
 		setProtectedCosmeticVisibility(sourceModel)
 		updateInsertedHat(sourceModel, model)
 		updateInsertedShirt(sourceModel, model)
+		updateInsertedBoltSleeves(sourceModel, model)
 	end
 
 	setProtectedCosmeticVisibility(model, sourceModel)
@@ -751,6 +825,14 @@ local function applyLoadedModelRules(sourceModel, model)
 		if object:IsA("BasePart") and cosmeticrootnamesHIDE[object.Name] then
 			object.Transparency = 1
 			object.CanCollide = false
+		end
+	end
+end
+
+local function forceFeetVisible(model)
+	for _, object in ipairs(model:GetDescendants()) do
+		if object:IsA("BasePart") and (object.Name == "LFoot" or object.Name == "RFoot") then
+			object.Transparency = 0
 		end
 	end
 end
@@ -826,6 +908,7 @@ local function setupCharacter(char, forceReload)
 		return
 	end
 	applyLoadedModelRules(sourceRoot, mdl)
+	forceFeetVisible(oldVisual or mdl)
 	mdl:SetAttribute("AssetId", activeAssetId)
 
 	if oldVisual then

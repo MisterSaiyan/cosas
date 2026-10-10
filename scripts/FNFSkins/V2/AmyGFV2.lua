@@ -631,12 +631,17 @@ local function GFSetupAmyViewport()
 
 		replaceAViewportModel()
 
+		local viewportRefreshPending = false
 		viewportModel.DescendantAdded:Connect(function()
-			task.wait(0.1)
-			if not vpOverrideModel or not vpOverrideModel.Parent then
-				vpOverrideModel = nil
-				replaceAViewportModel()
-			end
+			if viewportRefreshPending then return end
+			viewportRefreshPending = true
+			task.delay(0.1, function()
+				viewportRefreshPending = false
+				if viewportModel.Parent and (not vpOverrideModel or not vpOverrideModel.Parent) then
+					vpOverrideModel = nil
+					replaceAViewportModel()
+				end
+			end)
 		end)
 	end)
 end
@@ -1379,14 +1384,44 @@ if _G.AmyHammerUpd then _G.AmyHammerUpd:Disconnect() end
 _G.AmyHammerUpd = workspace.Players.ChildAdded:Connect(function(child)
     print("ChildAdded:", child.ClassName, child:GetFullName())
     if game.Players.LocalPlayer.Name ~= child.Name then return end
-    
-    local lastCamCFrame = workspace.CurrentCamera.CFrame -- wait for camera first setup
-    repeat task.wait() until workspace.CurrentCamera.CFrame ~= lastCamCFrame
 
-    local Hammer = child:FindFirstChild("Hammer", true)
-    if not Hammer then return end
-    print(Hammer:GetFullName())
-    updateHammer(Hammer)
+    local cameraConnection
+    local currentCameraConnection
+    local initialCFrame
+    local finished = false
+
+    local function applyHammer()
+        if finished then return end
+        finished = true
+        if cameraConnection then cameraConnection:Disconnect() end
+        if currentCameraConnection then currentCameraConnection:Disconnect() end
+
+        local Hammer = child:FindFirstChild("Hammer", true)
+        if not Hammer then return end
+        print(Hammer:GetFullName())
+        updateHammer(Hammer)
+    end
+
+    local function watchCamera()
+        if cameraConnection then
+            cameraConnection:Disconnect()
+            cameraConnection = nil
+        end
+        local camera = workspace.CurrentCamera
+        if not camera then return end
+        if not initialCFrame then initialCFrame = camera.CFrame end
+        if camera.CFrame ~= initialCFrame then
+            applyHammer()
+            return
+        end
+        cameraConnection = camera:GetPropertyChangedSignal("CFrame"):Connect(function()
+            if camera.CFrame ~= initialCFrame then applyHammer() end
+        end)
+        if camera.CFrame ~= initialCFrame then applyHammer() end
+    end
+
+    currentCameraConnection = workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchCamera)
+    watchCamera()
 end)
 
 print("hammer recolor comes!")

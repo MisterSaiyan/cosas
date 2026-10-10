@@ -21,65 +21,111 @@ local function myAsset(fileName)
     return getcustomasset(path)
 end
 
--- iconos
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
 local BFIcon = myAsset("bf.png")
 local GFIcon = myAsset("gf.png")
+local runId = (_G.FNFShopIconsGeneration or 0) + 1
+_G.FNFShopIconsGeneration = runId
+_G.FNFShopIconsKeepBF = false
+_G.FNFShopIconsKeepGF = false
+local scheduled = false
+local refresh
+local watchedProperties = setmetatable({}, { __mode = "k" })
 
--- BF
+local function isCurrent()
+    return _G.FNFShopIconsGeneration == runId
+end
 
-task.spawn(function()
-    _G.FNFShopIconsKeepBF = false
-    task.wait(0.3)
+local function scheduleRefresh()
+    if scheduled or not isCurrent() then return end
+    scheduled = true
+    task.delay(0.05, function()
+        scheduled = false
+        if isCurrent() then
+            refresh()
+        end
+    end)
+end
+
+local function watchProperty(instance, property)
+    local properties = watchedProperties[instance]
+    if not properties then
+        properties = {}
+        watchedProperties[instance] = properties
+    end
+    if properties[property] then return end
+    properties[property] = true
+    instance:GetPropertyChangedSignal(property):Connect(scheduleRefresh)
+end
+
+local function setImage(instance, image)
+    if not instance or not (instance:IsA("ImageLabel") or instance:IsA("ImageButton")) then return end
+    watchProperty(instance, "Image")
+    if instance.Image ~= image then instance.Image = image end
+end
+
+local function applyCharacterIcon(root, characterName, image)
+    local card = root
+        and root:FindFirstChild("CharSelection")
+        and root.CharSelection:FindFirstChild(characterName)
+    local icon = card and card:FindFirstChild("Icon")
+    local border = icon and icon:FindFirstChild("Border")
+    local primaryIcon = border and border:FindFirstChild("Icon")
+    local secondaryIcon = border and border:FindFirstChild("Icon2")
+
+    setImage(primaryIcon, image)
+    if secondaryIcon and secondaryIcon:IsA("GuiObject") then
+        watchProperty(secondaryIcon, "Visible")
+        if secondaryIcon.Visible then secondaryIcon.Visible = false end
+    end
+end
+
+local function applySelectedIcon(root, characterName, image)
+    local display = root and root:FindFirstChild("CharDisplay")
+    local nameLabel = display and display:FindFirstChild("CharName")
+    if not display or not display:IsA("GuiObject") or not nameLabel or not nameLabel:IsA("TextLabel") then
+        return
+    end
+
+    watchProperty(display, "Visible")
+    watchProperty(nameLabel, "Text")
+    if not display.Visible or nameLabel.Text ~= characterName then return end
+
+    setImage(display:FindFirstChild("CharImage"), image)
+    local info = root:FindFirstChild("Info")
+    local charInfo = info and info:FindFirstChild("CharInfo")
+    local charIcon = charInfo and charInfo:FindFirstChild("CharIcon")
+    local border = charIcon and charIcon:FindFirstChild("Border")
+    setImage(border and border:FindFirstChild("ImageLabel"), image)
+end
+
+refresh = function()
+    if not isCurrent() then return end
+    local gameUI = playerGui:FindFirstChild("GameUI")
+    local shop = gameUI and gameUI:FindFirstChild("shop")
+    local display = shop and shop:FindFirstChild("display")
+    local root = display and display:FindFirstChild("fram2")
+    if not root then return end
+
+    if _G.FNFShopIconsKeepBF then
+        applyCharacterIcon(root, "Sonic", BFIcon)
+        applySelectedIcon(root, "Sonic", BFIcon)
+    end
+    if _G.FNFShopIconsKeepGF then
+        applyCharacterIcon(root, "Amy", GFIcon)
+        applySelectedIcon(root, "Amy", GFIcon)
+    end
+end
+
+playerGui.DescendantAdded:Connect(scheduleRefresh)
+playerGui.DescendantRemoving:Connect(scheduleRefresh)
+scheduleRefresh()
+task.delay(0.3, function()
+    if not isCurrent() then return end
     _G.FNFShopIconsKeepBF = true
-    while _G.FNFShopIconsKeepBF do
-        pcall(function() -- om 0.2 anni
-            game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Sonic"].Icon.Border.Icon2.Visible = false
-            game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Sonic"].Icon.Border.Icon.Image = BFIcon
-        end)
-        pcall(function() -- for 0.1a by sobii
-        game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Sonic"].Border.ImageLabel.Image = BFIcon
-        end)
-        pcall(function()
-            local CharDisplay = game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharDisplay
-            if not CharDisplay.Visible then return end
-            if CharDisplay.CharName.Text == "Sonic" then
-                CharDisplay.CharImage.Image = BFIcon
-            end
-            local CharInfoIcon = game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.Info.CharInfo.CharIcon.Border.ImageLabel
-            if CharDisplay.CharName.Text == "Sonic" then
-                CharInfoIcon.Image = BFIcon
-            end
-        end)
-        task.wait()
-    end
-end)
-
--- GF
-
-task.spawn(function()
-    _G.FNFShopIconsKeepGF = false
-    task.wait(0.3)
     _G.FNFShopIconsKeepGF = true
-    while _G.FNFShopIconsKeepGF do
-        pcall(function() -- om 0.2 anni
-            game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Amy"].Icon.Border.Icon2.Visible = false
-            game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Amy"].Icon.Border.Icon.Image = GFIcon
-        end)
-        pcall(function() -- for 0.1a by sobii
-             game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Amy"].Border.ImageLabel.Image = GFIcon
-        end)
-        pcall(function()
-            local CharDisplay = game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharDisplay
-            if not CharDisplay.Visible then return end
-            if CharDisplay.CharName.Text == "Amy" then
-                CharDisplay.CharImage.Image = GFIcon
-            end
-            local CharInfoIcon = game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.Info.CharInfo.CharIcon.Border.ImageLabel
-            if CharDisplay.CharName.Text == "Amy" then
-                CharInfoIcon.Image = GFIcon
-            end
-        end)
-        task.wait()
-    end
+    scheduleRefresh()
 end)

@@ -37,9 +37,9 @@ task.spawn(function()
             game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Sonic"].Icon.Border.Icon2.Visible = false
             game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Sonic"].Icon.Border.Icon.Image = BFIcon
         end)
-        -- pcall(function() -- for 0.1a by sobii
-        --     game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Sonic"].Border.ImageLabel.Image = BFIcon
-        -- end)
+        pcall(function() -- for 0.1a by sobii
+        game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Sonic"].Border.ImageLabel.Image = BFIcon
+        end)
         pcall(function()
             local CharDisplay = game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharDisplay
             if not CharDisplay.Visible then return end
@@ -66,9 +66,9 @@ task.spawn(function()
             game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Amy"].Icon.Border.Icon2.Visible = false
             game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Amy"].Icon.Border.Icon.Image = GFIcon
         end)
-        -- pcall(function() -- for 0.1a by sobii
-        --     game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Amy"].Border.ImageLabel.Image = GFIcon
-        -- end)
+        pcall(function() -- for 0.1a by sobii
+             game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharSelection["Amy"].Border.ImageLabel.Image = GFIcon
+        end)
         pcall(function()
             local CharDisplay = game:GetService("Players").LocalPlayer.PlayerGui.GameUI.shop.display.fram2.CharDisplay
             if not CharDisplay.Visible then return end

@@ -1375,11 +1375,37 @@ local function createObserverTabButton(texto, orden)
 end
 
 local function getSharedConfigTopBar()
-    local bfGui = CoreGui:FindFirstChild("ConfiguracionesBF")
-    if bfGui then
-        local bar = bfGui:FindFirstChild("ContenedorHorizontal")
-        if bar then
-            return bar
+    local playerGui = localPlayer:FindFirstChildOfClass("PlayerGui")
+    for _, root in ipairs({ CoreGui, playerGui }) do
+        if root then
+            local bfGui = root:FindFirstChild("ConfiguracionesBF")
+            local bar = bfGui and bfGui:FindFirstChild("ContenedorHorizontal")
+            if bar then
+                return bar
+            end
+        end
+    end
+
+    for _, root in ipairs({ CoreGui, playerGui }) do
+        if root then
+            local gfButton = root:FindFirstChild("GFv2", true)
+            if gfButton and gfButton.Parent and gfButton.Parent:IsA("GuiObject") then
+                return gfButton.Parent
+            end
+        end
+    end
+
+    return nil
+end
+
+local function findGFConfigButton()
+    local playerGui = localPlayer:FindFirstChildOfClass("PlayerGui")
+    for _, root in ipairs({ CoreGui, playerGui }) do
+        if root then
+            local button = root:FindFirstChild("GFv2", true)
+            if button and button:IsA("TextButton") then
+                return button
+            end
         end
     end
     return nil
@@ -1431,6 +1457,26 @@ local function ensureObserverButton()
 end
 
 local ObserverButton = ensureObserverButton()
+
+local function normalizeConfigButtonOrder()
+    if not ObserverSharedBar then return end
+
+    local gfButton = ObserverSharedBar:FindFirstChild("GFv2") or findGFConfigButton()
+    if gfButton and gfButton ~= ObserverButton then
+        gfButton.LayoutOrder = 2
+        gfButton.Parent = ObserverSharedBar
+    end
+
+    for _, child in ipairs(ObserverSharedBar:GetChildren()) do
+        if child:IsA("TextButton") and child.Text == "BFv2" then
+            child.LayoutOrder = 1
+        elseif child == ObserverButton then
+            child.LayoutOrder = 3
+        end
+    end
+end
+
+normalizeConfigButtonOrder()
 
 local function ensureObserverPanel()
     local panel = rawget(_G, "ObserverConfigPanel")
@@ -1583,7 +1629,5 @@ createObserverConfigRow(ObsPanel, "Hide Amy Jacket (GF)", function() return GFHi
 ObserverButton.MouseButton1Click:Connect(function()
 	setObserverConfigVisible(not ObsConfigOpen)
 end)
-
--- hi
 
 setObserverConfigVisible(false)

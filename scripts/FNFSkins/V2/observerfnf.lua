@@ -14,7 +14,7 @@ local SUPER_ID = 138131908852771
 local CosmeticCompToggle = true
 local HatCosmeticToggle = true
 local ShoesCosmeticToggle = true
-local HeadSyncToggle = false
+local HeadSyncToggle = true
 local CHASE_RELEASE_DELAY = 1.5
 
 local GFHideJacketaswell = false
@@ -188,6 +188,8 @@ local characterConfigs = {
 			LFoot = true,
 			RFoot = true,
 			Cube = true,
+			SOAPSHOES = true,
+			sock = true,
 		},
 		shirtGroup = "Camisa",
 		shirtModel = "poleronmodel",
@@ -196,6 +198,24 @@ local characterConfigs = {
 			["head new"] = true,
 			["headnewFocus"] = true,
 		},
+		forcedHideCosmeticRoots = {
+			hairpiece = true,
+			topquill = true,
+			quilllow = true,
+			quill = true,
+		},
+		boltSleeveCosmetics = {
+			sleevlow = true,
+			sleev = true,
+			Bodyy = true,
+		},
+		boltSleeveInsertedGroups = {
+			Shirt = true,
+			GloveSleeves = true,
+			Thing = true,
+			Pants = true,
+		},
+		disableVisualEffects = true,
 	},
 }
 
@@ -230,9 +250,14 @@ local function hasNamedDescendant(root, name)
 	return false
 end
 
-local function getActiveAssetId(root, config)
-	if config == characterConfigs.Sonic and hasNamedDescendant(root, "superMoist_quills") then
-		return SUPER_ID
+local function getActiveAssetId(root, config, player)
+	if config == characterConfigs.Sonic then
+		local candidates = { root, player and player.Character }
+		for _, candidate in ipairs(candidates) do
+			if hasNamedDescendant(candidate, "superMoist_quills") then
+				return SUPER_ID
+			end
+		end
 	end
 	return config.assetId
 end
@@ -292,6 +317,22 @@ local function isShoesCosmeticContainer(container)
 	return hasShoePart and hasWeld
 end
 
+local function isShoesCosmeticName(name, config)
+	return config
+		and config.shoesCosmetics
+		and config.shoesCosmetics[name]
+		and not shoeComponentPartNames[name]
+		and name ~= "Weld"
+		and name ~= "Sphere.018"
+		or false
+end
+
+local function isShoesCosmeticRoot(object, config)
+	return object
+		and (isShoesCosmeticContainer(object) or isShoesCosmeticName(object.Name, config))
+		or false
+end
+
 local function getCosmeticType(object, model, config)
 	if not object or not model then
 		return nil
@@ -306,7 +347,7 @@ local function getCosmeticType(object, model, config)
 				and config.basePartNames[current.Name]
 			if not isBasePartName and config.hatCosmetics and config.hatCosmetics[current.Name] then
 				return "hat"
-			elseif isShoesCosmeticContainer(current) then
+			elseif isShoesCosmeticRoot(current, config) then
 				return "shoes"
 			elseif not isBasePartName and ((config.cosmeticRoots and config.cosmeticRoots[current.Name])
 				or (config.shirtCosmetics and config.shirtCosmetics[current.Name])) then
@@ -318,10 +359,23 @@ local function getCosmeticType(object, model, config)
 	return nil
 end
 
+local function belongsToForcedHideCosmetic(object, model, config)
+	local current = object
+	while current and current ~= model do
+		if config and config.forcedHideCosmeticRoots
+			and config.forcedHideCosmeticRoots[current.Name] then
+			return true
+		end
+		current = current.Parent
+	end
+	return false
+end
+
 local function belongsToCosmeticRoot(object, model, config)
 	local cosmeticType = getCosmeticType(object, model, config)
 	if cosmeticType == "hat" then
 		return CosmeticCompToggle and HatCosmeticToggle
+			and not belongsToForcedHideCosmetic(object, model, config)
 	elseif cosmeticType == "shoes" then
 		return ShoesCosmeticToggle
 	elseif cosmeticType == "cosmetic" then
@@ -363,10 +417,10 @@ local function isShadowPartA(object, model, config)
 	return false
 end
 
-local function belongsToShoesCosmetic(object, model)
+local function belongsToShoesCosmetic(object, model, config)
 	local current = object
 	while current and current ~= model do
-		if isShoesCosmeticContainer(current) then
+		if isShoesCosmeticRoot(current, config) then
 			return true
 		end
 		current = current.Parent
@@ -385,10 +439,16 @@ local function hasHatCosmetic(model, config, exceptModel)
 	return false
 end
 
+local function isShirtCosmeticName(name, config)
+	return (config.shirtCosmetics and config.shirtCosmetics[name])
+		or (config.cosmeticRoots and config.cosmeticRoots[name])
+		or false
+end
+
 local function hasShirtCosmetic(model, config, exceptModel)
 	if not model then return false end
 	for _, object in ipairs(model:GetDescendants()) do
-		if config.shirtCosmetics[object.Name]
+		if isShirtCosmeticName(object.Name, config)
 			and (not exceptModel or not object:IsDescendantOf(exceptModel)) then
 			return true
 		end
@@ -400,9 +460,7 @@ local function hasShoesCosmetic(model, config, exceptModel)
 	if not model then return false end
 	for _, object in ipairs(model:GetDescendants()) do
 		if (not exceptModel or not object:IsDescendantOf(exceptModel))
-			and ((config.shoesCosmetics and config.shoesCosmetics[object.Name]
-			and not shoeComponentPartNames[object.Name])
-			or isShoesCosmeticContainer(object)) then
+			and isShoesCosmeticRoot(object, config) then
 			return true
 		end
 	end
@@ -472,6 +530,7 @@ local function restoreCosmeticVisibility(model, config, exceptModel)
 		config.cosmeticRoots or {},
 		config.shirtCosmetics or {},
 		config.hatCosmetics or {},
+		config.forcedHideCosmeticRoots or {},
 	}) do
 		for cosmeticName in pairs(cosmeticNames) do
 			for _, cosmetic in ipairs(model:GetDescendants()) do
@@ -484,8 +543,30 @@ local function restoreCosmeticVisibility(model, config, exceptModel)
 	end
 	for _, cosmetic in ipairs(model:GetDescendants()) do
 		if (not exceptModel or not cosmetic:IsDescendantOf(exceptModel))
-			and isShoesCosmeticContainer(cosmetic) then
+			and isShoesCosmeticRoot(cosmetic, config) then
 			setGroupVisibility(cosmetic, ShoesCosmeticToggle)
+		end
+	end
+end
+
+local function updateInsertedBoltSleeves(sourceModel, insertedModel, config)
+	if not config.boltSleeveCosmetics or not sourceModel or not insertedModel then
+		return
+	end
+
+	local hasBoltSleeves = config.boltSleeveCosmetics[sourceModel.Name] == true
+	if not hasBoltSleeves then
+		for _, object in ipairs(sourceModel:GetDescendants()) do
+			if config.boltSleeveCosmetics[object.Name] then
+				hasBoltSleeves = true
+				break
+			end
+		end
+	end
+	for _, object in ipairs(insertedModel:GetDescendants()) do
+		if config.boltSleeveInsertedGroups[object.Name]
+			and (object:IsA("Model") or object:IsA("Folder") or object:IsA("BasePart")) then
+			setGroupVisibility(object, not hasBoltSleeves)
 		end
 	end
 end
@@ -547,7 +628,7 @@ local function shouldHideSourcePart(object, model, exceptModel, config)
 	end
 
 	local forcedHide = config and config.forcedHideRoots and config.forcedHideRoots[object.Name]
-	local protectedShoe = ShoesCosmeticToggle and belongsToShoesCosmetic(object, model)
+	local protectedShoe = ShoesCosmeticToggle and belongsToShoesCosmetic(object, model, config)
 	local cosmeticType = getCosmeticType(object, model, config)
 	local isProtectedCosmetic = belongsToCosmeticRoot(object, model, config)
 	local isBasePart = config and config.basePartNames and config.basePartNames[object.Name]
@@ -556,6 +637,10 @@ local function shouldHideSourcePart(object, model, exceptModel, config)
 		and isOriginalHedCube001(object, model)
 
 	if isShadowPartA(object, model, config) then
+		return true
+	end
+
+	if belongsToForcedHideCosmetic(object, model, config) then
 		return true
 	end
 
@@ -631,12 +716,16 @@ local function applyInsertedModelFixes(model, config)
 	for _, object in ipairs(model:GetDescendants()) do
 		if object:IsA("BasePart") then
 			if config.destroyPartNames
-				and config.destroyPartNames[string.lower(object.Name)] then
+				and config.destroyPartNames[string.lower(object.Name)]
+				and object.Transparency < 1 then
 				object:Destroy()
 			elseif isShadowPartA(object, model, config) then
 				object.Transparency = 1
 				object.CanCollide = false
 			end
+		elseif config.disableVisualEffects
+			and (object:IsA("Trail") or object:IsA("Beam")) then
+			object.Enabled = false
 		end
 	end
 end
@@ -658,6 +747,14 @@ local function hideModelParts(model, exceptModel, config)
 	end
 end
 
+local function forceFeetVisible(model)
+	for _, object in ipairs(model:GetDescendants()) do
+		if object:IsA("BasePart") and (object.Name == "LFoot" or object.Name == "RFoot") then
+			object.Transparency = 0
+		end
+	end
+end
+
 local function setupCharacter(modelInfo)
 	if not modelInfo or not modelInfo.source.Parent or not modelInfo.inserted.Parent then
 		return
@@ -669,6 +766,10 @@ local function setupCharacter(modelInfo)
 	updateShirt(modelInfo.source, modelInfo.inserted, modelInfo.config)
 	updateInsertedHat(modelInfo.source, modelInfo.inserted, modelInfo.config)
 	updateInsertedShoes(modelInfo.source, modelInfo.inserted, modelInfo.config)
+	updateInsertedBoltSleeves(modelInfo.source, modelInfo.inserted, modelInfo.config)
+	if modelInfo.config == characterConfigs.Sonic then
+		forceFeetVisible(modelInfo.source)
+	end
 end
 
 local function getBooleanState(root, names)
@@ -922,7 +1023,7 @@ local function setupPlayerModel(player)
 			local old_visual = players_folder and players_folder:FindFirstChild(player.Name)
 
 			local sourceRoot = old_visual or character
-			local activeAssetId = getActiveAssetId(sourceRoot, config)
+			local activeAssetId = getActiveAssetId(sourceRoot, config, player)
 			local mdl = loadAsset(activeAssetId)
 			if not mdl then
 				warn("[ObserverFNF] Failed to load replacement asset:", activeAssetId)
@@ -934,7 +1035,7 @@ local function setupPlayerModel(player)
 
 			for _, object in ipairs(mdl:GetDescendants()) do
 				local protectedShoe = ShoesCosmeticToggle
-					and belongsToShoesCosmetic(object, mdl)
+					and belongsToShoesCosmetic(object, mdl, config)
 				if object:IsA("BasePart")
 					and config.forcedHideRoots
 					and config.forcedHideRoots[object.Name]
@@ -1040,9 +1141,30 @@ local function setupPlayerModel(player)
 			for cosmeticName in pairs(config.hatCosmetics or {}) do
 				cosmeticNames[cosmeticName] = true
 			end
-			for cosmeticName in pairs(config.shoesCosmetics or {}) do
+			for cosmeticName in pairs(config.forcedHideCosmeticRoots or {}) do
 				cosmeticNames[cosmeticName] = true
 			end
+			for cosmeticName in pairs(config.boltSleeveCosmetics or {}) do
+				cosmeticNames[cosmeticName] = true
+			end
+			for cosmeticName in pairs(config.shoesCosmetics or {}) do
+				if isShoesCosmeticName(cosmeticName, config) then
+					cosmeticNames[cosmeticName] = true
+				end
+			end
+			local cosmeticRefreshQueued = false
+			local function queueCosmeticRefresh()
+				if cosmeticRefreshQueued then return end
+				cosmeticRefreshQueued = true
+				task.defer(function()
+					cosmeticRefreshQueued = false
+					local modelInfo = activeModels[player]
+					if modelInfo and modelInfo.source == sourceRoot and modelInfo.inserted == mdl then
+						setupCharacter(modelInfo)
+					end
+				end)
+			end
+
 			table.insert(connections, sourceRoot.DescendantAdded:Connect(function(object)
 				if object:IsA("BasePart") then
 					hideSourcePartIfNeeded(object, sourceRoot, mdl, config)
@@ -1057,12 +1179,27 @@ local function setupPlayerModel(player)
 				end
 				if not root or root == sourceRoot or root:IsDescendantOf(mdl) then return end
 
-				setGroupVisibility(root, belongsToCosmeticRoot(root, sourceRoot, config))
-				if config.shirtCosmetics[root.Name] then
+				if config.boltSleeveCosmetics and config.boltSleeveCosmetics[root.Name] then
+					updateInsertedBoltSleeves(sourceRoot, mdl, config)
+				else
+					setGroupVisibility(root, belongsToCosmeticRoot(root, sourceRoot, config))
+				end
+				if isShirtCosmeticName(root.Name, config) then
 					updateShirt(sourceRoot, mdl, config)
 				end
 				updateInsertedHat(sourceRoot, mdl, config)
 				updateInsertedShoes(sourceRoot, mdl, config)
+			end))
+			table.insert(connections, sourceRoot.DescendantRemoving:Connect(function(object)
+				local root = object
+				while root and root ~= sourceRoot
+					and not cosmeticNames[root.Name]
+					and not isShoesCosmeticContainer(root) do
+					root = root.Parent
+				end
+				if root and root ~= sourceRoot and not root:IsDescendantOf(mdl) then
+					queueCosmeticRefresh()
+				end
 			end))
 
 			applyObservedIcon(player)

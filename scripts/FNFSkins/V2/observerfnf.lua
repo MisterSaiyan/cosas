@@ -1387,7 +1387,7 @@ local function ensureObserverPanel()
     local panel = Instance.new("Frame")
     panel.Name = "ObserverConfigPanel"
     panel.Size = UDim2.new(0, 250, 0, 222)
-    panel.Position = UDim2.new(0, 400, 0, 60)
+    panel.Position = UDim2.new(0, 600, 0, 60)
     panel.BackgroundColor3 = Color3.fromRGB(17, 17, 17)
     panel.BorderSizePixel = 0
     panel.Visible = false

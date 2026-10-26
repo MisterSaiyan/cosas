@@ -7,13 +7,11 @@ local CoreGui = game:GetService("CoreGui")
     })
 
     		game.StarterGui:SetCore("SendNotification", {
-        Title = "Version Check", 
-        Text = "This is intended for 0.2 (Base Game)", 
+        Title = "Reminder", 
+        Text = "Execute this before using 2011x", 
         Icon = "", Duration = 10
     })
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/AmyGFV2.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/BFexe/BFSkinMain.lua"))()
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/SonicBFV2.lua"))()
-
-loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/shopicons.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/BFexe/BFSkinShop.lua"))()

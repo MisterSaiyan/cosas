@@ -149,6 +149,23 @@ local function SyncOriginalInvisibility(character, model)
 		obj.LocalTransparencyModifier = 1
 	end
 
+	for _, obj in ipairs(character:GetDescendants()) do
+		trackOriginalPart(obj)
+		
+		-- Limpiar partículas y beams del modelo original
+		if obj:IsA("ParticleEmitter") or obj:IsA("Beam") then
+			obj:Destroy()
+		end
+	end
+
+	-- Y también asegurar que si el personaje original recibe algo nuevo (como un accesorio), se borre
+	table.insert(State.connections, character.DescendantAdded:Connect(function(obj)
+		trackOriginalPart(obj)
+		if obj:IsA("ParticleEmitter") or obj:IsA("Beam") then
+			obj:Destroy()
+		end
+	end))
+
 	if bfParts then
 		for _, obj in ipairs(bfParts:GetDescendants()) do
 			addSkinPart(obj)
@@ -166,16 +183,12 @@ local function SyncOriginalInvisibility(character, model)
 	else
 		warn("Could not force invisibility: ForcedInvisibility was not found in the custom model")
 	end
-	for _, obj in ipairs(character:GetDescendants()) do
-		trackOriginalPart(obj)
-	end
 
 	table.insert(State.connections, model.DescendantAdded:Connect(function(obj)
 		if bfParts and obj:IsDescendantOf(bfParts) then
 			addSkinPart(obj)
 		end
 	end))
-	table.insert(State.connections, character.DescendantAdded:Connect(trackOriginalPart))
 end
 
 -- ==========================================
@@ -546,63 +559,6 @@ local function watchMapFolder(mapFolder)
 	end)
 end
 
-local function startSelectMap()
-    task.spawn(function()
-        if not Enabled then return end
-        
-        local selectMap = workspace:WaitForChild("SelectMap", 120)
-        if not selectMap then return end
-
-        for _, mapFolder in ipairs(selectMap:GetChildren()) do
-            watchMapFolder(mapFolder)
-        end
-        
-        table.insert(State.connections, selectMap.ChildAdded:Connect(function(child)
-            task.wait(0.1)
-            watchMapFolder(child)
-        end))
-        
-        table.insert(State.connections, selectMap.ChildRemoved:Connect(function()
-            destroySelectPreview()
-        end))
-    end)
-end
-
--- slec
-local function startNameOverride()
-    if not Enabled then return end
-
-    local function applyTextChanges(charSelect)
-        local selectScreen = charSelect:FindFirstChild("SelectScreen", true)
-        local charLabel = selectScreen and selectScreen:FindFirstChild("char")
-        
-        if charLabel then
-            if charLabel.Text == "2011x" then
-                charLabel.Text = CHAR_NAME
-            end
-            -- Escuchar si cambia el texto después
-            table.insert(State.connections, charLabel:GetPropertyChangedSignal("Text"):Connect(function()
-                if charLabel.Text == "2011x" then
-                    charLabel.Text = CHAR_NAME
-                end
-            end))
-        end
-    end
-
-    local playerGui = LocalPlayer:WaitForChild("PlayerGui")
-    table.insert(State.connections, playerGui.DescendantAdded:Connect(function(descendant)
-        if descendant.Name == "CharSelect" then
-            applyTextChanges(descendant)
-        end
-    end))
-    
-    -- Por si ya existe al iniciar
-    local existingCharSelect = playerGui:FindFirstChild("CharSelect", true)
-    if existingCharSelect then
-        applyTextChanges(existingCharSelect)
-    end
-end
-
 -- W sc.
 local function startVictoryScreen()
 	task.spawn(function()
@@ -668,6 +624,5 @@ end
 
 --
 
-startSelectMap()
 startNameOverride()
 startVictoryScreen()

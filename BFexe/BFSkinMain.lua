@@ -13,6 +13,21 @@ local SELECT_MODEL_ID = AssetId
 local SELECT_ANIM_ID  = ""
 local DISPLAY_NAME    = "2022x"
 local CHAR_NAME       = "2022x"
+-- Protect the rage aura (atleast in 0.2)
+local beamsprotected = {
+	"Beams",
+}
+
+local function isProtected(obj)
+	for _, name in ipairs(beamsprotected) do
+		if obj.Name == name then
+			return true
+		end
+	end
+	return false
+end
+
+--
 
 local ChaseThemeUrl      = "https://github.com/MisterSaiyan/cosas/raw/refs/heads/main/MJX.mp3"
 local LastLifeThemeUrl   = "https://github.com/MisterSaiyan/cosas/raw/refs/heads/main/BFlastlifeFIX.mp3"
@@ -149,20 +164,26 @@ local function SyncOriginalInvisibility(character, model)
 		obj.LocalTransparencyModifier = 1
 	end
 
+-- 1. Bucle inicial (Solo apaga los que NO están protegidos)
 	for _, obj in ipairs(character:GetDescendants()) do
 		trackOriginalPart(obj)
 		
-		-- Limpiar partículas y beams del modelo original
 		if obj:IsA("ParticleEmitter") or obj:IsA("Beam") then
-			obj:Destroy()
+			if not isProtected(obj) then
+				obj.Enabled = false
+			end
+			-- Si está protegido, NO hace nada (mantiene su Enabled original del juego)
 		end
 	end
 
-	-- Y también asegurar que si el personaje original recibe algo nuevo (como un accesorio), se borre
+	-- 2. Evento único para elementos que se añaden después (DescendantAdded)
 	table.insert(State.connections, character.DescendantAdded:Connect(function(obj)
 		trackOriginalPart(obj)
+		
 		if obj:IsA("ParticleEmitter") or obj:IsA("Beam") then
-			obj:Destroy()
+			if not isProtected(obj) then
+				obj:Destroy() -- Solo destruye si NO está protegido
+			end
 		end
 	end))
 
@@ -190,10 +211,6 @@ local function SyncOriginalInvisibility(character, model)
 		end
 	end))
 end
-
--- ==========================================
--- FUNCIONES DE LIMPIEZA OPTIMIZADAS
--- ==========================================
 
 local function destroySelectPreview()
 	if selectSyncConn then 
@@ -261,10 +278,6 @@ local function ResetState()
 		State.model = nil
 	end
 end
-
--- ==========================================
--- SETUP DE KOLO Y CARACTERES
--- ==========================================
 
 local function setupKolo(character)
 	if not IsKolo() or not character or character:FindFirstChild("Kolo") then return end

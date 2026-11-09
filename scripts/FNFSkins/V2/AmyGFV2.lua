@@ -10,7 +10,7 @@ _G.AmyGFV2Loaded = true
 
 local player = Players.LocalPlayer
 local GFCharacter = player.Character or player.CharacterAdded:Wait()
-local GFAssetId = 73695760388601
+local GFAssetId = 136333819458978
 local GFIsScriptActive = false
 local GFCurrentModel = nil
 local GFSyncConn = nil
@@ -29,19 +29,13 @@ local GFModeConnections = {}
 local GFStartPending = false
 
 -- Amy Iconos
+local IconNormalGF = "rbxassetid://73222561332765"
+local ExpressionNormalGF = "rbxassetid://79752501485749"
+local ExpressionChasedGF = "rbxassetid://113659883065962"
+local DownedIconGF = "rbxassetid://91117693958700"
+local IconLastLifeGF = "rbxassetid://119311173785729"
+local ExpressionLastLifeGF = "rbxassetid://86029426878323"
 
-local IconNormalGF = "rbxassetid://73222561332765" -- Expression.Regular
-local ExpressionNormalGF = "rbxassetid://79752501485749" -- Eyes.Regular
-local ExpressionChasedGF = "rbxassetid://113659883065962" -- Eyes.Chased
-
--- LastLife Iconos Amy
-
-local DownedIconGF = "rbxassetid://91117693958700" -- Expression.Downed
-
-local IconLastLifeGF = "rbxassetid://119311173785729" -- Expression.LastLife
-local ExpressionLastLifeGF = "rbxassetid://86029426878323" -- Reemplaza Eyes.Regular si estas en lastlife
-
--- force reload without a gui
 local GFForceReload = false
 local GFCosmeticToggle = true
 local GFKeyDebounce = false
@@ -52,8 +46,8 @@ local shirtCosmetics = {
     AmyChristmasDress = true,
     coatthingy = true,
     Sleeve = true,
-	lowerleg = true,
-	upperleg = true,
+    lowerleg = true,
+    upperleg = true,
 }
 shirtCosmetics["modern dress"] = true
 
@@ -74,20 +68,12 @@ local function GFBelongsToCosmeticRoot(object, model)
 end
 
 local function GFRestoreCosmeticVisibility(model)
-    if not GFCosmeticToggle then return end
-    if not model then
-        return
-    end
+    if not GFCosmeticToggle or not model then return end
 
     for cosmeticName in pairs(shirtCosmetics) do
         local cosmetic = model:FindFirstChild(cosmeticName, true)
         if cosmetic then
-            local objects = { cosmetic }
             for _, object in ipairs(cosmetic:GetDescendants()) do
-                table.insert(objects, object)
-            end
-
-            for _, object in ipairs(objects) do
                 if object:IsA("BasePart") then
                     object.Transparency = 0
                     object.CanCollide = false
@@ -97,14 +83,15 @@ local function GFRestoreCosmeticVisibility(model)
     end
 end
 
-local GFHideThing = false -- Toggle Hammer visibility fix (don't change)
+-- ============================================================================
+-- FUNCIONES DEL MARTILLO (HAMMER FIX & VISIBILITY)
+-- ============================================================================
+
+local GFHideThing = false
 local GFTargetHammerState = {}
 
 local function GFGetHammer(targetModel)
-    if not targetModel then
-        return nil
-    end
-
+    if not targetModel then return nil end
     return targetModel:FindFirstChild("Hammer", true)
         or targetModel:FindFirstChild("Axe", true)
         or targetModel:FindFirstChild("MagicalAmy", true)
@@ -112,16 +99,11 @@ end
 
 local function GFCacheHammerState(targetModel)
     local hammer = GFGetHammer(targetModel)
-    if not hammer or GFTargetHammerState[targetModel] then
-        return
-    end
+    if not hammer or GFTargetHammerState[targetModel] then return end
 
     local snapshot = {}
     local function collect(node)
-        if not node then
-            return
-        end
-
+        if not node then return end
         if node:IsA("BasePart") then
             table.insert(snapshot, {
                 part = node,
@@ -131,21 +113,17 @@ local function GFCacheHammerState(targetModel)
                 massless = node.Massless,
             })
         end
-
         for _, child in ipairs(node:GetDescendants()) do
             collect(child)
         end
     end
-
     collect(hammer)
     GFTargetHammerState[targetModel] = snapshot
 end
 
 local function GFRestoreHammerState(targetModel)
     local snapshot = targetModel and GFTargetHammerState[targetModel]
-    if not snapshot then
-        return
-    end
+    if not snapshot then return end
 
     for _, entry in ipairs(snapshot) do
         if entry and entry.part and entry.part.Parent then
@@ -155,27 +133,19 @@ local function GFRestoreHammerState(targetModel)
             entry.part.Massless = entry.massless
         end
     end
-
     GFTargetHammerState[targetModel] = nil
 end
 
 local function GFHammerVisibilityFix(targetModel, visible)
-    if GFHideThing or not targetModel then
-        return
-    end
-
+    if GFHideThing or not targetModel then return end
     local hammer = GFGetHammer(targetModel)
-    if not hammer then
-        return
-    end
+    if not hammer then return end
 
     GFCacheHammerState(targetModel)
-
     local transparency = visible and 0 or 1
     if hammer:IsA("BasePart") then
         hammer.Transparency = transparency
     end
-
     for _, object in ipairs(hammer:GetDescendants()) do
         if object:IsA("BasePart") then
             object.Transparency = transparency
@@ -193,9 +163,7 @@ local function GFUpdateInsertedShirt(model, insertedModel)
         end
         return
     end
-    if not model or not insertedModel then
-        return
-    end
+    if not model or not insertedModel then return end
 
     local hasShirtCosmetic = false
     for cosmeticName in pairs(shirtCosmetics) do
@@ -208,67 +176,47 @@ local function GFUpdateInsertedShirt(model, insertedModel)
     local vestidoModel = insertedModel:FindFirstChild("Vestido", true)
     local chaquetaModel = insertedModel:FindFirstChild("Chaqueta", true)
     local white = Color3.fromRGB(255, 255, 255)
-    local protectedSleeves = {
-        LSleeve = true,
-        RSleeve = true,
-    }
+    local protectedSleeves = { LSleeve = true, RSleeve = true }
 
     local function isProtectedSleeve(object, root)
         local current = object
         while current and current ~= root do
-            if protectedSleeves[current.Name] then
-                return true
-            end
+            if protectedSleeves[current.Name] then return true end
             current = current.Parent
         end
         return false
     end
 
     local function setShirtVisibility(shirtGroup, visible)
-        if not shirtGroup then
-            return
-        end
-
-        local objects = { shirtGroup }
+        if not shirtGroup then return end
         for _, object in ipairs(shirtGroup:GetDescendants()) do
-            table.insert(objects, object)
-        end
-
-        for _, object in ipairs(objects) do
-            if not isProtectedSleeve(object, shirtGroup) and object:IsA("BasePart") then
-                object.Transparency = visible and 0 or 1
-                object.CanCollide = false
-            elseif not isProtectedSleeve(object, shirtGroup)
-                and (object:IsA("Decal") or object:IsA("Texture")) then
-                object.Transparency = visible and 0 or 1
+            if not isProtectedSleeve(object, shirtGroup) then
+                if object:IsA("BasePart") then
+                    object.Transparency = visible and 0 or 1
+                    object.CanCollide = false
+                elseif object:IsA("Decal") or object:IsA("Texture") then
+                    object.Transparency = visible and 0 or 1
+                end
             end
         end
     end
 
     local function setJacketRelatedColors()
+        -- Forzamos la restauración o recolor blanco puro exacto del original
         if not HideJacketaswell then
             for part, originalColor in pairs(GFJacketOriginalColors) do
-                if part.Parent then
-                    part.Color = originalColor
-                end
+                if part.Parent then part.Color = originalColor end
                 GFJacketOriginalColors[part] = nil
             end
         else
             local colorTargets = {}
             for _, name in ipairs({ "LSleeve", "RSleeve", "Arms" }) do
                 local target = insertedModel:FindFirstChild(name, true)
-                if target then
-                    table.insert(colorTargets, target)
-                end
+                if target then table.insert(colorTargets, target) end
             end
 
             for _, target in ipairs(colorTargets) do
-                local objects = { target }
                 for _, object in ipairs(target:GetDescendants()) do
-                    table.insert(objects, object)
-                end
-
-                for _, object in ipairs(objects) do
                     if object:IsA("BasePart") then
                         if GFJacketOriginalColors[object] == nil then
                             GFJacketOriginalColors[object] = object.Color
@@ -279,15 +227,11 @@ local function GFUpdateInsertedShirt(model, insertedModel)
             end
         end
 
+        -- Aseguramos que las mangas protegidas mantengan visibilidad 0 y propiedades correctas
         for _, name in ipairs({ "LSleeve", "RSleeve" }) do
             local sleeve = insertedModel:FindFirstChild(name, true)
             if sleeve then
-                local objects = { sleeve }
                 for _, object in ipairs(sleeve:GetDescendants()) do
-                    table.insert(objects, object)
-                end
-
-                for _, object in ipairs(objects) do
                     if object:IsA("BasePart") then
                         object.Transparency = 0
                         object.CanCollide = false
@@ -315,375 +259,93 @@ local function GFGetPlayerModel()
     return playersFolder and playersFolder:FindFirstChild(player.Name)
 end
 
-local function GFGetBooleanState(root, names)
-    if not root then
-        return false
-    end
-
-    for _, name in ipairs(names) do
-        local value = root:GetAttribute(name)
-        if value == true or value == "true" or value == "True" then
-            return true
-        end
-
-        local stateObject = root:FindFirstChild(name, true)
-        if stateObject then
-            if stateObject:IsA("BoolValue") and stateObject.Value then
-                return true
-            end
-            if stateObject:IsA("ObjectValue") and stateObject.Value ~= nil then
-                return true
-            end
-            if stateObject:IsA("StringValue") and (stateObject.Value == "true" or stateObject.Value == "True") then
-                return true
-            end
-            if stateObject:IsA("IntValue") and stateObject.Value > 0 then
-                return true
-            end
-        end
-    end
-
-    return false
+local function GFIsAmy()
+	local model = GFGetPlayerModel()
+	return model and model:GetAttribute("Character") == "Amy"
 end
 
-local function GFSetFolderState(folder, activeName, imageId, fitToFrame, layout, zIndex)
-    if not folder then
-        return
-    end
+-- ============================================================================
+-- PARCHE CONDICIONAL DE REPLICATEDSTORAGE
+-- ============================================================================
 
-    for _, child in ipairs(folder:GetChildren()) do
-        if child:IsA("ImageLabel") or child:IsA("ImageButton") then
-            local isActive = child.Name == activeName
-            child.Visible = false
-        end
-    end
+local ReplicatedReplacedModel = nil
 
-    for _, child in ipairs(folder:GetChildren()) do
-        if child:IsA("ImageLabel") or child:IsA("ImageButton") then
-            local isActive = child.Name == activeName
-            if isActive then
-                child.Visible = true
-                child.Image = imageId
-                child.ZIndex = zIndex
-                if layout and layout.position then
-                    child.Position = layout.position
-                end
-                if fitToFrame and layout and layout.size then
-                    child.AnchorPoint = Vector2.new(0.5, 0.5)
-                    child.Size = layout.size
-                    child.ScaleType = Enum.ScaleType.Fit
-                end
+local function GFSetupReplicatedStorageAsset()
+    if ReplicatedReplacedModel and ReplicatedReplacedModel.Parent then return end
+    
+    task.spawn(function()
+        local storage = game:GetService("ReplicatedStorage")
+        local skinsFolder = storage:FindFirstChild("ClientAssets") 
+            and storage.ClientAssets:FindFirstChild("Characters") 
+            and storage.ClientAssets.Characters:FindFirstChild("Survivors") 
+            and storage.ClientAssets.Characters.Survivors:FindFirstChild("Amy") 
+            and storage.ClientAssets.Characters.Survivors.Amy:FindFirstChild("Skins")
+        
+        if not skinsFolder then return end
+        local originalDefault = skinsFolder:FindFirstChild("Default")
+        if not originalDefault then return end
+
+        local replacement = GFLoadAsset(GFAssetId)
+        if replacement then
+            replacement.Name = "Default"
+            if not replacement:FindFirstChild("Sphere.003") then
+                local fallback = Instance.new("Part")
+                fallback.Name = "Sphere.003"
+                fallback.Size = Vector3.new(0.1, 0.1, 0.1)
+                fallback.Transparency = 1
+                fallback.CanCollide = false
+                fallback.CanTouch = false
+                fallback.CanQuery = false
+                fallback.Anchored = true
+                fallback.Parent = replacement
             end
-        end
-    end
-end
-
-local GFFunctionApplyIcon
-
-GFFunctionApplyIcon = function()
-    local playerGui = player:FindFirstChildOfClass("PlayerGui")
-    local round = playerGui and playerGui:FindFirstChild("Round")
-    local gameGui = round and round:FindFirstChild("Game")
-    local teams = gameGui and gameGui:FindFirstChild("Teams")
-    local playerFrame = teams and teams:FindFirstChild(player.Name)
-    local frame = playerFrame and playerFrame:FindFirstChild("Frame")
-    local characterGui = frame and frame:FindFirstChild("Character")
-
-    if not characterGui then
-        return
-    end
-
-    local model = GFGetPlayerModel() or player.Character
-        local isDowned = GFGetBooleanState(model, { "Downed", "IsDowned", "BeingDowned" })
-        or GFGetBooleanState(player.Character, { "Downed", "IsDowned", "BeingDowned" })
-        or GFGetBooleanState(player, { "Downed", "IsDowned", "BeingDowned" })
-    local isLastLife = GFGetBooleanState(model, { "LastLife", "IsLastLife", "SecondLife" })
-        or GFGetBooleanState(player.Character, { "LastLife", "IsLastLife", "SecondLife" })
-        or GFGetBooleanState(player, { "LastLife", "IsLastLife", "SecondLife" })
-    local isChased = GFGetBooleanState(model, { "Chased", "IsChased", "InChase", "BeingChased" })
-        or GFGetBooleanState(player.Character, { "Chased", "IsChased", "InChase", "BeingChased" })
-        or GFGetBooleanState(player, { "Chased", "IsChased", "InChase", "BeingChased" })
-
-    if isChased then
-        if not GFChasedVisible or GFChasedLostAt then
-            GFChasedVisible = true
-            GFChasedLostAt = nil
-            GFChasedGeneration += 1
-        end
-    elseif GFChasedVisible then
-        if not GFChasedLostAt then
-            GFChasedLostAt = os.clock()
-            GFChasedGeneration += 1
-            local generation = GFChasedGeneration
-            task.delay(GFChasedReleaseDelay, function()
-                if GFIsScriptActive and GFChasedGeneration == generation then
-                    GFFunctionApplyIcon()
-                end
-            end)
-        elseif os.clock() - GFChasedLostAt >= GFChasedReleaseDelay then
-            GFChasedVisible = false
-            GFChasedLostAt = nil
-            GFChasedGeneration += 1
-        end
-    end
-
-    local eyesState = "Regular"
-    local expressionState = isLastLife and "LastLife" or "Regular"
-    local eyesImage = ExpressionNormalGF
-    local expressionImage = isLastLife and IconLastLifeGF or IconNormalGF
-
-    if GFChasedVisible then
-        eyesState = "Chased"
-        eyesImage = ExpressionChasedGF
-    end
-    if isDowned then
-        eyesState = "Stunned"
-        expressionState = "Downed"
-        expressionImage = DownedIconGF
-    end
-    if isLastLife and not GFChasedVisible then
-        eyesImage = ExpressionLastLifeGF
-    end
-
-    if eyesState ~= GFLastEyesState then
-        GFLastEyesState = eyesState
-        warn("[AmyGFV2] Eyes state:", eyesState, "Chased:", isChased, "Downed:", isDowned)
-    end
-
-    local layout = {
-        position = UDim2.fromScale(0.45, 0.39),
-        size = UDim2.fromScale(0.60, 0.60),
-    }
-    GFSetFolderState(characterGui:FindFirstChild("Eyes"), isDowned and "" or eyesState, eyesImage, true, layout, 10)
-    GFSetFolderState(characterGui:FindFirstChild("Expression"), expressionState, expressionImage, true, layout, 5)
-end
-
-local GFIconStateNames = {
-    LastLife = true,
-    IsLastLife = true,
-    SecondLife = true,
-    Downed = true,
-    IsDowned = true,
-    BeingDowned = true,
-    Chased = true,
-    IsChased = true,
-    InChase = true,
-    BeingChased = true,
-}
-
-local function GFDisconnectIconWatchers()
-    for _, connection in ipairs(GFIconConnections) do
-        connection:Disconnect()
-    end
-    table.clear(GFIconConnections)
-end
-
-local function GFWatchIconStateRoot(root, watchedRoots, watchedValues)
-    if not root or watchedRoots[root] then
-        return
-    end
-    watchedRoots[root] = true
-
-    local function refresh()
-        if GFIsScriptActive then
-            GFFunctionApplyIcon()
-        end
-    end
-
-    local function watchValue(object)
-        if not GFIconStateNames[object.Name]
-            or not object:IsA("ValueBase")
-            or watchedValues[object] then
-            return
-        end
-        watchedValues[object] = true
-        table.insert(GFIconConnections, object.Changed:Connect(refresh))
-    end
-
-    for stateName in pairs(GFIconStateNames) do
-        table.insert(
-            GFIconConnections,
-            root:GetAttributeChangedSignal(stateName):Connect(refresh)
-        )
-    end
-    for _, descendant in ipairs(root:GetDescendants()) do
-        watchValue(descendant)
-    end
-    table.insert(GFIconConnections, root.DescendantAdded:Connect(function(descendant)
-        watchValue(descendant)
-        if GFIconStateNames[descendant.Name] then
-            refresh()
-        end
-    end))
-    table.insert(GFIconConnections, root.DescendantRemoving:Connect(function(descendant)
-        if GFIconStateNames[descendant.Name] then
-            task.defer(refresh)
-        end
-    end))
-end
-
-local function GFSetupIconWatchers()
-    GFDisconnectIconWatchers()
-    local watchedRoots = setmetatable({}, { __mode = "k" })
-    local watchedValues = setmetatable({}, { __mode = "k" })
-
-    GFWatchIconStateRoot(player, watchedRoots, watchedValues)
-    GFWatchIconStateRoot(player.Character, watchedRoots, watchedValues)
-    GFWatchIconStateRoot(GFGetPlayerModel(), watchedRoots, watchedValues)
-
-    local function watchPlayersFolder(folder)
-        GFWatchIconStateRoot(folder:FindFirstChild(player.Name), watchedRoots, watchedValues)
-        table.insert(GFIconConnections, folder.ChildAdded:Connect(function(child)
-            if child.Name == player.Name then
-                GFWatchIconStateRoot(child, watchedRoots, watchedValues)
-                GFFunctionApplyIcon()
+            if not replacement:FindFirstChild("Sphere.007") then
+                local fallback = Instance.new("Part")
+                fallback.Name = "Sphere.007"
+                fallback.Size = Vector3.new(0.1, 0.1, 0.1)
+                fallback.Transparency = 1
+                fallback.CanCollide = false
+                fallback.CanTouch = false
+                fallback.CanQuery = false
+                fallback.Anchored = true
+                fallback.Parent = replacement
             end
-        end))
-    end
-
-    local playersFolder = workspace:FindFirstChild("Players")
-    if playersFolder then
-        watchPlayersFolder(playersFolder)
-    end
-    table.insert(GFIconConnections, workspace.ChildAdded:Connect(function(child)
-        if child.Name == "Players" then
-            watchPlayersFolder(child)
+            replacement.Parent = skinsFolder
+            ReplicatedReplacedModel = replacement
+            originalDefault:Destroy()
         end
-    end))
-
-    local playerGui = player:FindFirstChildOfClass("PlayerGui")
-    if playerGui then
-        table.insert(GFIconConnections, playerGui.DescendantAdded:Connect(function(descendant)
-            if descendant.Name == "Character"
-                or descendant.Name == "Eyes"
-                or descendant.Name == "Expression" then
-                GFFunctionApplyIcon()
-            end
-        end))
-    end
-    GFFunctionApplyIcon()
+    end)
 end
 
--- Head Sync
-
-local GFSyncToggle = false -- True to enable head sync, false to disable (Default: true)
-
+-- Head Sync Variables
+local GFSyncToggle = true
 local GFOriginalHeadBase, GFCustomMotorBase, GFOriginalBody, GFOriginalHead, GFCustomHead, GFCustomHeadMotor
 
 local function GFFindOriginalHead(model)
     if not model then return nil end
-
     local head = model:FindFirstChild("MainHead", true) or model:FindFirstChild("Head", true)
-    if head and head:IsA("BasePart") then
-        return head
-    end
-
+    if head and head:IsA("BasePart") then return head end
     return nil
 end
 
--- Setup ViewPort (Cuz of cosmetic clipping the model)
-
-local function GFSetupAmyViewport()
-	task.spawn(function()
-		local viewportFrame = player.PlayerGui
-			:WaitForChild("Round", 30)
-			:WaitForChild("Game", 30)
-			:WaitForChild("SurvivorHP", 30)
-			:WaitForChild("ViewportFrame", 30)
-		if not viewportFrame then return end
-		local viewportModel = viewportFrame
-			:WaitForChild("WorldModel", 30)
-			:WaitForChild("Default", 30)
-		if not viewportModel then return end
-
-		local vpOverrideModel = nil
-		local function replaceAViewportModel()
-			local ok, objects = pcall(game.GetObjects, game, "rbxassetid://" .. GFAssetId)
-			if not ok or #objects == 0 then return end
-			if vpOverrideModel and vpOverrideModel.Parent then
-				vpOverrideModel:Destroy()
-				vpOverrideModel = nil
-			end
-			local newModel = objects[1]:Clone()
-			vpOverrideModel = newModel
-			for _, part in ipairs(viewportModel:GetDescendants()) do
-				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-					part.Transparency = 1
-				end
-			end
-			local newHum = newModel:FindFirstChildOfClass("Humanoid")
-			if newHum then newHum:Destroy() end
-			for _, v in ipairs(newModel:GetDescendants()) do
-				if v:IsA("BasePart") then v.CanCollide = false end
-			end
-			newModel.Parent = viewportModel
-			local viewportHRP = viewportModel:FindFirstChild("HumanoidRootPart")
-			local primaryPart = newModel.PrimaryPart or newModel:FindFirstChildWhichIsA("BasePart")
-			if viewportHRP and primaryPart then
-				newModel:PivotTo(viewportHRP.CFrame)
-				primaryPart.Transparency = 1
-				local weld = Instance.new("WeldConstraint")
-				weld.Part0 = viewportHRP
-				weld.Part1 = primaryPart
-				weld.Parent = viewportHRP
-			end
-		end
-
-		replaceAViewportModel()
-
-		local viewportRefreshPending = false
-		viewportModel.DescendantAdded:Connect(function()
-			if viewportRefreshPending then return end
-			viewportRefreshPending = true
-			task.delay(0.1, function()
-				viewportRefreshPending = false
-				if viewportModel.Parent and (not vpOverrideModel or not vpOverrideModel.Parent) then
-					vpOverrideModel = nil
-					replaceAViewportModel()
-				end
-			end)
-		end)
-	end)
-end
-
 local function GFFindCustomHead(model)
-
     local mainHead = model:FindFirstChild("MainHead", true)
     if not mainHead then return nil end
-
-    if mainHead:IsA("BasePart") then
-        return mainHead
-    end
-
+    if mainHead:IsA("BasePart") then return mainHead end
     return mainHead:FindFirstChildWhichIsA("BasePart", true)
 end
 
 local function GFFindBody(model)
-	if not model then
-		return nil
-	end
-
-	local body =
-		model:FindFirstChild("Body", true)
-		or model:FindFirstChild("Torso", true)
-		or model:FindFirstChild("UpperTorso", true)
-		or model:FindFirstChild("HumanoidRootPart", true)
-
-	if body and body:IsA("BasePart") then
-		return body
-	end
-
+	if not model then return nil end
+	local body = model:FindFirstChild("Body", true) or model:FindFirstChild("Torso", true) or model:FindFirstChild("UpperTorso", true) or model:FindFirstChild("HumanoidRootPart", true)
+	if body and body:IsA("BasePart") then return body end
 	return nil
 end
 
 local function GFFindHeadMotor(model, headPart)
-    if not model or not headPart then
-        return nil
-    end
-
+    if not model or not headPart then return nil end
     local mainHead = model:FindFirstChild("MainHead", true)
     if not mainHead then return nil end
-
     return mainHead:FindFirstChild("Joint", true)
         or mainHead:FindFirstChildWhichIsA("Motor6D", true)
         or mainHead:FindFirstChildWhichIsA("Weld", true)
@@ -691,113 +353,33 @@ local function GFFindHeadMotor(model, headPart)
 end
 
 local function GFSetupHeadSync(originalModel, customModel, fallbackRoot)
-	if not GFSyncToggle then
-		return
-	end
-
-	if not originalModel or not customModel then
-		warn(
-			"[HeadSync] Faltan modelos",
-			"OriginalModel:", originalModel,
-			"CustomModel:", customModel
-		)
-		return
-	end
-
+	if not GFSyncToggle then return end
 	GFOriginalHead = GFFindOriginalHead(originalModel)
 	GFOriginalBody = GFFindBody(originalModel) or fallbackRoot
 	GFCustomHead = GFFindCustomHead(customModel)
 	GFCustomHeadMotor = GFFindHeadMotor(customModel, GFCustomHead)
 
-	if not GFOriginalHead then
-		warn("[HeadSync] No se encontró el Head original")
-		return
-	end
-
-	if not GFOriginalBody or not GFOriginalBody:IsA("BasePart") then
-		warn("[HeadSync] No se encontró Body/Root original")
-		return
-	end
-
-	if not GFCustomHead then
-		warn("[HeadSync] No se encontró el Head custom")
-		return
-	end
-
-	if not GFCustomHeadMotor then
-		warn(
-			"[HeadSync] No se encontró un Motor6D conectado al Head custom",
-			GFCustomHead:GetFullName()
-		)
-		return
-	end
-
+	if not GFOriginalHead or not GFOriginalBody or not GFCustomHead or not GFCustomHeadMotor then return end
 	GFOriginalHeadBase = GFOriginalBody.CFrame:ToObjectSpace(GFOriginalHead.CFrame)
 	GFCustomMotorBase = GFCustomHeadMotor.C0
 end
 
-local function GFIsAmy()
-	local model = GFGetPlayerModel()
-	return model and model:GetAttribute("Character") == "Amy"
-end
+local GFSetupCharacter
 
--- Replace the replicatedstorage char (affects viewport, character selection and inventory)
-
-task.spawn(function()
-    local storage = game:GetService("ReplicatedStorage")
-    local skins = storage
-        :WaitForChild("ClientAssets")
-        :WaitForChild("Characters")
-        :WaitForChild("Survivors")
-        :WaitForChild("Amy")
-        :WaitForChild("Skins")
-
-    local originalDefault = skins:WaitForChild("Default")
-    local replacement = GFLoadAsset(GFAssetId)
-
-    if replacement then
-        replacement.Name = "Default"
-		if not replacement:FindFirstChild("Sphere.003") then
-			local fallback = Instance.new("Part")
-			fallback.Name = "Sphere.003"
-			fallback.Size = Vector3.new(0.1, 0.1, 0.1)
-			fallback.Transparency = 1
-			fallback.CanCollide = false
-			fallback.CanTouch = false
-			fallback.CanQuery = false
-			fallback.Anchored = true
-			fallback.Parent = replacement
-		end
-		if not replacement:FindFirstChild("Sphere.007") then
-			local fallback = Instance.new("Part")
-			fallback.Name = "Sphere.007"
-			fallback.Size = Vector3.new(0.1, 0.1, 0.1)
-			fallback.Transparency = 1
-			fallback.CanCollide = false
-			fallback.CanTouch = false
-			fallback.CanQuery = false
-			fallback.Anchored = true
-			fallback.Parent = replacement
-		end
-        replacement.Parent = skins
-        originalDefault:Destroy()
-    end
-end)
-
-local function GFSetupCharacter(char, forceReload)
+GFSetupCharacter = function(char, forceReload)
     if not GFIsScriptActive and not forceReload then return end
     if GFSetupInProgress then return end
     GFSetupInProgress = true
-	for _, connection in ipairs(GFCosmeticConnections) do
-		connection:Disconnect()
-	end
-	table.clear(GFCosmeticConnections)
+
+    for _, connection in ipairs(GFCosmeticConnections) do
+        connection:Disconnect()
+    end
+    table.clear(GFCosmeticConnections)
+
     GFSetupGeneration += 1
     local generation = GFSetupGeneration
 
-	if forceReload then
-			GFIsScriptActive = true
-		end
+    if forceReload then GFIsScriptActive = true end
 
     if GFSyncConn then GFSyncConn:Disconnect() GFSyncConn = nil end
     if GFCurrentModel and GFCurrentModel.Parent then GFCurrentModel:Destroy() GFCurrentModel = nil end
@@ -805,11 +387,7 @@ local function GFSetupCharacter(char, forceReload)
     for _, v in ipairs(char:GetDescendants()) do
         if v:IsA("BasePart") and not GFBelongsToCosmeticRoot(v, char) then
             v.Transparency = 1
-            if v.Name == "HumanoidRootPart" then
-                v.CanCollide = true
-            else
-                v.CanCollide = false
-            end
+            v.CanCollide = (v.Name == "HumanoidRootPart")
         end
     end
 
@@ -831,23 +409,20 @@ local function GFSetupCharacter(char, forceReload)
         GFSetupInProgress = false
         return
     end
+
     if generation ~= GFSetupGeneration or not GFIsScriptActive then
         mdl:Destroy()
         GFSetupInProgress = false
         return
     end
 
-    if oldVisual then
-        mdl.Parent = oldVisual
-    else
-        mdl.Parent = char
-    end
+    mdl.Parent = char
 
     local hrp = char:FindFirstChild("HumanoidRootPart")
     local newHrp = mdl:FindFirstChild("HumanoidRootPart", true)
     if not hrp or not newHrp then
         mdl:Destroy()
-		GFSetupInProgress = false
+        GFSetupInProgress = false
         return
     end
 
@@ -878,92 +453,68 @@ local function GFSetupCharacter(char, forceReload)
     end
 
     newHrp.CFrame = hrp.CFrame
-    local physicalWeld = Instance.new("WeldConstraint")
-    physicalWeld.Name = "SkinPhysicalAnchor"
-    physicalWeld.Part0 = hrp
-    physicalWeld.Part1 = newHrp
-    physicalWeld.Parent = newHrp
-
     GFCurrentModel = mdl
     GFUpdateInsertedShirt(oldVisual or char, mdl)
     GFSetupHeadSync(oldVisual or char, mdl, hrp)
-	GFSetupInProgress = false
+    GFSetupInProgress = false
 
-	local cosmeticSource = oldVisual or char
-	local cosmeticUpdatePending = false
-	local function queueCosmeticUpdate(object)
-		local current = object
-		local isCosmetic = false
-		while current and current ~= cosmeticSource do
-			if cosmeticRootNames[current.Name] or shirtCosmetics[current.Name] then
-				isCosmetic = true
-				break
-			end
-			current = current.Parent
-		end
-		if not isCosmetic or cosmeticUpdatePending then
-			return
-		end
+    local origHead = GFOriginalHead
+    local origBody = GFOriginalBody
+    local custMotor = GFCustomHeadMotor
+    local custHead = GFCustomHead
+    local custBase = GFCustomMotorBase
+    local origBase = GFOriginalHeadBase
 
-		cosmeticUpdatePending = true
-		task.defer(function()
-			cosmeticUpdatePending = false
-			if not GFIsScriptActive or GFSetupGeneration ~= generation
-				or GFCurrentModel ~= mdl or not cosmeticSource.Parent then
-				return
-			end
-			GFRestoreCosmeticVisibility(cosmeticSource)
-			GFUpdateInsertedShirt(cosmeticSource, mdl)
-		end)
-	end
-	table.insert(GFCosmeticConnections, cosmeticSource.DescendantAdded:Connect(queueCosmeticUpdate))
-	table.insert(GFCosmeticConnections, cosmeticSource.DescendantRemoving:Connect(queueCosmeticUpdate))
-
-    if GFSyncToggle then
-        GFSyncConn = RunService.RenderStepped:Connect(function()
-        if not char or not char.Parent or not hrp or not hrp.Parent or not newHrp or not newHrp.Parent or not GFIsScriptActive then
+    GFSyncConn = RunService.RenderStepped:Connect(function()
+        if not GFIsScriptActive or not hrp or not hrp.Parent then
             if GFSyncConn then GFSyncConn:Disconnect() GFSyncConn = nil end
             return
         end
 
-        if GFSyncToggle and GFOriginalHead and GFOriginalHead.Parent and GFOriginalBody and GFOriginalBody.Parent and GFCustomHeadMotor and GFCustomHeadMotor.Parent then
-            local success, result = pcall(function()
-                local currentOriginalHead = GFOriginalBody.CFrame:ToObjectSpace(GFOriginalHead.CFrame)
-                local rotationDelta = GFOriginalHeadBase.Rotation:Inverse() * currentOriginalHead.Rotation
-
-                local targetC0 = GFCustomMotorBase
-                if GFCustomHeadMotor.Part1 == GFCustomHead then
-                    targetC0 = GFCustomMotorBase * rotationDelta
-                elseif GFCustomHeadMotor.Part0 == GFCustomHead then
-                    targetC0 = GFCustomMotorBase * rotationDelta:Inverse()
-                end
-
-                GFCustomHeadMotor.C0 = GFCustomHeadMotor.C0:Lerp(targetC0, 0.35)
-            end)
-            if not success then
-                warn("[HeadSync] Error during rotation calculation:", result)
+        if not GFCurrentModel or not GFCurrentModel.Parent or not newHrp or not newHrp.Parent then
+            if not GFSetupInProgress then
+                task.spawn(function()
+                    GFSetupCharacter(char, true)
+                end)
             end
+            return
         end
-        end)
-    end
+
+        newHrp.CFrame = hrp.CFrame
+
+        if GFSyncToggle and origHead and origHead.Parent and origBody and origBody.Parent and custMotor and custMotor.Parent then
+            local currentOriginalHead = origBody.CFrame:ToObjectSpace(origHead.CFrame)
+            local rotationDelta = origBase.Rotation:Inverse() * currentOriginalHead.Rotation
+
+            local targetC0 = custBase
+            if custMotor.Part1 == custHead then
+                targetC0 = custBase * rotationDelta
+            elseif custMotor.Part0 == custHead then
+                targetC0 = custBase * rotationDelta:Inverse()
+            end
+
+            custMotor.C0 = custMotor.C0:Lerp(targetC0, 0.35)
+        end
+    end)
 end
 
 local function GFStartScript()
     if GFIsScriptActive or GFStartPending then return end
     GFStartPending = true
-    task.wait(1.5) -- Reducido de 3 a 1 para agilizar la entrada
+    task.wait(1)
 	if not GFIsAmy() then
 		GFStartPending = false
 		return
 	end
-    GFSetupAmyViewport()
+    
+    GFSetupReplicatedStorageAsset()
+
     GFChasedVisible = false
     GFChasedLostAt = nil
     GFChasedGeneration += 1
     GFLastEyesState = nil
     GFIsScriptActive = true
 	GFStartPending = false
-	GFSetupIconWatchers()
     if GFCharacter then GFSetupCharacter(GFCharacter) end
 end
 
@@ -972,58 +523,36 @@ local function GFStopScript()
     if not GFIsScriptActive then return end
     GFIsScriptActive = false
 	GFStartPending = false
-	GFDisconnectIconWatchers()
-	for _, connection in ipairs(GFCosmeticConnections) do
-		connection:Disconnect()
-	end
+	for _, connection in ipairs(GFCosmeticConnections) do connection:Disconnect() end
 	table.clear(GFCosmeticConnections)
     if GFSyncConn then GFSyncConn:Disconnect() GFSyncConn = nil end
     if GFCurrentModel and GFCurrentModel.Parent then GFCurrentModel:Destroy() GFCurrentModel = nil end
     if GFCharacter then
         GFRestoreHammerState(GFCharacter)
         for _, v in ipairs(GFCharacter:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.Transparency = 0
-            end
+            if v:IsA("BasePart") then v.Transparency = 0 end
         end
     end
 end
 
 player.CharacterAdded:Connect(function(newChar)
     GFCharacter = newChar
-	if GFIsScriptActive then
-		GFSetupIconWatchers()
-	end
     if GFIsScriptActive then
-        task.wait(1.5)
+        task.wait(1)
         GFSetupCharacter(newChar)
     end
 end)
 
 local GFIsCurrentlyAmy = false
-local GFIsPlaying = false
-
-local watchedAmyModels = setmetatable({}, { __mode = "k" })
 local function GFUpdateCharacterMode()
 	local check = GFIsAmy() == true
-	if check == GFIsCurrentlyAmy then
-		return
-	end
-
+	if check == GFIsCurrentlyAmy then return end
 	GFIsCurrentlyAmy = check
-	GFIsPlaying = check
-	if check then
-		GFStartScript()
-	else
-		GFStopScript()
-	end
+	if check then GFStartScript() else GFStopScript() end
 end
 
 local function GFWatchAmyModel(model)
-	if not model or watchedAmyModels[model] then
-		return
-	end
-	watchedAmyModels[model] = true
+	if not model then return end
 	table.insert(GFModeConnections, model:GetAttributeChangedSignal("Character"):Connect(function()
 		task.defer(GFUpdateCharacterMode)
 	end))
@@ -1031,9 +560,7 @@ end
 
 local function GFWatchPlayersFolder(folder)
 	local visual = folder:FindFirstChild(player.Name)
-	if visual then
-		GFWatchAmyModel(visual)
-	end
+	if visual then GFWatchAmyModel(visual) end
 	table.insert(GFModeConnections, folder.ChildAdded:Connect(function(child)
 		if child.Name == player.Name then
 			GFWatchAmyModel(child)
@@ -1043,40 +570,22 @@ local function GFWatchPlayersFolder(folder)
 end
 
 local playersFolder = workspace:FindFirstChild("Players")
-if playersFolder then
-	GFWatchPlayersFolder(playersFolder)
-end
-table.insert(GFModeConnections, workspace.ChildAdded:Connect(function(child)
-	if child.Name == "Players" then
-		GFWatchPlayersFolder(child)
-	end
-end))
+if playersFolder then GFWatchPlayersFolder(playersFolder) end
+workspace.ChildAdded:Connect(function(child)
+	if child.Name == "Players" then GFWatchPlayersFolder(child) end
+end)
 
 GFUpdateCharacterMode()
 
--- Keybind para forcereload de debug
-
+-- Keybind para Force Reload (Tecla T)
 local function GFTriggerForceReload()
-	if not GFIsCurrentlyAmy then
-		game.StarterGui:SetCore("SendNotification", {
-        Title = "GF Over Amy", 
-        Text = "Force Reload doesn't work if you are not playing as amy.", 
-        Icon = "rbxassetid://128451136697149", Duration = 10
-    })
-	return
-	end
-
-    if GFForceReload then
-        return
-    end
-
+	if not GFIsCurrentlyAmy then return end
+    if GFForceReload then return end
     GFForceReload = true
-
     if player.Character and player.Character.Parent then
         GFRestoreHammerState(player.Character)
         GFSetupCharacter(player.Character, true)
     end
-
     task.defer(function()
         task.wait(0.2)
         GFForceReload = false
@@ -1084,181 +593,88 @@ local function GFTriggerForceReload()
 end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then
-        return
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.T then
+        if GFKeyDebounce then return end
+        GFKeyDebounce = true
+        task.delay(0.25, function() GFKeyDebounce = false end)
+        GFTriggerForceReload()
     end
-
-    if input.KeyCode ~= Enum.KeyCode.T then
-        return
-    end
-
-    if GFKeyDebounce then
-        return
-    end
-
-    GFKeyDebounce = true
-    task.delay(0.25, function()
-        GFKeyDebounce = false
-    end)
-
-    GFTriggerForceReload()
 end)
 
--- Configuracion GFV2
+-- ============================================================================
+-- INTERFAZ GRÁFICA
+-- ============================================================================
 
-local function crearBotonVisualGF(texto, orden)
-    local boton = Instance.new("TextButton")
-    boton.Name = "Panel_" .. (texto:gsub("%s+", ""))
-    boton.Size = UDim2.new(0, 0, 0, 42)
-    boton.AutomaticSize = Enum.AutomaticSize.X
-    boton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    boton.BackgroundTransparency = 0.1
-    boton.AutoButtonColor = true
-    boton.LayoutOrder = orden
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0.5, 0)
-    corner.Parent = boton
-
-    local padding = Instance.new("UIPadding")
-    padding.PaddingLeft = UDim.new(0, 22)
-    padding.PaddingRight = UDim.new(0, 22)
-    padding.Parent = boton
-
-    boton.Text = texto
-    boton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    boton.Font = Enum.Font.GothamBold
-    boton.TextSize = 15
-
-    return boton
-end
-
-local function getSharedGFTopBar()
-    local bfGui = CoreGui:FindFirstChild("ConfiguracionesBF")
-    if bfGui then
-        local bar = bfGui:FindFirstChild("ContenedorHorizontal")
-        if bar then
-            return bar
-        end
-    end
-    return nil
-end
-
-local GFSharedBar = getSharedGFTopBar()
 local GFConfigOpen = false
 
-local function ensureGFButton()
-    if GFSharedBar and GFSharedBar:FindFirstChild("GFv2") then
-        return GFSharedBar:FindFirstChild("GFv2")
-    end
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "GFV2ConfigMenu"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.Parent = CoreGui
 
-    local bar = GFSharedBar or (function()
-        local screenGui = Instance.new("ScreenGui")
-        screenGui.Name = "ConfiguracionesGF"
-        screenGui.ResetOnSpawn = false
-        screenGui.IgnoreGuiInset = true
-        screenGui.Parent = CoreGui
+local GFButton = Instance.new("TextButton")
+GFButton.Name = "GFv2"
+GFButton.Size = UDim2.new(0, 70, 0, 42)
+GFButton.Position = UDim2.new(0, 480, 0, 12)
+GFButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+GFButton.BackgroundTransparency = 0.1
+GFButton.Text = "GFv2"
+GFButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+GFButton.Font = Enum.Font.GothamBold
+GFButton.TextSize = 15
+GFButton.Parent = screenGui
 
-        local topBar = Instance.new("Frame")
-        topBar.Name = "ContenedorHorizontal"
-        topBar.Size = UDim2.new(0, 0, 0, 42)
-        topBar.AutomaticSize = Enum.AutomaticSize.X
-        topBar.Position = UDim2.new(0, 400, 0, 12)
-        topBar.BackgroundTransparency = 1
-        topBar.Parent = screenGui
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0.5, 0)
+btnCorner.Parent = GFButton
 
-        local listLayout = Instance.new("UIListLayout")
-        listLayout.Parent = topBar
-        listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        listLayout.FillDirection = Enum.FillDirection.Horizontal
-        listLayout.Padding = UDim.new(0, 12)
-        listLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+local GFPanel = Instance.new("Frame")
+GFPanel.Name = "GFV2ConfigPanel"
+GFPanel.Size = UDim2.new(0, 220, 0, 190)
+GFPanel.Position = UDim2.new(0, 480, 0, 60)
+GFPanel.BackgroundColor3 = Color3.fromRGB(17, 17, 17)
+GFPanel.BorderSizePixel = 0
+GFPanel.Visible = false
+GFPanel.Parent = screenGui
 
-        return topBar
-    end)()
+local panelCorner = Instance.new("UICorner")
+panelCorner.CornerRadius = UDim.new(0, 14)
+panelCorner.Parent = GFPanel
 
-    local existingButton = bar:FindFirstChild("GFv2")
-    if existingButton then
-        return existingButton
-    end
+local panelStroke = Instance.new("UIStroke")
+panelStroke.Color = Color3.fromRGB(255, 255, 255)
+panelStroke.Thickness = 1
+panelStroke.Transparency = 1
+panelStroke.Parent = GFPanel
 
-    local gfButton = crearBotonVisualGF("GFv2", 2)
-    gfButton.Name = "GFv2"
-    gfButton.Parent = bar
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 8)
+layout.FillDirection = Enum.FillDirection.Vertical
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Parent = GFPanel
 
-    return gfButton
-end
-
-local GFButton = ensureGFButton()
-
-local function ensureGFPanel()
-    local panel = rawget(_G, "GFV2ConfigPanel")
-    if panel and panel.Parent then
-        return panel
-    end
-
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "GFV2ConfigMenu"
-    screenGui.ResetOnSpawn = false
-    screenGui.IgnoreGuiInset = true
-    screenGui.Parent = CoreGui
-
-    local panel = Instance.new("Frame")
-    panel.Name = "GFV2ConfigPanel"
-    panel.Size = UDim2.new(0, 220, 0, 182)
-    panel.Position = UDim2.new(0, 400, 0, 60)
-    panel.BackgroundColor3 = Color3.fromRGB(17, 17, 17)
-    panel.BorderSizePixel = 0
-    panel.Visible = false
-    panel.Parent = screenGui
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 14)
-    corner.Parent = panel
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255, 255, 255)
-    stroke.Thickness = 1.5
-    stroke.Transparency = 1
-    stroke.LineJoinMode = Enum.LineJoinMode.Miter
-    stroke.Parent = panel
-
-    local layout = Instance.new("UIListLayout")
-    layout.Padding = UDim.new(0, 8)
-    layout.FillDirection = Enum.FillDirection.Vertical
-    layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Parent = panel
-
-    local padding = Instance.new("UIPadding")
-    padding.PaddingLeft = UDim.new(0, 10)
-    padding.PaddingRight = UDim.new(0, 10)
-    padding.PaddingTop = UDim.new(0, 10)
-    padding.PaddingBottom = UDim.new(0, 10)
-    padding.Parent = panel
-
-    _G.GFV2ConfigPanel = panel
-    return panel
-end
-
-local GFPanel = ensureGFPanel()
+local padding = Instance.new("UIPadding")
+padding.PaddingLeft = UDim.new(0, 10)
+padding.PaddingRight = UDim.new(0, 10)
+padding.PaddingTop = UDim.new(0, 10)
+padding.PaddingBottom = UDim.new(0, 10)
+padding.Parent = GFPanel
 
 local function createGFConfigRow(parent, labelText, valueRef, onToggle)
     local row = Instance.new("Frame")
     row.Name = labelText .. "Row"
     row.Size = UDim2.new(1, 0, 0, 32)
-    row.BackgroundColor3 = Color3.fromRGB(27, 27, 27)
+    row.BackgroundTransparency = 1
     row.Parent = parent
-
-    local rowCorner = Instance.new("UICorner")
-    rowCorner.CornerRadius = UDim.new(0, 8)
-    rowCorner.Parent = row
 
     local textLabel = Instance.new("TextLabel")
     textLabel.Size = UDim2.new(0.6, 0, 1, 0)
     textLabel.BackgroundTransparency = 1
     textLabel.Text = labelText
-    textLabel.TextColor3 = Color3.fromRGB(245, 245, 245)
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     textLabel.Font = Enum.Font.GothamSemibold
     textLabel.TextSize = 14
     textLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -1280,16 +696,8 @@ local function createGFConfigRow(parent, labelText, valueRef, onToggle)
     toggleCorner.CornerRadius = UDim.new(0, 8)
     toggleCorner.Parent = toggleButton
 
-    local toggleStroke = Instance.new("UIStroke")
-    toggleStroke.Color = Color3.fromRGB(0, 0, 0)
-    toggleStroke.Thickness = 1
-    toggleStroke.Transparency = 1
-    toggleStroke.Parent = toggleButton
-
     toggleButton.MouseButton1Click:Connect(function()
-        if onToggle then
-            onToggle()
-        end
+        if onToggle then onToggle() end
         local nextValue = valueRef()
         toggleButton.Text = tostring(nextValue)
         toggleButton.BackgroundColor3 = nextValue and Color3.fromRGB(34, 197, 94) or Color3.fromRGB(120, 120, 120)
@@ -1315,15 +723,8 @@ local function makeGFConfigButton(label, callback)
     corner.CornerRadius = UDim.new(0, 10)
     corner.Parent = button
 
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(0, 0, 0)
-    stroke.Thickness = 1
-    stroke.Parent = button
-
     button.MouseButton1Click:Connect(function()
-        if callback then
-            callback()
-        end
+        if callback then callback() end
     end)
 
     return button
@@ -1340,35 +741,51 @@ local function toggleGFSyncState()
     GFSyncToggle = not GFSyncToggle
 end
 
-local function setGFConfigVisible(visible)
-    GFConfigOpen = visible
-    GFPanel.Visible = visible
-    GFButton.Text = visible and "Close" or "GFv2"
+local function toggleGFHideJacketState()
+    HideJacketaswell = not HideJacketaswell
+    if player.Character and player.Character.Parent then
+        GFSetupCharacter(player.Character, true)
+    end
 end
 
 createGFConfigRow(GFPanel, "Cosmetic Comp.", function() return GFCosmeticToggle end, toggleGFCosmeticState)
 createGFConfigRow(GFPanel, "Head Sync", function() return GFSyncToggle end, toggleGFSyncState)
-createGFConfigRow(GFPanel, "Hide Jacket", function() return HideJacketaswell end, function()
-    HideJacketaswell = not HideJacketaswell
-end)
+createGFConfigRow(GFPanel, "Hide Jacket", function() return HideJacketaswell end, toggleGFHideJacketState)
 
 makeGFConfigButton("Force Reload", function()
     GFTriggerForceReload()
 end)
 
 GFButton.MouseButton1Click:Connect(function()
-    setGFConfigVisible(not GFConfigOpen)
+    GFConfigOpen = not GFConfigOpen
+    GFPanel.Visible = GFConfigOpen
+    GFButton.Text = GFConfigOpen and "Close" or "GFv2"
 end)
-
-setGFConfigVisible(false)
-
--- Loadstring para el tema lms
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/MisterSaiyan/cosas/refs/heads/main/scripts/FNFSkins/V2/gflms.lua"))()
 
--- Colores del martillo (creditos a lil2kki)
+-- ============================================================================
+-- RECOLOR DEL MARTILLO / AXE (VALIDACIÓN ESTRICTA DE PARTES FÍSICAS)
+-- ============================================================================
 
 local function updateHammer(model)
+    if not model then return end
+    
+    -- Verificamos de forma segura si el modelo tiene al menos una BasePart antes de iterar
+    local hasValidParts = false
+    if model:IsA("BasePart") then
+        hasValidParts = true
+    else
+        for _, desc in ipairs(model:GetDescendants()) do
+            if desc:IsA("BasePart") then
+                hasValidParts = true
+                break
+            end
+        end
+    end
+    
+    if not hasValidParts then return end -- Si está vacío, salimos silenciosamente
+
     for _, v in ipairs(model:GetDescendants()) do
         if v:IsA("BasePart") then
             if v.Color == Color3.fromRGB(255, 217, 0) then v.Color = Color3.fromRGB(27, 42, 53) end
@@ -1378,52 +795,53 @@ local function updateHammer(model)
     end
 end
 
-updateHammer(game:GetService("ReplicatedStorage").ClientAssets.Characters.Survivors.Amy.Skins.Default.Hammer)
+-- Función auxiliar para obtener el arma solo si tiene contenido real
+local function getValidWeapon(parent)
+    if not parent then return nil end
+    local weapon = parent:FindFirstChild("Hammer") or parent:FindFirstChild("Axe")
+    if not weapon then return nil end
+
+    -- Verificamos si tiene partes adentro
+    local hasParts = false
+    if weapon:IsA("BasePart") then
+        hasParts = true
+    else
+        for _, desc in ipairs(weapon:GetDescendants()) do
+            if desc:IsA("BasePart") then
+                hasParts = true
+                break
+            end
+        end
+    end
+
+    if not hasParts then return nil end
+    return weapon
+end
+
+pcall(function()
+    local skinsFolder = game:GetService("ReplicatedStorage"):FindFirstChild("ClientAssets")
+        and game.ReplicatedStorage.ClientAssets:FindFirstChild("Characters")
+        and game.ReplicatedStorage.ClientAssets.Characters:FindFirstChild("Survivors")
+        and game.ReplicatedStorage.ClientAssets.Characters.Survivors:FindFirstChild("Amy")
+        and game.ReplicatedStorage.ClientAssets.Characters.Survivors.Amy:FindFirstChild("Skins")
+    
+    if not skinsFolder then return end
+    local defaultSkin = skinsFolder:FindFirstChild("Default")
+    if not defaultSkin then return end
+
+    local weapon = getValidWeapon(defaultSkin)
+    if not weapon then return end
+
+    updateHammer(weapon)
+end)
 
 if _G.AmyHammerUpd then _G.AmyHammerUpd:Disconnect() end
 _G.AmyHammerUpd = workspace.Players.ChildAdded:Connect(function(child)
-    print("ChildAdded:", child.ClassName, child:GetFullName())
     if game.Players.LocalPlayer.Name ~= child.Name then return end
-
-    local cameraConnection
-    local currentCameraConnection
-    local initialCFrame
-    local finished = false
-
-    local function applyHammer()
-        if finished then return end
-        finished = true
-        if cameraConnection then cameraConnection:Disconnect() end
-        if currentCameraConnection then currentCameraConnection:Disconnect() end
-
-        local Hammer = child:FindFirstChild("Hammer", true)
-        if not Hammer then return end
-        print(Hammer:GetFullName())
-        updateHammer(Hammer)
-    end
-
-    local function watchCamera()
-        if cameraConnection then
-            cameraConnection:Disconnect()
-            cameraConnection = nil
-        end
-        local camera = workspace.CurrentCamera
-        if not camera then return end
-        if not initialCFrame then initialCFrame = camera.CFrame end
-        if camera.CFrame ~= initialCFrame then
-            applyHammer()
-            return
-        end
-        cameraConnection = camera:GetPropertyChangedSignal("CFrame"):Connect(function()
-            if camera.CFrame ~= initialCFrame then applyHammer() end
-        end)
-        if camera.CFrame ~= initialCFrame then applyHammer() end
-    end
-
-		-- hi
-
-    currentCameraConnection = workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(watchCamera)
-    watchCamera()
+    task.delay(0.2, function()
+        if not child or not child.Parent then return end
+        local weapon = getValidWeapon(child)
+        if not weapon then return end
+        updateHammer(weapon)
+    end)
 end)
-
-print("hammer recolor comes!")

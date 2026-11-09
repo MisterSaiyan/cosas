@@ -9,7 +9,7 @@ local CoreGui = game:GetService("CoreGui")
 
 local player = Players.LocalPlayer
 local character = player.Character
-local ASSET_ID = 137895615579863
+local ASSET_ID = 75527685619423
 local SUPER_ID = 138131908852771
 local isScriptActive = false
 local currentMdl = nil
@@ -131,357 +131,301 @@ for _, partName in ipairs(sonicBaseRoots) do
 	sonicBasePartNames[partName] = true
 end
 
--- Cosmetics
+local cosmetictoggle = true
+local hatCosmeticToggle = true
+local shoesCosmeticToggle = true
 
-local cosmetictoggle = true -- true to protect cosmetics from being hidden (Default: true)
-local hatCosmeticToggle = true -- separate toggle for hats only (Default: true)
-local shoesCosmeticToggle = true -- separate toggle for shoes only (Default: true)
-
-local cosmeticRootNames = -- Protected cosmetic root names that should not be hidden
-{ 
-	Shadow = true,
-	SHOVEL = true,
-	Bodyy = true,
-	-- Buckles
-	["Cube.001"] = true,
-	["Cube.014"] = true,
+local cosmeticRootNames = { 
+    Shadow = true,
+    SHOVEL = true,
+    Bodyy = true,
+    ["Cube.001"] = true,
+    ["Cube.014"] = true,
 }
 
-local cosmeticrootnamesHIDE = -- Cosmetics that are forced to hide
-{
- superMoist_shoes = true,
+local cosmeticrootnamesHIDE = {
+    superMoist_shoes = true,
     ["head new"] = true,
     headnewFocus = true,
-	hairpiece = true,
-	topquill = true,
-	quilllow = true,
-	quill = true,
+    hairpiece = true,
+    topquill = true,
+    quilllow = true,
+    quill = true,
 }
 
-local shirtCosmetics = -- Body Cosmetics, these will hide BF's sweatshirt
-{
-	HyperCape = true,
-	RedCape = true,
-	PacedCape = true,
-	EnergyCape = true,
-	DevilHunter = true,
-	PostMortemCape = true,
-	superMoist_cape = true,
-	Bodyy = true,
-	SHORT = true,
-	BrownScarg = true,
+local shirtCosmetics = {
+    HyperCape = true,
+    RedCape = true,
+    PacedCape = true,
+    EnergyCape = true,
+    DevilHunter = true,
+    PostMortemCape = true,
+    superMoist_cape = true,
+    Bodyy = true,
+    SHORT = true,
+    BrownScarg = true,
 }
 
-local HatsCosmetics = -- Cosmetics that requiere hiding BF's hat
-	{
-	Hair = true,
-	hairpiece = true,
-	topquill = true,
-	quilllow = true,
-	quill = true,
-	Hat = true,
-	Bowtie = true,
-	PaceHat = true,
-	StrawCowboy = true,
-	AnniFlowers = true,
-	AnniversaryCombo = true,
-	AnniDoll = true,
-	AnniNo1Hat = true,
-	AnniHat = true,
-	OvaHat = true,
-	BrokenCrown = true,
-	SANTA_HAT = true,
-	TrevorsHat = true,
-	Crown = true,
-	ScoutHat = true,
-	}
+local HatsCosmetics = {
+    Hair = true,
+    hairpiece = true,
+    topquill = true,
+    quilllow = true,
+    quill = true,
+    Hat = true,
+    Bowtie = true,
+    PaceHat = true,
+    StrawCowboy = true,
+    AnniFlowers = true,
+    AnniversaryCombo = true,
+    AnniDoll = true,
+    AnniNo1Hat = true,
+    AnniHat = true,
+    OvaHat = true,
+    BrokenCrown = true,
+    SANTA_HAT = true,
+    TrevorsHat = true,
+    Crown = true,
+    ScoutHat = true,
+}
 
-	-- Debe ocultar todo lo que este dentro de
-	-- la agrupacion (Shoes) del modelo custom
-	local ShoesCosmetics = {
-		superMoist_shoes = true,
-		-- Front Studded Shoes
-		["Right Shoe"] = true,
-		Weld = true,
-		["Sphere.018"] = true,
-	LFoot = true,
-	RFoot = true,
-	Cube = true,
-	}
+local ShoesCosmetics = {
+    superMoist_shoes = true,
+    ["Right Shoe"] = true,
+    Weld = true,
+    ["Sphere.018"] = true,
+    LFoot = true,
+    RFoot = true,
+    Cube = true,
+}
 
 local shoeComponentPartNames = {
-	LFoot = true,
-	RFoot = true,
-	Cube = true,
+    LFoot = true,
+    RFoot = true,
+    Cube = true,
 }
 
--- Functions to manage cosmetic visibility and model setup
 
 local function isShoesCosmeticContainer(container)
-	if not container or not (container:IsA("Model") or container:IsA("Folder")) then
-		return false
-	end
+    if not container or not (container:IsA("Model") or container:IsA("Folder")) then
+        return false
+    end
 
-	local hasShoePart = false
-	local hasWeld = false
-	-- Container must have at least one shoe part and
-	-- a weld to be considered a shoes cosmetic container
-	for _, child in ipairs(container:GetChildren()) do
-		if shoeComponentPartNames[child.Name]
-			and (child:IsA("BasePart") or child:IsA("Model") or child:IsA("Folder")) then
-			hasShoePart = true
-			if child:FindFirstChild("Weld", true) then
-				hasWeld = true
-			end
-		elseif child.Name == "Weld" then
-			hasWeld = true
-		end
-	end
-	return hasShoePart and hasWeld
+    local hasShoePart = false
+    local hasWeld = false
+    for _, child in ipairs(container:GetChildren()) do
+        if shoeComponentPartNames[child.Name]
+            and (child:IsA("BasePart") or child:IsA("Model") or child:IsA("Folder")) then
+            hasShoePart = true
+            if child:FindFirstChild("Weld", true) then
+                hasWeld = true
+            end
+        elseif child.Name == "Weld" then
+            hasWeld = true
+        end
+    end
+    return hasShoePart and hasWeld
 end
-
--- Check if an object belongs to a shoes cosmetic container
--- within the model hierarchy
 
 local function belongsToShoesCosmetic(object, model)
-	local current = object
-	while current and current ~= model do
-		if isShoesCosmeticContainer(current) then
-			return true
-		end
-		current = current.Parent
-	end
-	return false
+    local current = object
+    while current and current ~= model do
+        if isShoesCosmeticContainer(current) then
+            return true
+        end
+        current = current.Parent
+    end
+    return false
 end
 
--- Check if an object is the original "Cube.001" part of the "hed" group in the model hierarchy
-
 local function isOriginalHedCube001(object, model)
-	if not object or object.Name ~= "Cube.001" then
-		return false
-	end
-
-	-- Check if the object is a descendant of the original "hed part
-	-- in the model hierarchy
-	local current = object.Parent
-	while current do
-		if current.Name == "hed" then
-			return true
-		end
-		if current == model then
-			break
-		end
-		current = current.Parent
-	end
-	return false
+    if not object or object.Name ~= "Cube.001" then
+        return false
+    end
+    local current = object.Parent
+    while current do
+        if current.Name == "hed" then
+            return true
+        end
+        if current == model then
+            break
+        end
+        current = current.Parent
+    end
+    return false
 end
 
 local function isShadowPartA(object, model)
-	local current = object
-	local foundA = false
-	while current and current ~= model do
-		if current.Name == "A" then
-			foundA = true
-		elseif current.Name == "Shadow" and foundA then
-			return true
-		end
-		current = current.Parent
-	end
-	return false
+    local current = object
+    local foundA = false
+    while current and current ~= model do
+        if current.Name == "A" then
+            foundA = true
+        elseif current.Name == "Shadow" and foundA then
+            return true
+        end
+        current = current.Parent
+    end
+    return false
 end
+
+-- APLICACIÓN CORRECTA DE VISIBILIDAD EN ACCESORIOS
 
 local function setProtectedCosmeticVisibility(model, cosmeticSource)
-	if not model then
-		return
-	end
+    if not model then return end
 
-	local function applyToObject(obj, visible)
-		if not obj then
-			return
-		end
+    local function applyToObject(obj, visible)
+        if not obj then return end
+        local objects = { obj }
+        for _, child in ipairs(obj:GetDescendants()) do
+            table.insert(objects, child)
+        end
 
-		local objects = { obj }
-		for _, child in ipairs(obj:GetDescendants()) do
-			table.insert(objects, child)
-		end
+        for _, object in ipairs(objects) do
+            if object:IsA("BasePart") then
+                if isShadowPartA(object, model) or object.Name == "Weld" or isSuperMoistCapeWeld(object) then
+                    object.Transparency = 1
+                else
+                    object.Transparency = visible and 0 or 1
+                end
+                object.CanCollide = false
+            elseif object:IsA("Decal") or object:IsA("Texture") then
+                object.Transparency = isShadowPartA(object, model) and 1 or (visible and 0 or 1)
+            end
+        end
+    end
 
-		for _, object in ipairs(objects) do
-			if object:IsA("BasePart") then
-				if isShadowPartA(object, model) then
-					object.Transparency = 1
-				elseif object.Name == "Weld" or isSuperMoistCapeWeld(object) then
-					object.Transparency = 1
-				else
-					object.Transparency = visible and 0 or 1
-				end
-				object.CanCollide = false
-			elseif object:IsA("Decal") or object:IsA("Texture") then
-				object.Transparency = isShadowPartA(object, model) and 1 or (visible and 0 or 1)
-			end
+    local protectedNames = {}
+    for name in pairs(shirtCosmetics) do protectedNames[name] = true end
+    for name in pairs(HatsCosmetics) do protectedNames[name] = true end
+    for name in pairs(cosmeticRootNames) do protectedNames[name] = true end
+    for name in pairs(cosmeticrootnamesHIDE) do protectedNames[name] = true end
 
-		end
-	end
+    for _, object in ipairs(model:GetDescendants()) do
+        local name = object.Name
+        if isOriginalHedCube001(object, model) then
+            if object:IsA("BasePart") then
+                object.Transparency = 1
+                object.CanCollide = false
+            end
+        elseif protectedNames[name] then
+            if object:IsA("Model") or object:IsA("Folder") or object:IsA("BasePart") then
+                local isHatCosmetic = HatsCosmetics[name] == true
+                local targetVisible = cosmetictoggle
+                if isHatCosmetic then
+                    targetVisible = cosmetictoggle and hatCosmeticToggle
+                end
+                applyToObject(object, targetVisible)
+            end
+        end
+    end
 
-	local protectedNames = {}
-	for name in pairs(shirtCosmetics) do
-		protectedNames[name] = true
-	end
-	for name in pairs(HatsCosmetics) do
-		protectedNames[name] = true
-	end
-	for name in pairs(cosmeticRootNames) do
-		protectedNames[name] = true
-	end
-	for name in pairs(cosmeticrootnamesHIDE) do
-		protectedNames[name] = true
-	end
+    for _, object in ipairs(model:GetDescendants()) do
+        if isShoesCosmeticContainer(object) then
+            applyToObject(object, shoesCosmeticToggle)
+        end
+    end
 
-	for _, object in ipairs(model:GetDescendants()) do
-		local name = object.Name
-		if isOriginalHedCube001(object, model) then
-			if object:IsA("BasePart") then
-				object.Transparency = 1
-				object.CanCollide = false
-			end
-		elseif protectedNames[name] then
-			if object:IsA("Model") or object:IsA("Folder") or object:IsA("BasePart") then
-				local isHatCosmetic = HatsCosmetics[name] == true
-				local targetVisible = cosmetictoggle
-				if isHatCosmetic then
-					targetVisible = cosmetictoggle and hatCosmeticToggle
-				end
-				applyToObject(object, targetVisible)
-			end
-		end
-	end
+    local rootsToCheck = { model }
+    if cosmeticSource and cosmeticSource ~= model then
+        table.insert(rootsToCheck, cosmeticSource)
+    end
 
-	for _, object in ipairs(model:GetDescendants()) do
-		if isShoesCosmeticContainer(object) then
-			applyToObject(object, shoesCosmeticToggle)
-		end
-	end
+    local hasShoesCosmetic = false
+    for _, root in ipairs(rootsToCheck) do
+        if (ShoesCosmetics[root.Name] and not shoeComponentPartNames[root.Name])
+            or isShoesCosmeticContainer(root) then
+            hasShoesCosmetic = true
+            break
+        end
+        for _, object in ipairs(root:GetDescendants()) do
+            if (ShoesCosmetics[object.Name] and not shoeComponentPartNames[object.Name])
+                or isShoesCosmeticContainer(object) then
+                hasShoesCosmetic = true
+                break
+            end
+        end
+        if hasShoesCosmetic then break end
+    end
 
-	local rootsToCheck = { model }
-	if cosmeticSource and cosmeticSource ~= model then
-		table.insert(rootsToCheck, cosmeticSource)
-	end
-
-	local hasShoesCosmetic = false
-	for _, root in ipairs(rootsToCheck) do
-		if (ShoesCosmetics[root.Name] and not shoeComponentPartNames[root.Name])
-			or isShoesCosmeticContainer(root) then
-			hasShoesCosmetic = true
-			break
-		end
-
-		for _, object in ipairs(root:GetDescendants()) do
-			if (ShoesCosmetics[object.Name] and not shoeComponentPartNames[object.Name])
-				or isShoesCosmeticContainer(object) then
-				hasShoesCosmetic = true
-				break
-			end
-		end
-
-		if hasShoesCosmetic then
-			break
-		end
-	end
-
-	local hideShoesGroups = hasShoesCosmetic and shoesCosmeticToggle
-	for _, group in ipairs(model:GetDescendants()) do
-		if (group.Name == "Shoes" or group.Name == "Thing2")
-			and (group:IsA("Model") or group:IsA("Folder")) then
-			applyToObject(group, not hideShoesGroups)
-		end
-	end
+    local hideShoesGroups = hasShoesCosmetic and shoesCosmeticToggle
+    for _, group in ipairs(model:GetDescendants()) do
+        if (group.Name == "Shoes" or group.Name == "Thing2")
+            and (group:IsA("Model") or group:IsA("Folder")) then
+            applyToObject(group, not hideShoesGroups)
+        end
+    end
 end
 
+-- CONTROL DE ROPA Y GORROS INSERTADOS
+
 local function updateInsertedShirt(model, insertedModel)
-	if not model or not insertedModel then
-		return
-	end
+    if not model or not insertedModel then return end
 
-	local shirtModel = insertedModel:FindFirstChild("poleronmodel", true)
-	local baseShirtModel = insertedModel:FindFirstChild("Camisa", true)
-		or insertedModel:FindFirstChild("camisa", true)
+    local shirtModel = insertedModel:FindFirstChild("poleronmodel", true)
+    local baseShirtModel = insertedModel:FindFirstChild("Camisa", true)
+        or insertedModel:FindFirstChild("camisa", true)
 
-	local function setShirtVisibility(group, visible)
-		if not group then
-			return
-		end
+    local function setShirtVisibility(group, visible)
+        if not group then return end
+        for _, object in ipairs(group:GetDescendants()) do
+            if object:IsA("BasePart") then
+                object.Transparency = visible and 0 or 1
+                object.CanCollide = false
+            elseif object:IsA("Decal") or object:IsA("Texture") then
+                object.Transparency = visible and 0 or 1
+            end
+        end
+    end
 
-		local objects = { group }
-		for _, object in ipairs(group:GetDescendants()) do
-			table.insert(objects, object)
-		end
+    if not cosmetictoggle then
+        setShirtVisibility(shirtModel, true)
+        setShirtVisibility(baseShirtModel, false)
+        return
+    end
 
-		for _, object in ipairs(objects) do
-			if object:IsA("BasePart") then
-				object.Transparency = visible and 0 or 1
-				object.CanCollide = false
-			elseif object:IsA("Decal") or object:IsA("Texture") then
-				object.Transparency = visible and 0 or 1
-			end
-		end
-	end
+    local hasShirtCosmetic = false
+    for cosmeticName in pairs(shirtCosmetics) do
+        if model:FindFirstChild(cosmeticName, true) then
+            hasShirtCosmetic = true
+            break
+        end
+    end
 
-	if not cosmetictoggle then
-		setShirtVisibility(shirtModel, true)
-		setShirtVisibility(baseShirtModel, false)
-		return
-	end
-
-	local hasShirtCosmetic = false
-	for cosmeticName in pairs(shirtCosmetics) do
-		if model:FindFirstChild(cosmeticName, true) then
-			hasShirtCosmetic = true
-			break
-		end
-	end
-
-	setShirtVisibility(shirtModel, not hasShirtCosmetic)
-	setShirtVisibility(baseShirtModel, hasShirtCosmetic)
+    setShirtVisibility(shirtModel, not hasShirtCosmetic)
+    setShirtVisibility(baseShirtModel, hasShirtCosmetic)
 end
 
 local function updateInsertedHat(model, insertedModel)
-	if not model or not insertedModel then
-		return
-	end
+    if not model or not insertedModel then return end
 
-	local function setHatVisibility(name, visible)
-		for _, object in ipairs(insertedModel:GetDescendants()) do
-			if object:IsA("BasePart") and object.Name == name then
-				object.Transparency = visible and 0 or 1
-				object.CanCollide = false
-			end
-		end
-	end
+    local function setHatVisibility(name, visible)
+        for _, object in ipairs(insertedModel:GetDescendants()) do
+            if object:IsA("BasePart") and object.Name == name then
+                object.Transparency = visible and 0 or 1
+                object.CanCollide = false
+            end
+        end
+    end
 
-	if not cosmetictoggle then
-		setHatVisibility("bhat", true)
-		setHatVisibility("hat", true)
-		setHatVisibility("sas", true)
-		return
-	end
+    if not cosmetictoggle or not hatCosmeticToggle then
+        setHatVisibility("bhat", true)
+        setHatVisibility("hat", true)
+        setHatVisibility("sas", true)
+        return
+    end
 
-	if not hatCosmeticToggle then
-		setHatVisibility("bhat", true)
-		setHatVisibility("hat", true)
-		setHatVisibility("sas", true)
-		return
-	end
+    local hasHatCosmetic = false
+    for cosmeticName in pairs(HatsCosmetics) do
+        if model:FindFirstChild(cosmeticName, true) then
+            hasHatCosmetic = true
+            break
+        end
+    end
 
-	local hasHatCosmetic = false
-	for cosmeticName in pairs(HatsCosmetics) do
-		if model:FindFirstChild(cosmeticName, true) then
-			hasHatCosmetic = true
-			break
-		end
-	end
-
-	setHatVisibility("bhat", not hasHatCosmetic)
-	setHatVisibility("hat", not hasHatCosmetic)
-	setHatVisibility("sas", not hasHatCosmetic)
+    setHatVisibility("bhat", not hasHatCosmetic)
+    setHatVisibility("hat", not hasHatCosmetic)
+    setHatVisibility("sas", not hasHatCosmetic)
 end
 
 local function belongsToCosmeticRoot(object, model)
@@ -591,35 +535,46 @@ task.spawn(function()
 
     if replacement then
         replacement.Name = "Default"
-		local replacementRoot = replacement:FindFirstChild("HumanoidRootPart", true)
-		if replacementRoot and replacement:IsA("Model") then
-			local rootCFrame = replacementRoot.CFrame
-			local pivotCFrame = replacement:GetPivot()
-			replacement.PrimaryPart = replacementRoot
-			replacement:PivotTo(rootCFrame:ToObjectSpace(pivotCFrame))
-		end
-		if not replacement:FindFirstChild("Sphere.003") then
-			local fallback = Instance.new("Part")
-			fallback.Name = "Sphere.003"
-			fallback.Size = Vector3.new(0.1, 0.1, 0.1)
-			fallback.Transparency = 1
-			fallback.CanCollide = false
-			fallback.CanTouch = false
-			fallback.CanQuery = false
-			fallback.Anchored = true
-			fallback.Parent = replacement
-		end
-		if not replacement:FindFirstChild("Sphere.007") then
-			local fallback = Instance.new("Part")
-			fallback.Name = "Sphere.007"
-			fallback.Size = Vector3.new(0.1, 0.1, 0.1)
-			fallback.Transparency = 1
-			fallback.CanCollide = false
-			fallback.CanTouch = false
-			fallback.CanQuery = false
-			fallback.Anchored = true
-			fallback.Parent = replacement
-		end
+        local replacementRoot = replacement:FindFirstChild("HumanoidRootPart", true)
+        if replacementRoot and replacement:IsA("Model") then
+            local rootCFrame = replacementRoot.CFrame
+            local pivotCFrame = replacement:GetPivot()
+            replacement.PrimaryPart = replacementRoot
+            replacement:PivotTo(rootCFrame:ToObjectSpace(pivotCFrame))
+        end
+
+        -- [COMPATIBILIDAD]: Limpiamos o aplicamos reglas base de ocultamiento 
+        -- para que las partes estáticas de la skin no colisionen visualmente con los accesorios futuros.
+        for _, object in ipairs(replacement:GetDescendants()) do
+            if object:IsA("BasePart") and (cosmeticrootnamesHIDE[object.Name] or sonicBasePartNames[object.Name]) then
+                -- Opcional: aseguramos estado base neutro para evitar solapamientos
+                object.CanCollide = false
+            end
+        end
+
+        if not replacement:FindFirstChild("Sphere.003") then
+            local fallback = Instance.new("Part")
+            fallback.Name = "Sphere.003"
+            fallback.Size = Vector3.new(0.1, 0.1, 0.1)
+            fallback.Transparency = 1
+            fallback.CanCollide = false
+            fallback.CanTouch = false
+            fallback.CanQuery = false
+            fallback.Anchored = true
+            fallback.Parent = replacement
+        end
+        if not replacement:FindFirstChild("Sphere.007") then
+            local fallback = Instance.new("Part")
+            fallback.Name = "Sphere.007"
+            fallback.Size = Vector3.new(0.1, 0.1, 0.1)
+            fallback.Transparency = 1
+            fallback.CanCollide = false
+            fallback.CanTouch = false
+            fallback.CanQuery = false
+            fallback.Anchored = true
+            fallback.Parent = replacement
+        end
+        
         replacement.Parent = skins
         originalDefault:Destroy()
     end
@@ -1530,7 +1485,7 @@ local function setBFConfigVisible(visible)
     bfConfigOpen = visible
     bfConfigPanel.Visible = visible
     btnBFV2.Text = visible and "Close" or "BFv2"
-end
+	end
 
 btnBFV2.MouseButton1Click:Connect(function()
     setBFConfigVisible(not bfConfigOpen)

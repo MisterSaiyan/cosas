@@ -29,12 +29,14 @@ local GFModeConnections = {}
 local GFStartPending = false
 
 -- Amy Iconos
-local IconNormalGF = "rbxassetid://73222561332765"
-local ExpressionNormalGF = "rbxassetid://79752501485749"
-local ExpressionChasedGF = "rbxassetid://113659883065962"
-local DownedIconGF = "rbxassetid://91117693958700"
-local IconLastLifeGF = "rbxassetid://119311173785729"
-local ExpressionLastLifeGF = "rbxassetid://86029426878323"
+local IconNormalGF = "rbxassetid://73222561332765" -- Expression.Regular
+local ExpressionNormalGF = "rbxassetid://79752501485749" -- Eyes.Regular
+local ExpressionChasedGF = "rbxassetid://113659883065962" -- Eyes.Chased
+
+-- LastLife Iconos Amy
+local DownedIconGF = "rbxassetid://91117693958700" -- Expression.Downed
+local IconLastLifeGF = "rbxassetid://119311173785729" -- Expression.LastLife
+local ExpressionLastLifeGF = "rbxassetid://86029426878323" -- Reemplaza Eyes.Regular si estas en lastlife
 
 local GFForceReload = false
 local GFCosmeticToggle = true
@@ -262,6 +264,259 @@ end
 local function GFIsAmy()
 	local model = GFGetPlayerModel()
 	return model and model:GetAttribute("Character") == "Amy"
+end
+
+-- ============================================================================
+-- SISTEMA DE ICONOS (RESTAURADO)
+-- ============================================================================
+
+local function GFGetBooleanState(root, names)
+    if not root then
+        return false
+    end
+
+    for _, name in ipairs(names) do
+        local value = root:GetAttribute(name)
+        if value == true or value == "true" or value == "True" then
+            return true
+        end
+
+        local stateObject = root:FindFirstChild(name, true)
+        if stateObject then
+            if stateObject:IsA("BoolValue") and stateObject.Value then
+                return true
+            end
+            if stateObject:IsA("ObjectValue") and stateObject.Value ~= nil then
+                return true
+            end
+            if stateObject:IsA("StringValue") and (stateObject.Value == "true" or stateObject.Value == "True") then
+                return true
+            end
+            if stateObject:IsA("IntValue") and stateObject.Value > 0 then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+local function GFSetFolderState(folder, activeName, imageId, fitToFrame, layout, zIndex)
+    if not folder then
+        return
+    end
+
+    for _, child in ipairs(folder:GetChildren()) do
+        if child:IsA("ImageLabel") or child:IsA("ImageButton") then
+            child.Visible = false
+        end
+    end
+
+    for _, child in ipairs(folder:GetChildren()) do
+        if child:IsA("ImageLabel") or child:IsA("ImageButton") then
+            local isActive = child.Name == activeName
+            if isActive then
+                child.Visible = true
+                child.Image = imageId
+                child.ZIndex = zIndex
+                if layout and layout.position then
+                    child.Position = layout.position
+                end
+                if fitToFrame and layout and layout.size then
+                    child.AnchorPoint = Vector2.new(0.5, 0.5)
+                    child.Size = layout.size
+                    child.ScaleType = Enum.ScaleType.Fit
+                end
+            end
+        end
+    end
+end
+
+local GFFunctionApplyIcon
+
+GFFunctionApplyIcon = function()
+    local playerGui = player:FindFirstChildOfClass("PlayerGui")
+    local round = playerGui and playerGui:FindFirstChild("Round")
+    local gameGui = round and round:FindFirstChild("Game")
+    local teams = gameGui and gameGui:FindFirstChild("Teams")
+    local playerFrame = teams and teams:FindFirstChild(player.Name)
+    local frame = playerFrame and playerFrame:FindFirstChild("Frame")
+    local characterGui = frame and frame:FindFirstChild("Character")
+
+    if not characterGui then
+        return
+    end
+
+    local model = GFGetPlayerModel() or player.Character
+    local isDowned = GFGetBooleanState(model, { "Downed", "IsDowned", "BeingDowned" })
+        or GFGetBooleanState(player.Character, { "Downed", "IsDowned", "BeingDowned" })
+        or GFGetBooleanState(player, { "Downed", "IsDowned", "BeingDowned" })
+    local isLastLife = GFGetBooleanState(model, { "LastLife", "IsLastLife", "SecondLife" })
+        or GFGetBooleanState(player.Character, { "LastLife", "IsLastLife", "SecondLife" })
+        or GFGetBooleanState(player, { "LastLife", "IsLastLife", "SecondLife" })
+    local isChased = GFGetBooleanState(model, { "Chased", "IsChased", "InChase", "BeingChased" })
+        or GFGetBooleanState(player.Character, { "Chased", "IsChased", "InChase", "BeingChased" })
+        or GFGetBooleanState(player, { "Chased", "IsChased", "InChase", "BeingChased" })
+
+    -- Chased con retardo de salida (GFChasedReleaseDelay)
+    if isChased then
+        if not GFChasedVisible or GFChasedLostAt then
+            GFChasedVisible = true
+            GFChasedLostAt = nil
+            GFChasedGeneration += 1
+        end
+    elseif GFChasedVisible then
+        if not GFChasedLostAt then
+            GFChasedLostAt = os.clock()
+            GFChasedGeneration += 1
+            local generation = GFChasedGeneration
+            task.delay(GFChasedReleaseDelay, function()
+                if GFIsScriptActive and GFChasedGeneration == generation then
+                    GFFunctionApplyIcon()
+                end
+            end)
+        elseif os.clock() - GFChasedLostAt >= GFChasedReleaseDelay then
+            GFChasedVisible = false
+            GFChasedLostAt = nil
+            GFChasedGeneration += 1
+        end
+    end
+
+    local eyesState = "Regular"
+    local expressionState = isLastLife and "LastLife" or "Regular"
+    local eyesImage = ExpressionNormalGF
+    local expressionImage = isLastLife and IconLastLifeGF or IconNormalGF
+
+    if GFChasedVisible then
+        eyesState = "Chased"
+        eyesImage = ExpressionChasedGF
+    end
+    if isDowned then
+        eyesState = "Stunned"
+        expressionState = "Downed"
+        expressionImage = DownedIconGF
+    end
+    if isLastLife and not GFChasedVisible then
+        eyesImage = ExpressionLastLifeGF
+    end
+
+    if eyesState ~= GFLastEyesState then
+        GFLastEyesState = eyesState
+        warn("[AmyGFV2] Eyes state:", eyesState, "Chased:", isChased, "Downed:", isDowned)
+    end
+
+    local layout = {
+        position = UDim2.fromScale(0.45, 0.39),
+        size = UDim2.fromScale(0.60, 0.60),
+    }
+    GFSetFolderState(characterGui:FindFirstChild("Eyes"), isDowned and "" or eyesState, eyesImage, true, layout, 10)
+    GFSetFolderState(characterGui:FindFirstChild("Expression"), expressionState, expressionImage, true, layout, 5)
+end
+
+local GFIconStateNames = {
+    LastLife = true,
+    IsLastLife = true,
+    SecondLife = true,
+    Downed = true,
+    IsDowned = true,
+    BeingDowned = true,
+    Chased = true,
+    IsChased = true,
+    InChase = true,
+    BeingChased = true,
+}
+
+local function GFDisconnectIconWatchers()
+    for _, connection in ipairs(GFIconConnections) do
+        connection:Disconnect()
+    end
+    table.clear(GFIconConnections)
+end
+
+local function GFWatchIconStateRoot(root, watchedRoots, watchedValues)
+    if not root or watchedRoots[root] then
+        return
+    end
+    watchedRoots[root] = true
+
+    local function refresh()
+        if GFIsScriptActive then
+            GFFunctionApplyIcon()
+        end
+    end
+
+    local function watchValue(object)
+        if not GFIconStateNames[object.Name]
+            or not object:IsA("ValueBase")
+            or watchedValues[object] then
+            return
+        end
+        watchedValues[object] = true
+        table.insert(GFIconConnections, object.Changed:Connect(refresh))
+    end
+
+    for stateName in pairs(GFIconStateNames) do
+        table.insert(
+            GFIconConnections,
+            root:GetAttributeChangedSignal(stateName):Connect(refresh)
+        )
+    end
+    for _, descendant in ipairs(root:GetDescendants()) do
+        watchValue(descendant)
+    end
+    table.insert(GFIconConnections, root.DescendantAdded:Connect(function(descendant)
+        watchValue(descendant)
+        if GFIconStateNames[descendant.Name] then
+            refresh()
+        end
+    end))
+    table.insert(GFIconConnections, root.DescendantRemoving:Connect(function(descendant)
+        if GFIconStateNames[descendant.Name] then
+            task.defer(refresh)
+        end
+    end))
+end
+
+local function GFSetupIconWatchers()
+    GFDisconnectIconWatchers()
+    local watchedRoots = setmetatable({}, { __mode = "k" })
+    local watchedValues = setmetatable({}, { __mode = "k" })
+
+    GFWatchIconStateRoot(player, watchedRoots, watchedValues)
+    GFWatchIconStateRoot(player.Character, watchedRoots, watchedValues)
+    GFWatchIconStateRoot(GFGetPlayerModel(), watchedRoots, watchedValues)
+
+    local function watchPlayersFolder(folder)
+        GFWatchIconStateRoot(folder:FindFirstChild(player.Name), watchedRoots, watchedValues)
+        table.insert(GFIconConnections, folder.ChildAdded:Connect(function(child)
+            if child.Name == player.Name then
+                GFWatchIconStateRoot(child, watchedRoots, watchedValues)
+                GFFunctionApplyIcon()
+            end
+        end))
+    end
+
+    local playersFolder = workspace:FindFirstChild("Players")
+    if playersFolder then
+        watchPlayersFolder(playersFolder)
+    end
+    table.insert(GFIconConnections, workspace.ChildAdded:Connect(function(child)
+        if child.Name == "Players" then
+            watchPlayersFolder(child)
+        end
+    end))
+
+    local playerGui = player:FindFirstChildOfClass("PlayerGui")
+    if playerGui then
+        table.insert(GFIconConnections, playerGui.DescendantAdded:Connect(function(descendant)
+            if descendant.Name == "Character"
+                or descendant.Name == "Eyes"
+                or descendant.Name == "Expression" then
+                GFFunctionApplyIcon()
+            end
+        end))
+    end
+    GFFunctionApplyIcon()
 end
 
 -- ============================================================================
@@ -515,6 +770,7 @@ local function GFStartScript()
     GFLastEyesState = nil
     GFIsScriptActive = true
 	GFStartPending = false
+    GFSetupIconWatchers() -- RESTAURADO
     if GFCharacter then GFSetupCharacter(GFCharacter) end
 end
 
@@ -523,6 +779,7 @@ local function GFStopScript()
     if not GFIsScriptActive then return end
     GFIsScriptActive = false
 	GFStartPending = false
+    GFDisconnectIconWatchers() -- RESTAURADO
 	for _, connection in ipairs(GFCosmeticConnections) do connection:Disconnect() end
 	table.clear(GFCosmeticConnections)
     if GFSyncConn then GFSyncConn:Disconnect() GFSyncConn = nil end
@@ -538,6 +795,7 @@ end
 player.CharacterAdded:Connect(function(newChar)
     GFCharacter = newChar
     if GFIsScriptActive then
+        GFSetupIconWatchers() -- RESTAURADO
         task.wait(1)
         GFSetupCharacter(newChar)
     end

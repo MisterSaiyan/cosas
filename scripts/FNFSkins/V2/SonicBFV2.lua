@@ -205,11 +205,25 @@ local shoeComponentPartNames = {
     Cube = true,
 }
 
+local function isInsideHatCosmetic(object)
+	local current = object
+	while current do
+		if HatsCosmetics[current.Name] then
+			return true
+		end
+		current = current.Parent
+	end
+	return false
+end
+
 
 local function isShoesCosmeticContainer(container)
-    if not container or not (container:IsA("Model") or container:IsA("Folder")) then
-        return false
-    end
+	if not container or not (container:IsA("Model") or container:IsA("Folder")) then
+		return false
+	end
+	if isInsideHatCosmetic(container) then
+		return false
+	end
 
     local hasShoePart = false
     local hasWeld = false
@@ -450,6 +464,17 @@ local function belongsToForcedHideCosmetic(object, model)
 	return false
 end
 
+local function belongsToHatCosmetic(object, model)
+	local current = object
+	while current and current ~= model do
+		if HatsCosmetics[current.Name] then
+			return true
+		end
+		current = current.Parent
+	end
+	return false
+end
+
 local function hideModelParts(model, exceptModel)
 	if not model then
 		return
@@ -460,13 +485,14 @@ local function hideModelParts(model, exceptModel)
 		local isForcedHiddenCosmetic = belongsToForcedHideCosmetic(object, model)
 		local isBasePart = sonicBasePartNames[object.Name]
 		local isShoesCosmetic = shoesCosmeticToggle and belongsToShoesCosmetic(object, model)
-		local shouldHide = not isShoesCosmetic and (
+		local protectedHat = cosmetictoggle and hatCosmeticToggle and belongsToHatCosmetic(object, model)
+			local shouldHide = not isShoesCosmetic and (
 			isShadowPartA(object, model)
 			or isOriginalHedCube001(object, model)
 			or isForcedHiddenCosmetic
-			or (cosmetictoggle and isBasePart and not isCosmeticPart)
+			or (cosmetictoggle and isBasePart and not isCosmeticPart and not protectedHat)
 			or (not cosmetictoggle and (isBasePart or isCosmeticPart))
-		)
+)
 
 		if object:IsA("BasePart")
 			and shouldHide
@@ -721,6 +747,11 @@ local function applyLoadedModelRules(sourceModel, model)
 
 	setProtectedCosmeticVisibility(model, sourceModel)
 
+	if sourceModel then
+		updateInsertedHat(sourceModel, model)
+		updateInsertedShirt(sourceModel, model)
+	end
+
 	forceHideProblemHeadParts(model)
 
 	for _, object in ipairs(model:GetDescendants()) do
@@ -801,6 +832,7 @@ local function setupCharacter(char, forceReload)
 		setupInProgress = false
 		return
 	end
+	
 	applyLoadedModelRules(sourceRoot, mdl)
 	mdl:SetAttribute("AssetId", activeAssetId)
 

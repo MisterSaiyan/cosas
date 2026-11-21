@@ -9,7 +9,7 @@ local localPlayer = Players.LocalPlayer
         Icon = "", Duration = 10
     })
 
-local ASSET_ID = 137895615579863
+local ASSET_ID = 75527685619423
 local SUPER_ID = 138131908852771
 local CosmeticCompToggle = true
 local HatCosmeticToggle = true
@@ -35,7 +35,7 @@ local ExpressionLastLifeBF = "rbxassetid://126888188456611" -- Reemplaza Eyes.Re
 
 local characterConfigs = {
 	Amy = {
-		assetId = 73695760388601,
+		assetId = 136333819458978,
 		alwaysVisibleObjectNames = {
 			"Hammer",
 			"Axe",
